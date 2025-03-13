@@ -23,6 +23,7 @@
     "@react-navigation/native": "^7.0.14",
     "@solana/wallet-adapter-react": "^0.15.35",
     "@solana/wallet-adapter-react-ui": "^0.9.35",
+    "@yz1311/react-native-intent-launcher": "^0.3.5",
     "expo": "~52.0.38",
     "expo-blur": "~14.0.3",
     "expo-constants": "~17.0.8",

@@ -2,11 +2,11 @@ import React, { useEffect } from 'react';
 import { 
   getGrantedPermissions, 
   initialize, 
-  requestPermission 
+  readRecords, 
+  requestPermission,
 } from 'react-native-health-connect';
-import { Alert, Button, Platform, View, Text } from 'react-native';
+import { Alert, Button, Platform, View, Text,Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
 const InitializeHealthConnect = () => {
   useEffect(() => {
     const checkHealthConnect = async () => {
@@ -24,24 +24,43 @@ const InitializeHealthConnect = () => {
     try {
       const isInitialized = await initialize();
       console.log({ isInitialized });
-
-      const granted = await requestPermission([
+      const isInstalled = await Linking.canOpenURL(`healthconnect://`);
+      // if(!isInstalled){
+      //   await Linking.openURL("https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata");
+      //   return;
+      // }
+          await requestPermission([
         { accessType: 'read', recordType: 'Steps' },
+      { accessType: 'read', recordType: 'Distance' },
+      { accessType: 'read', recordType: 'FloorsClimbed' },
       ]);
-
-      if (granted.length > 0) {
-        console.log("health granctes");
-        alert("Permission Granted");
-      } else {
-        console.log("health deniser");
-        alert("Permission Denied");
-      }
-        
+      const readSampleData = () => {
+        const now = new Date(); 
+        const fiveMinutesAgo = new Date(now.getTime() - 24*60* 60 * 1000); 
+      
+        const startTime = fiveMinutesAgo.toISOString();
+        const endTime = now.toISOString();
+        readRecords('Steps', {
+          timeRangeFilter: {
+            operator: 'between',
+             startTime: startTime,
+            endTime:endTime
+          },
+        }).then(({ records }) => {
+          // @ts-ignore
+          const count=records.records.count;
+          console.log("steps",JSON.stringify({count}));
+          console.log('Retrieved records: ', JSON.stringify({ records }, null, 2)); 
+        });
+      };
+      readSampleData();
+      
       const permissions = await getGrantedPermissions();
       console.log('Granted permissions:', permissions);
 
-      Alert.alert("Permissions granted!", JSON.stringify(permissions, null, 2));
+      Alert.alert("Permissions granted!");
     } catch (error) {
+        
       console.error('Error initializing Health Connect:', error);
       Alert.alert('Error', 'Failed to initialize Health Connect.');
     }
