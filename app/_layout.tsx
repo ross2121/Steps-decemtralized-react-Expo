@@ -1,9 +1,13 @@
+import  InitializeHealthConnect  from "@/components/screens/nativeheatlth"
 import HomeScreen from "@/components/screens/HomeScreen";
 import LeaderboardScreen from "@/components/screens/LeaderboardScreen";
 import ProfileScreen from "@/components/screens/ProfileScreen";
 import StatisticsScreen from "@/components/screens/StatisticsScreen";
 import WalletScreen from "@/components/screens/WalletScreen";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import React from "react";
+import App from "@/components/screens/WalletScreen";
+
 
 const Tab = createBottomTabNavigator();
 
@@ -26,7 +30,7 @@ export default function Layout() {
           headerShown: false,
         }}
       />
-      <Tab.Screen name="Wallet" component={WalletScreen} />
+      <Tab.Screen name="Wallet" component={InitializeHealthConnect} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

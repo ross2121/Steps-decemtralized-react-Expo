@@ -1,39 +1,30 @@
-import { StyleSheet, Text, View } from "react-native";
-import React, { useCallback, useMemo, useRef } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useMemo } from "react";
+import {
+  ConnectionProvider,
+  WalletProvider,
+} from "@solana/wallet-adapter-react";
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+import {
+  WalletModalProvider,
+  WalletDisconnectButton,
+  WalletMultiButton,
+} from "@solana/wallet-adapter-react-ui";
+import "@solana/wallet-adapter-react-ui/styles.css";
 
-import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-const WalletScreen = () => {
-  const sheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["50%", "97%"], []);
-  const handleSheetChange = useCallback((index: any) => {
-    // console.log("handleSheetChange", index);
-  }, []);
-
+function App() {
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <SafeAreaView>
-        <Text>Balance</Text>
-      </SafeAreaView>
-      <BottomSheet
-        ref={sheetRef}
-        snapPoints={snapPoints}
-        enableDynamicSizing={false}
-        onChange={handleSheetChange}
-        animateOnMount={true}
-      >
-        <Text>Transactions</Text>
-      </BottomSheet>
-    </GestureHandlerRootView>
+    <ConnectionProvider endpoint={"https://api.devnet.solana.com"}>
+      <WalletProvider wallets={[]} autoConnect>
+        <WalletModalProvider>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <WalletMultiButton />
+            <WalletDisconnectButton />
+          </div>
+        </WalletModalProvider>
+      </WalletProvider>
+    </ConnectionProvider>
   );
-};
+}
 
-export default WalletScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
+export default App;
