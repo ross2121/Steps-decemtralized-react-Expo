@@ -7,6 +7,7 @@ import WalletScreen from "@/components/screens/WalletScreen";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React from "react";
 import App from "@/components/screens/WalletScreen";
+import Wallet from "@/components/screens/WalletScreen";
 
 
 const Tab = createBottomTabNavigator();
@@ -32,6 +33,7 @@ export default function Layout() {
       />
       <Tab.Screen name="Wallet" component={InitializeHealthConnect} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Wallets" component={Wallet} />
     </Tab.Navigator>
   );
 }
