@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, TextInput, Button, Alert, StyleSheet } from "react-native";
 import axios from "axios";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -9,14 +10,13 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const[error,seterror]=useState<string|null>(null);
 
   const handleSignup = async () => {
-    // Validate inputs
     if (!name || !username || !email || !password) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
-
     setLoading(true);
 
     try {
@@ -27,13 +27,25 @@ const Signup = () => {
         password,
       });
       Alert.alert("Success", "Account created successfully");
+      console.log(response.data);
+      console.log("username",response.data.user.username)
+      await AsyncStorage.setItem("username",response.data.user.username);
+      await AsyncStorage.setItem("PublicKey",response.data.user.publickey);
+      if(!AsyncStorage.getItem("PublicKey")){
+        console.log("No public found");
+        Alert.alert("No public found");
+      }
       console.log("Signup response:", response.data);
     } catch (error:any) {
+      console.log(error);
       if (error.response) {
+        seterror(error.message);
         Alert.alert("Error", error.response.data.message || "An error occurred");
       } else if (error.request) {
+        seterror(error.request);
         Alert.alert("Error", "No response from the server");
       } else {
+        seterror(error.request);
         Alert.alert("Error", "An error occurred");
       }
       console.error("Signup error:", error);
@@ -44,7 +56,7 @@ const Signup = () => {
 
   return (
     <SafeAreaProvider>
-      <View style={styles.container}>
+     {error ?<View>{error}</View>: <View style={styles.container}>
         <TextInput
           style={styles.input}
           placeholder="Name"
@@ -80,7 +92,7 @@ const Signup = () => {
           onPress={handleSignup}
           disabled={loading}
         />
-      </View>
+      </View>}
     </SafeAreaProvider>
   );
 };
