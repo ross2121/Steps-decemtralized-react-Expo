@@ -27,21 +27,7 @@ const SolanaTransaction = () => {
     }
   };
 
-  const getTxn = async () => {
-    try {
-      // Fetch transaction status from the backend
-      const response = await axios.post("http://localhost:3000/api/v1/status", {
-        txn: txn,
-      });
-
-      // Set the signature from the response
-      setSignature(response.data.ress.transaction.signatures[0]);
-      console.log("Transaction Signature:", response.data.ress.transaction.signatures[0]);
-    } catch (error) {
-      console.error("Error fetching transaction status:", error);
-      Alert.alert("Error", "Failed to fetch transaction status");
-    }
-  };
+  
 
   return (
     <View style={styles.container}>
@@ -71,7 +57,6 @@ const SolanaTransaction = () => {
         value={txn}
         onChangeText={setTxn}
       />
-      <Button title="Get Transaction Status" onPress={getTxn} />
       <View style={styles.resultContainer}>
         <Text>Sign: {sign}</Text>
         <Text>Signature: {signature}</Text>
