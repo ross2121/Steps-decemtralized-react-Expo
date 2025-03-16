@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: "#1E1E2E", // Dark background for contrast
+    backgroundColor: "#1E1E2E",
   },
   backgroundContent: {
     flex: 1,
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "white", // White text for readability
+    color: "white", 
     textAlign: "center",
     marginBottom: 10,
   },

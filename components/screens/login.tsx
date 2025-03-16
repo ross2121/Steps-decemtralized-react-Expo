@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { View, TextInput, Button, Alert, StyleSheet } from "react-native";
 import axios from "axios";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -14,13 +16,17 @@ const Login = () => {
       return;
     }
     setLoading(true);
-  
     try {
       const response = await axios.post("https://decentrailzedttrack.onrender.com/api/v1/signin", {
-        email:"youvalsi4@gmail.com",
-        password:"assdadds",
+        email:email,
+        password:password,
       });
-      Alert.alert("Success", "Logged in successfully");
+      Alert.alert("Success", "Logged in successfully"); 
+      await AsyncStorage.setItem("token",response.data.token);
+      await AsyncStorage.setItem("username",response.data.user.username);
+      await AsyncStorage.setItem("PublicKey",response.data.user.publickey);
+      await AsyncStorage.setItem("userid",response.data.user.id);
+      router.push("/(tabs)")
       console.log("Login response:", response.data);
     } catch (error:any) {
       if (error.response) {

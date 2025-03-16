@@ -3,6 +3,7 @@ import { View, TextInput, Button, Alert, StyleSheet } from "react-native";
 import axios from "axios";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from "expo-router";
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -20,17 +21,18 @@ const Signup = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("https://decentrailzedttrack.onrender.com/api/v1/register", {
+      const response = await axios.post("http://10.5.121.76:3000/api/v1/register", {
         name,
         username,
         email,
         password,
       });
       Alert.alert("Success", "Account created successfully");
-      console.log(response.data);
-      console.log("username",response.data.user.username)
       await AsyncStorage.setItem("username",response.data.user.username);
+      await AsyncStorage.setItem("token",response.data.token);
       await AsyncStorage.setItem("PublicKey",response.data.user.publickey);
+      await AsyncStorage.setItem("userid",response.data.user.id);
+      router.push("/(tabs)")
       if(!AsyncStorage.getItem("PublicKey")){
         console.log("No public found");
         Alert.alert("No public found");
