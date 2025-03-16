@@ -10,6 +10,12 @@ const App=()=>{
   const singup=()=>{
     router.push("/(auth)/singup")
   }
+  const friend=()=>{
+    router.push("/Friend/friends")
+  }
+  const Showfriend=()=>{
+    router.push("/Friend/showfriend")
+  }
   return(
     <SafeAreaView>
         <Text>
@@ -18,6 +24,8 @@ const App=()=>{
      <Button title="Create Competion" onPress={onClick}></Button>
      <View>
      <Button title="Register" onPress={singup}></Button>
+     <Button title="Friend" onPress={friend}></Button>
+     <Button title="Grok" onPress={Showfriend}></Button>
      </View>
     </SafeAreaView>
   )
