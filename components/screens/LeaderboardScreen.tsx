@@ -2,7 +2,6 @@ import React, { useCallback, useRef, useMemo } from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Image } from "react-native";
 
@@ -174,7 +173,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "white", 
+    color: "white",
     textAlign: "center",
     marginBottom: 10,
   },
