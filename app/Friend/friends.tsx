@@ -29,26 +29,26 @@ const Friend = () => {
 
   return (
     <GestureHandlerRootView>
-    <SafeAreaView style={styles.container}>
-      <BottomSheet
-        ref={sheetRef}
-        snapPoints={snapPoints}
-        enableDynamicSizing={false}
-        animateOnMount={true}
-      >
-        <View style={styles.modalView}>
-          <Text>Add Username</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Username"
-            onChangeText={setUsername}
-            keyboardType="name-phone-pad"
-            autoCapitalize="none"
-          />
-          <Button title="Add friend" onPress={() => Onclick()} />
-        </View>
-      </BottomSheet>
-    </SafeAreaView>
+      <SafeAreaView style={styles.container}>
+        <BottomSheet
+          ref={sheetRef}
+          snapPoints={snapPoints}
+          enableDynamicSizing={false}
+          animateOnMount={true}
+        >
+          <View style={styles.modalView}>
+            <Text>Add Username</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Username"
+              onChangeText={setUsername}
+              keyboardType="name-phone-pad"
+              autoCapitalize="none"
+            />
+            <Button title="Add friend" onPress={() => Onclick()} />
+          </View>
+        </BottomSheet>
+      </SafeAreaView>
     </GestureHandlerRootView>
   );
 };

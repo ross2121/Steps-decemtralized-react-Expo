@@ -2,13 +2,12 @@ import InitializeHealthConnect from "@/app/(tabs)/nativeheatlth";
 import HomeScreen from "@/components/screens/HomeScreen";
 import LeaderboardScreen from "@/components/screens/LeaderboardScreen";
 import { Tabs } from "expo-router";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+
 import React from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Entypo from "@expo/vector-icons/Entypo";
 
 const Layout = () => {
-  const Tab = createBottomTabNavigator();
   return (
     <Tabs screenOptions={{ tabBarActiveTintColor: "blue", headerShown: false }}>
       <Tabs.Screen
@@ -31,7 +30,7 @@ const Layout = () => {
       <Tabs.Screen
         name="Wallet"
         options={{
-          title: "WALLET",
+          title: "wallet",
           tabBarIcon: ({ color }) => (
             <Entypo name="wallet" size={24} color="black" />
           ),
