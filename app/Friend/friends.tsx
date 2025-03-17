@@ -5,6 +5,7 @@ import { StyleSheet } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import BottomSheet from "@gorhom/bottom-sheet";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const Friend = () => {
   const [username, setUsername] = useState("");
@@ -27,6 +28,7 @@ const Friend = () => {
   const sheetRef = useRef<BottomSheet>(null);
 
   return (
+    <GestureHandlerRootView>
     <SafeAreaView style={styles.container}>
       <BottomSheet
         ref={sheetRef}
@@ -47,6 +49,7 @@ const Friend = () => {
         </View>
       </BottomSheet>
     </SafeAreaView>
+    </GestureHandlerRootView>
   );
 };
 

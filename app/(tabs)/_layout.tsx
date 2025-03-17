@@ -6,9 +6,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Entypo from "@expo/vector-icons/Entypo";
-import Wallet from "@/components/screens/login";
-import SolanaTransaction from "@/app/(tabs)/wallet";
-import Stepcount from "@/app/(tabs)/step";
+
 const Layout = () => {
   const Tab = createBottomTabNavigator();
   return (
