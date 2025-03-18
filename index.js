@@ -1,6 +1,8 @@
 // index.js
 import { getRandomValues as expoCryptoGetRandomValues } from "expo-crypto";
 import { Buffer } from "buffer"
+import 'react-native-gesture-handler';
+import 'react-native-reanimated'
 import "expo-router/entry";
 global.Buffer = Buffer;
 

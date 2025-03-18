@@ -1,8 +1,7 @@
 import React, { useCallback, useRef, useMemo } from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, Modal } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
-
 import { Image } from "react-native";
 
 const data = [
@@ -80,7 +79,6 @@ const data = [
 
 export default function LeaderboardScreen() {
   const sheetRef = useRef<BottomSheet>(null);
-
   const snapPoints = useMemo(() => ["50%", "97%"], []);
 
   const handleSheetChange = useCallback((index: any) => {
@@ -105,48 +103,45 @@ export default function LeaderboardScreen() {
   };
 
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <View style={styles.backgroundContent}>
-        <Text style={styles.text}>Background Content</Text>
-      </View>
-      <BottomSheet
-        ref={sheetRef}
-        snapPoints={snapPoints}
-        enableDynamicSizing={false}
-        onChange={handleSheetChange}
-        animateOnMount={true}
-      >
-        <View
-          style={{
-            // marginBottom: 20,
-            marginVertical: 18,
-          }}
+    <Modal visible={true} transparent={true}>
+      <GestureHandlerRootView style={styles.container}>
+        <View style={styles.backgroundContent}>
+          <Text style={styles.text}>Background Content</Text>
+        </View>
+        <BottomSheet
+          ref={sheetRef}
+          snapPoints={snapPoints}
+          enableDynamicSizing={false}
+          onChange={handleSheetChange}
+          animateOnMount={true}
         >
-          <Text
-            style={{
-              color: "black",
-              alignSelf: "center",
-              fontSize: 20,
-              fontWeight: "bold",
-            }}
-          >
-            LeaderBoard
-          </Text>
-        </View>
-        <View style={styles.headings}>
-          <Text style={styles.headingFont}>Rank</Text>
-          <Text style={styles.headingFont}>Avatar</Text>
-          <Text style={styles.headingFont}>Total XP</Text>
-          <Text style={styles.headingFont}>Fitness XP</Text>
-        </View>
-        <BottomSheetFlatList
-          data={data}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={styles.contentContainer}
-        />
-      </BottomSheet>
-    </GestureHandlerRootView>
+          <View style={{ marginVertical: 18 }}>
+            <Text
+              style={{
+                color: "black",
+                alignSelf: "center",
+                fontSize: 20,
+                fontWeight: "bold",
+              }}
+            >
+              LeaderBoard
+            </Text>
+          </View>
+          <View style={styles.headings}>
+            <Text style={styles.headingFont}>Rank</Text>
+            <Text style={styles.headingFont}>Avatar</Text>
+            <Text style={styles.headingFont}>Total XP</Text>
+            <Text style={styles.headingFont}>Fitness XP</Text>
+          </View>
+          <BottomSheetFlatList
+            data={data}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            contentContainerStyle={styles.contentContainer}
+          />
+        </BottomSheet>
+      </GestureHandlerRootView>
+    </Modal>
   );
 }
 

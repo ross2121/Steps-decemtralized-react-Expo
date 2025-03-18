@@ -60,6 +60,7 @@ const Layout = () => {
           title: "Wallet",
         }}
       /> */}
+      {/* <Tabs.Screen name="wallet" options={{ title: "Wallet" }} /> */}
       <Tabs.Screen name="wallet" options={{ title: "Wallet" }} />
     </Tabs>
   );

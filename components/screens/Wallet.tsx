@@ -9,6 +9,7 @@ import {
   Button,
   TouchableOpacity,
   StatusBar,
+  Modal,
 } from "react-native";
 import React from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -62,6 +63,7 @@ const TRANSACTIONS = [
   },
 ];
 const Wallet = () => {
+
   const connection = new Connection(
     "https://solana-devnet.g.alchemy.com/v2/r25E3uMjQakYPLTlM3f9rNihLj8SlmE_"
   );
@@ -94,7 +96,7 @@ const Wallet = () => {
       setbalace(balanced);
     };
     Wallets();
-  });
+  },[]);
   // Bottom sheet reference
   const bottomSheetRef = useRef<BottomSheet>(null);
 
@@ -153,6 +155,7 @@ const Wallet = () => {
   }, []);
 
   return (
+    <Modal>
     <GestureHandlerRootView style={styles.container}>
       <StatusBar barStyle="light-content" />
       <SafeAreaView style={styles.container}>
@@ -210,6 +213,7 @@ const Wallet = () => {
         </BottomSheet>
       </SafeAreaView>
     </GestureHandlerRootView>
+    </Modal>
   );
 };
 
