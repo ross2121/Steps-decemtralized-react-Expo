@@ -6,7 +6,7 @@ import { Text, View } from "react-native";
 const wallet = () => {
   return (
     <View>
-      <Wallets />
+      <Wallet></Wallet>
     </View>
   );
 };

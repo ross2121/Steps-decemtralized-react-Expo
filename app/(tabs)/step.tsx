@@ -32,6 +32,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
             console.log(recondr.records[0].count);
             let count=0;
             recondr.records.map((recod)=>count+=recod.count);
+            console.log(count);
             setsteps(count);
     }
   
@@ -39,12 +40,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
     },[])
     const sendSteps = (steps:any) => {
       const message = JSON.stringify({ userid, steps });
-      this.webSocket.send(message);
+      // this.webSocket.send(message);
   }
           return(
            <SafeAreaView>
              <WebSocket
-                ref={(ref) => (this.webSocket = ref)}
+                // ref={(ref) => (this.webSocket = ref)}
                 url="ws://10.5.121.76:4000"
                 onOpen={() => console.log('WebSocket connected')}
                 onMessage={(message) => console.log('Message from server:', message)}
