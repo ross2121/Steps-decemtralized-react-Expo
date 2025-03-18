@@ -7,6 +7,8 @@ import {
   NativeViewGestureHandler,
   ScrollView,
 } from "react-native-gesture-handler";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 const App = () => {
   return (
@@ -26,6 +28,10 @@ const App = () => {
             </View>
             <View>
               <CommunityGames />
+            </View>
+
+            <View>
+              <JoinGame />
             </View>
           </ScrollView>
         </LinearGradient>
@@ -144,7 +150,37 @@ const OfficialGames = () => {
 
   return (
     <View style={styles.gamesContainer}>
-      <Text style={styles.gamesTitle}>Official Games</Text>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingRight: 16,
+          marginBottom: 10,
+        }}
+      >
+        <Text style={styles.gamesTitle}>Official Games</Text>
+        <TouchableOpacity
+          style={{
+            paddingHorizontal: 10,
+            paddingVertical: 5,
+            justifyContent: "center",
+            borderRadius: 10,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 5,
+            }}
+          >
+            <Text style={{ color: "white" }}>All</Text>
+            <AntDesign name="arrowright" size={15} color="white" />
+          </View>
+        </TouchableOpacity>
+      </View>
 
       {/* Horizontal ScrollView for games */}
       <ScrollView
@@ -316,7 +352,37 @@ const CommunityGames = () => {
 
   return (
     <View style={styles.gamesContainer}>
-      <Text style={styles.gamesTitle}>Community Games</Text>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingRight: 16,
+          marginBottom: 10,
+        }}
+      >
+        <Text style={styles.gamesTitle}>Community Games</Text>
+        <TouchableOpacity
+          style={{
+            paddingHorizontal: 10,
+            paddingVertical: 5,
+            justifyContent: "center",
+            borderRadius: 10,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 5,
+            }}
+          >
+            <Text style={{ color: "white" }}>All</Text>
+            <AntDesign name="arrowright" size={15} color="white" />
+          </View>
+        </TouchableOpacity>
+      </View>
 
       {/* Horizontal ScrollView for games */}
       <ScrollView
@@ -351,7 +417,6 @@ const CommunityGames = () => {
             </View>
             <View
               style={{
-                marginTop: 10,
                 justifyContent: "center",
                 alignItems: "center",
               }}
@@ -360,7 +425,8 @@ const CommunityGames = () => {
                 style={{
                   width: "90%",
                   height: 0.5,
-                  marginTop: 15,
+
+                  marginTop: 20,
                   backgroundColor: "#e5ccff",
                 }}
               />
@@ -368,7 +434,7 @@ const CommunityGames = () => {
             <View>
               <View
                 style={{
-                  marginTop: 10,
+                  marginTop: 20,
                   flexDirection: "row",
                   justifyContent: "space-between",
                   paddingHorizontal: 5,
@@ -438,6 +504,84 @@ const CommunityGames = () => {
     </View>
   );
 };
+
+const JoinGame = () => {
+  return (
+    <View
+      style={{
+        padding: 15,
+      }}
+    >
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingRight: 16,
+          marginBottom: 10,
+        }}
+      >
+        <Text style={styles.gamesTitle}>Games</Text>
+        <TouchableOpacity
+          style={{
+            justifyContent: "center",
+            borderRadius: 10,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 5,
+            }}
+          >
+            <Text style={{ color: "white" }}>History</Text>
+            <AntDesign name="arrowright" size={15} color="white" />
+          </View>
+        </TouchableOpacity>
+      </View>
+
+      <View
+        style={{
+          backgroundColor: "rgba(0, 0, 0, 0.8)",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingVertical: 20,
+          marginBottom: 10,
+          paddingHorizontal: 35,
+          borderRadius: 13,
+        }}
+      >
+        <View
+          style={[
+            styles.gamebttn,
+            {
+              backgroundColor: "#9C89FF",
+            },
+          ]}
+        >
+          <View>
+            <AntDesign name="plus" size={24} color="white" />
+          </View>
+          <View>
+            <Text style={styles.gamebttnText}>New Game</Text>
+          </View>
+        </View>
+        <View style={styles.gamebttn}>
+          <View>
+            <FontAwesome6 name="magnifying-glass" size={24} color="white" />
+          </View>
+          <View>
+            <Text style={styles.gamebttnText}>Game code</Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
   gradient: {
     flex: 1,
@@ -478,18 +622,18 @@ const styles = StyleSheet.create({
   gamesTitle: {
     color: "white",
     fontSize: 22,
-    marginBottom: 15,
+
     fontWeight: "bold",
   },
   gamesScrollContent: {
-    paddingRight: "90%",
+    paddingRight: "50%",
   },
   gameCard: {
     backgroundColor: "rgba(0, 0, 0, 0.8)",
     borderRadius: 10,
 
     marginRight: 15,
-    width: "20%",
+    width: "22%",
     paddingHorizontal: 15,
     paddingVertical: 20,
     paddingBottom: 40,
@@ -520,6 +664,24 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
+  },
+
+  //games create and join
+
+  gamebttn: {
+    backgroundColor: "#7E38B7",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    gap: 10,
+  },
+  gamebttnText: {
+    color: "white",
+    fontSize: 15,
+    fontWeight: "bold",
   },
 });
 
