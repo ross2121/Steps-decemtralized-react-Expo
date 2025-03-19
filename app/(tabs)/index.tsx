@@ -5,7 +5,15 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  BackHandler,
+  Dimensions,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import {
@@ -19,8 +27,31 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { router } from "expo-router";
 import { getGrantedPermissions } from "react-native-health-connect";
+import BottomSheet from "@gorhom/bottom-sheet";
 
 const App = () => {
+  // Create refs and state
+  const [selectedGame, setSelectedGame] = useState(null);
+  const bottomSheetRef = useRef(null);
+
+  // Define snap points
+  const snapPoints = useMemo(() => ["50%", "75%"], []);
+
+  // Function to handle join button click
+  const handleJoinClick = useCallback((game) => {
+    console.log("Join clicked for game:", game.title);
+    setSelectedGame(game);
+
+    // Make sure to present the bottom sheet after a short delay
+    setTimeout(() => {
+      if (bottomSheetRef.current) {
+        bottomSheetRef.current.expand();
+      } else {
+        console.log("Bottom sheet ref is null");
+      }
+    }, 100);
+  }, []);
+
   useEffect(() => {
     const Auth = async () => {
       const token = await AsyncStorage.getItem("token");
@@ -34,9 +65,10 @@ const App = () => {
       }
     };
     Auth();
-  });
+  }, []); // Added empty dependency array to prevent continuous execution
+
   return (
-    <GestureHandlerRootView>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 1 }}>
         <LinearGradient
           colors={["#1a0033", "#4b0082", "#290d44"]}
@@ -51,13 +83,91 @@ const App = () => {
               <OfficialGames />
             </View>
             <View>
-              <CommunityGames />
+              <CommunityGames handleJoinClick={handleJoinClick} />
             </View>
-
             <View>
               <JoinGame />
             </View>
           </ScrollView>
+
+          {/* Bottom Sheet */}
+          <BottomSheet
+            ref={bottomSheetRef}
+            index={-1}
+            snapPoints={snapPoints}
+            enablePanDownToClose={true}
+            handleIndicatorStyle={{ backgroundColor: "#9C89FF" }}
+            backgroundStyle={{ backgroundColor: "#290d44" }}
+          >
+            <View style={styles.bottomSheetContent}>
+              {selectedGame ? (
+                <>
+                  <Text style={styles.bottomSheetTitle}>
+                    {selectedGame.title} Details
+                  </Text>
+                  <View style={styles.divider} />
+
+                  <View style={styles.gameDetailRow}>
+                    <View style={styles.gameDetailItem}>
+                      <Text style={styles.gameDetailLabel}>Entry Fee</Text>
+                      <Text style={styles.gameDetailValue}>
+                        ${selectedGame.entryPrice}
+                      </Text>
+                    </View>
+                    <View style={styles.gameDetailItem}>
+                      <Text style={styles.gameDetailLabel}>Duration</Text>
+                      <Text style={styles.gameDetailValue}>7 days</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.gameDetailRow}>
+                    <View style={styles.gameDetailItem}>
+                      <Text style={styles.gameDetailLabel}>Time Period</Text>
+                      <Text style={styles.gameDetailValue}>
+                        {selectedGame.time}
+                      </Text>
+                    </View>
+                    <View style={styles.gameDetailItem}>
+                      <Text style={styles.gameDetailLabel}>Players</Text>
+                      <Text style={styles.gameDetailValue}>
+                        {selectedGame.participants}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.gameDetailRow}>
+                    <View style={styles.gameDetailItem}>
+                      <Text style={styles.gameDetailLabel}>
+                        Daily Steps Target
+                      </Text>
+                      <Text style={styles.gameDetailValue}>
+                        {selectedGame.dailySteps}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.gameDescription}>
+                    <Text style={styles.gameDescriptionLabel}>
+                      Game Description
+                    </Text>
+                    <Text style={styles.gameDescriptionText}>
+                      This is a community challenge where participants compete
+                      to reach their daily step goals. Complete the challenge to
+                      win prizes and improve your fitness!
+                    </Text>
+                  </View>
+
+                  <TouchableOpacity style={styles.joinGameButton}>
+                    <Text style={styles.joinGameButtonText}>Join Game</Text>
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <Text style={styles.bottomSheetTitle}>
+                  Loading game details...
+                </Text>
+              )}
+            </View>
+          </BottomSheet>
         </LinearGradient>
       </SafeAreaView>
     </GestureHandlerRootView>
@@ -112,7 +222,7 @@ const StepsCount = () => {
                 marginLeft: 5,
                 color: "#9e9a99",
                 fontSize: 15,
-                fontWeight: "bold", // Changed "heavy" to "bold" as "heavy" is not a valid fontWeight
+                fontWeight: "bold",
               }}
             >
               {" "}
@@ -146,7 +256,6 @@ const OfficialGames = () => {
     {
       id: 3,
       title: "Game 3",
-
       entryPrice: "2",
       time: "10/3-16/03",
       participants: "83",
@@ -155,7 +264,6 @@ const OfficialGames = () => {
     {
       id: 4,
       title: "Game 4",
-
       entryPrice: "2",
       time: "10/3-16/03",
       participants: "83",
@@ -164,7 +272,6 @@ const OfficialGames = () => {
     {
       id: 5,
       title: "Game 5",
-
       entryPrice: "2",
       time: "10/3-16/03",
       participants: "83",
@@ -328,7 +435,7 @@ const OfficialGames = () => {
   );
 };
 
-const CommunityGames = () => {
+const CommunityGames = ({ handleJoinClick }) => {
   const games = [
     {
       id: 1,
@@ -349,7 +456,6 @@ const CommunityGames = () => {
     {
       id: 3,
       title: "Game 3",
-
       entryPrice: "2",
       time: "10/3-16/03",
       participants: "83",
@@ -358,7 +464,6 @@ const CommunityGames = () => {
     {
       id: 4,
       title: "Game 4",
-
       entryPrice: "2",
       time: "10/3-16/03",
       participants: "83",
@@ -367,27 +472,12 @@ const CommunityGames = () => {
     {
       id: 5,
       title: "Game 5",
-
       entryPrice: "2",
       time: "10/3-16/03",
       participants: "83",
       dailySteps: "12k",
     },
   ];
-
-  const [selectedGame, setSelectedGame] = useState(null);
-  const bottomSheetRef = useRef(null);
-
-  const snapPoints = useMemo(() => ["50%"], []);
-
-  const handleSheetChanges = useCallback((index) => {
-    console.log("Bottom sheet index", index);
-  }, []);
-
-  const handleJoinClick = (game) => {
-    setSelectedGame(game);
-    bottomSheetRef.current.expand();
-  };
 
   return (
     <View style={styles.gamesContainer}>
@@ -444,7 +534,10 @@ const CommunityGames = () => {
               <View>
                 <TouchableOpacity
                   style={styles.joinbutton}
-                  onPress={() => handleJoinClick(game)}
+                  onPress={() => {
+                    console.log("Join button pressed for game:", game.title);
+                    handleJoinClick(game);
+                  }}
                 >
                   <Text
                     style={{
@@ -467,7 +560,6 @@ const CommunityGames = () => {
                 style={{
                   width: "90%",
                   height: 0.5,
-
                   marginTop: 20,
                   backgroundColor: "#e5ccff",
                 }}
@@ -664,7 +756,6 @@ const styles = StyleSheet.create({
   gamesTitle: {
     color: "white",
     fontSize: 22,
-
     fontWeight: "bold",
   },
   gamesScrollContent: {
@@ -673,7 +764,6 @@ const styles = StyleSheet.create({
   gameCard: {
     backgroundColor: "rgba(0, 0, 0, 0.8)",
     borderRadius: 10,
-
     marginRight: 15,
     width: "22%",
     paddingHorizontal: 15,
@@ -709,7 +799,6 @@ const styles = StyleSheet.create({
   },
 
   //games create and join
-
   gamebttn: {
     backgroundColor: "#7E38B7",
     flexDirection: "row",
@@ -723,6 +812,70 @@ const styles = StyleSheet.create({
   gamebttnText: {
     color: "white",
     fontSize: 15,
+    fontWeight: "bold",
+  },
+
+  // Bottom Sheet styles
+  bottomSheetContent: {
+    flex: 1,
+    padding: 20,
+  },
+  bottomSheetTitle: {
+    color: "white",
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 15,
+  },
+  divider: {
+    width: "100%",
+    height: 1,
+    backgroundColor: "#9C89FF",
+    marginBottom: 20,
+  },
+  gameDetailRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  gameDetailItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  gameDetailLabel: {
+    color: "#bfbfbf",
+    fontSize: 14,
+    marginBottom: 5,
+  },
+  gameDetailValue: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  gameDescription: {
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  gameDescriptionLabel: {
+    color: "#bfbfbf",
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  gameDescriptionText: {
+    color: "white",
+    fontSize: 14,
+    lineHeight: 22,
+  },
+  joinGameButton: {
+    backgroundColor: "#9C89FF",
+    paddingVertical: 15,
+    borderRadius: 25,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  joinGameButtonText: {
+    color: "white",
+    fontSize: 18,
     fontWeight: "bold",
   },
 });
