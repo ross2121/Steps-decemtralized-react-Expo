@@ -1,4 +1,10 @@
-import React, { useEffect } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -15,20 +21,20 @@ import { router } from "expo-router";
 import { getGrantedPermissions } from "react-native-health-connect";
 
 const App = () => {
-    useEffect(()=>{
-      const Auth=async()=>{
-        const token=await AsyncStorage.getItem("token");
-         const permissions = await getGrantedPermissions();
-            if(!token){
-              router.push("/(auth)/test");
-            }
-            if(permissions.length==0){
-              router.push("/(googlefit)/test")
-              console.log("no permission")
-           }
+  useEffect(() => {
+    const Auth = async () => {
+      const token = await AsyncStorage.getItem("token");
+      const permissions = await getGrantedPermissions();
+      if (!token) {
+        router.push("/(auth)/test");
       }
-      Auth();
-    })
+      if (permissions.length == 0) {
+        router.push("/(googlefit)/test");
+        console.log("no permission");
+      }
+    };
+    Auth();
+  });
   return (
     <GestureHandlerRootView>
       <SafeAreaView style={{ flex: 1 }}>
@@ -185,6 +191,7 @@ const OfficialGames = () => {
             justifyContent: "center",
             borderRadius: 10,
           }}
+          onPress={() => router.push("/(nonav)/officialGames")}
         >
           <View
             style={{
@@ -368,6 +375,20 @@ const CommunityGames = () => {
     },
   ];
 
+  const [selectedGame, setSelectedGame] = useState(null);
+  const bottomSheetRef = useRef(null);
+
+  const snapPoints = useMemo(() => ["50%"], []);
+
+  const handleSheetChanges = useCallback((index) => {
+    console.log("Bottom sheet index", index);
+  }, []);
+
+  const handleJoinClick = (game) => {
+    setSelectedGame(game);
+    bottomSheetRef.current.expand();
+  };
+
   return (
     <View style={styles.gamesContainer}>
       <View
@@ -421,7 +442,10 @@ const CommunityGames = () => {
                 <Text style={styles.gameHeader}>{game.title}</Text>
               </View>
               <View>
-                <TouchableOpacity style={styles.joinbutton}>
+                <TouchableOpacity
+                  style={styles.joinbutton}
+                  onPress={() => handleJoinClick(game)}
+                >
                   <Text
                     style={{
                       color: "white",
