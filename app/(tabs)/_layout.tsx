@@ -10,59 +10,16 @@ import Entypo from "@expo/vector-icons/Entypo";
 const Layout = () => {
   return (
     <Tabs screenOptions={{ tabBarActiveTintColor: "blue", headerShown: false }}>
-      {/* <Tabs.Screen
-        name="Stats"
-        options={{
-          title: "Stats",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="stats-chart-outline" size={24} color="black" />
-          ),
-        }}
-      /> */}
-      {/* <Tab.Screen name="Leaderboard" component={LeaderboardScreen} /> */}
-      {/* <Tab.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{
-          headerShown: false,
-        }}
-      /> */}
-      {/* <Tabs.Screen
-        name="Wallet"
-        options={{
-          title: "wallet",
-          tabBarIcon: ({ color }) => (
-            <Entypo name="wallet" size={24} color="black" />
-          ),
-        }}
-      /> */}
-      {/* <Tab.Screen name="Profile" component={SolanaTransaction} /> */}
-      {/* <Tab.Screen name="Wallets" component={Wallet} /> */}
-      {/* <Tabs.Screen
-        name="step"
-        options={{
-          title: "Stats",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="stats-chart-outline" size={24} color="black" />
-          ),
-        }}
-      /> */}
-
       <Tabs.Screen
         name="index"
         options={{
           title: "Home",
         }}
       />
-      {/* <Tabs.Screen
-        name="wallet"
-        options={{
-          title: "Wallet",
-        }}
-      /> */}
-      {/* <Tabs.Screen name="wallet" options={{ title: "Wallet" }} /> */}
+
       <Tabs.Screen name="wallet" options={{ title: "Wallet" }} />
       <Tabs.Screen name="leaderboard" options={{ title: "Leaderboard" }} />
+      <Tabs.Screen name="profile" options={{ title: "Profile" }} />
     </Tabs>
   );
 };
