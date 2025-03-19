@@ -62,6 +62,7 @@ const Layout = () => {
       /> */}
       {/* <Tabs.Screen name="wallet" options={{ title: "Wallet" }} /> */}
       <Tabs.Screen name="wallet" options={{ title: "Wallet" }} />
+      <Tabs.Screen name="leaderboard" options={{ title: "Leaderboard" }} />
     </Tabs>
   );
 };

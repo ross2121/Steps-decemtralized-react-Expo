@@ -1,7 +1,7 @@
-import React, { useCallback, useRef, useMemo } from "react";
-import { StyleSheet, View, Text, Image, SafeAreaView, Modal } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import React, { useCallback, useRef, useMemo, useState } from "react";
+import { StyleSheet, View, Text, Image, Switch } from "react-native";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
+import { LinearGradient } from "expo-linear-gradient";
 
 const data = [
   {
@@ -76,11 +76,12 @@ const data = [
   },
 ];
 
-
-
 export default function LeaderboardScreen() {
+  const [isEnabled, setIsEnabled] = useState(false);
+  const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
+
   const sheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["50%", "97%"], []);
+  const snapPoints = useMemo(() => ["30%", "53%", "75%"], []);
 
   const handleSheetChange = useCallback((index: any) => {
     console.log("handleSheetChange", index);
@@ -104,13 +105,20 @@ export default function LeaderboardScreen() {
   };
 
   return (
-    // <GestureHandlerRootView style={{ flex: 1 }}>
     <View style={styles.container}>
       {/* Background Content */}
-      <View style={styles.backgroundContent}>
-        <Text style={styles.text}>Background Content</Text>
-      </View>
-
+      <LinearGradient
+        colors={["#1a0033", "#4b0082", "#290d44"]}
+        style={styles.gradient}
+      >
+        <View style={styles.backgroundContent}>
+          <Text style={styles.text}>Background Content</Text>
+          <Image
+            source={require("../../assets/images/Run2.gif")}
+            style={{ width: "100%", height: "40%" }}
+          />
+        </View>
+      </LinearGradient>
       {/* Bottom Sheet */}
       <BottomSheet
         ref={sheetRef}
@@ -120,106 +128,143 @@ export default function LeaderboardScreen() {
         animateOnMount={true}
         backgroundStyle={styles.bottomSheetBackground}
         handleIndicatorStyle={styles.bottomSheetIndicator}
+        style={{
+          borderTopLeftRadius: 30,
+          borderTopRightRadius: 30,
+          paddingHorizontal: 15,
+        }}
       >
-        <View style={{ marginVertical: 18 }}>
-          <Text
+        <View
+          style={{
+            backgroundColor: "#1a0033",
+            borderTopLeftRadius: 30,
+            borderTopRightRadius: 30,
+          }}
+        >
+          <View
             style={{
-              color: "black",
-              alignSelf: "center",
-              fontSize: 20,
-              fontWeight: "bold",
+              justifyContent: "space-between",
             }}
           >
-            LeaderBoard
-          </Text>
-        </View>
+            <View style={{}}>
+              <Text
+                style={{
+                  color: "white",
+                  marginLeft: 20,
+                  fontSize: 20,
+                  fontWeight: "bold",
+                  marginVertical: 15,
+                }}
+              >
+                LeaderBoard
+              </Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 10,
+                }}
+              >
+                <Switch
+                  trackColor={{ false: "#767577", true: "#81b0ff" }}
+                  thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
+                  ios_backgroundColor="#3e3e3e"
+                  onValueChange={toggleSwitch}
+                  value={isEnabled}
+                  style={{ marginLeft: 20 }}
+                />
+                <Text
+                  style={{
+                    color: "white",
+                    fontSize: 10,
+                  }}
+                >
+                  Friends Only
+                </Text>
+              </View>
+            </View>
+          </View>
 
-        {/* Headings */}
-        <View style={styles.headings}>
-          <Text style={styles.headingFont}>Rank</Text>
-          <Text style={styles.headingFont}>Avatar</Text>
-          <Text style={styles.headingFont}>Total XP</Text>
-          <Text style={styles.headingFont}>Fitness XP</Text>
-        </View>
+          {/* Headings */}
+          <View style={styles.headings}>
+            <Text style={styles.headingFont}>Rank</Text>
+            <Text style={styles.headingFont}>Avatar</Text>
+            <Text style={styles.headingFont}>Total XP</Text>
+            <Text style={styles.headingFont}>Fitness XP</Text>
+          </View>
 
-        {/* List of Items */}
-        <BottomSheetFlatList
-          data={data}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={styles.contentContainer}
-        />
+          {/* List of Items */}
+          <BottomSheetFlatList
+            data={data}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            contentContainerStyle={styles.contentContainer}
+          />
+        </View>
       </BottomSheet>
     </View>
-  
-  
   );
 }
 
-
-
 const styles = StyleSheet.create({
+  gradient: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: "#1E1E2E",
+    backgroundColor: "#1E2130",
   },
   backgroundContent: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
   },
   text: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: "bold",
     color: "white",
     textAlign: "center",
-    marginBottom: 10,
   },
   itemContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
-    backgroundColor: "#292B3A",
-    padding: 15,
+    backgroundColor: "#1a0033",
     paddingHorizontal: 20,
     marginHorizontal: 10,
     marginVertical: 5,
     borderRadius: 10,
   },
   index: {
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: "bold",
     color: "#FFD700",
-    marginRight: 10,
   },
   avatar: {
-    width: 50,
-    height: 50,
+    width: 45,
+    height: 40,
     borderRadius: 25,
     marginRight: 10,
   },
   contentContainer: {
-    paddingBottom: 20,
+    paddingBottom: "100%",
   },
   headings: {
     flexDirection: "row",
     justifyContent: "space-around",
-    paddingLeft: 10,
   },
   headingFont: {
-    fontSize: 17,
+    fontSize: 13,
     fontWeight: "bold",
-    color: "black",
+    color: "#bfbfbf",
+    marginBottom: 10,
   },
   bottomSheetBackground: {
-    backgroundColor: "#FFFFFF", // Light background for the bottom sheet
+    backgroundColor: "#7E3887",
     borderRadius: 20,
   },
   bottomSheetIndicator: {
-    backgroundColor: "#CCCCCC", // Indicator color
+    backgroundColor: "#CCCCCC",
     width: 40,
     height: 5,
     borderRadius: 3,
   },
 });
-

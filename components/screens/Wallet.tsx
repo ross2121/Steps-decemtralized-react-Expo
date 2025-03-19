@@ -16,6 +16,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { StyleSheet } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 const TRANSACTIONS = [
   {
     id: "1",
@@ -63,7 +64,6 @@ const TRANSACTIONS = [
   },
 ];
 
-
 const Wallet = () => {
   const connection = new Connection(
     "https://solana-devnet.g.alchemy.com/v2/r25E3uMjQakYPLTlM3f9rNihLj8SlmE_"
@@ -96,18 +96,14 @@ const Wallet = () => {
     fetchWallet();
   }, []);
 
-  // Bottom sheet reference
   const bottomSheetRef = useRef<BottomSheet>(null);
 
-  // Variables for bottom sheet snap points
   const snapPoints = useMemo(() => ["25%", "50%", "75%"], []);
 
-  // Callbacks
   const handleSheetChanges = useCallback((index: number) => {
-    console.log("Bottom sheet index:", index);
+    // console.log("Bottom sheet index:", index);
   }, []);
 
-  // Render transaction item
   const renderItem = useCallback(({ item }: any) => {
     return (
       <View style={styles.transactionItem}>
@@ -152,39 +148,45 @@ const Wallet = () => {
   }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#1E2130" }}>
-      <StatusBar barStyle="light-content" />
+    <SafeAreaView style={{ flex: 1 }}>
+      {/* <StatusBar barStyle="light-content" /> */}
+      <LinearGradient
+        colors={["#1a0033", "#4b0082", "#290d44"]}
+        style={styles.gradient}
+      >
+        {/* Wallet Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Wallet</Text>
+          <TouchableOpacity style={styles.settingsButton}>
+            <Feather name="settings" size={24} color="#5EDCF5" />
+          </TouchableOpacity>
+        </View>
 
-      {/* Wallet Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Wallet</Text>
-        <TouchableOpacity style={styles.settingsButton}>
-          <Feather name="settings" size={24} color="#5EDCF5" />
-        </TouchableOpacity>
-      </View>
+        {/* Balance Display */}
+        <View style={styles.balanceContainer}>
+          <Text style={styles.balanceText}>
+            ${(balance / LAMPORTS_PER_SOL).toFixed(2)}
+          </Text>
+        </View>
 
-      {/* Balance Display */}
-      <View style={styles.balanceContainer}>
-        <Text style={styles.balanceText}>${(balance / LAMPORTS_PER_SOL).toFixed(2)}</Text>
-      </View>
+        {/* Action Buttons */}
+        <View style={styles.actionButtonsContainer}>
+          <TouchableOpacity style={styles.actionButton} onPress={onClick}>
+            <Feather name="plus" size={24} color="white" />
+            <Text style={styles.actionButtonText}>Add</Text>
+          </TouchableOpacity>
 
-      {/* Action Buttons */}
-      <View style={styles.actionButtonsContainer}>
-        <TouchableOpacity style={styles.actionButton} onPress={onClick}>
-          <Feather name="plus" size={24} color="white" />
-          <Text style={styles.actionButtonText}>Add</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.actionButton}>
+            <Feather name="repeat" size={24} color="white" />
+            <Text style={styles.actionButtonText}>Swap</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionButton}>
-          <Feather name="repeat" size={24} color="white" />
-          <Text style={styles.actionButtonText}>Swap</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.actionButton}>
-          <Feather name="send" size={24} color="white" />
-          <Text style={styles.actionButtonText}>Send</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity style={styles.actionButton}>
+            <Feather name="send" size={24} color="white" />
+            <Text style={styles.actionButtonText}>Send</Text>
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
 
       {/* Bottom Sheet */}
       <BottomSheet
@@ -194,25 +196,36 @@ const Wallet = () => {
         onChange={handleSheetChanges}
         backgroundStyle={styles.bottomSheetBackground}
         handleIndicatorStyle={styles.bottomSheetIndicator}
+        style={{ paddingHorizontal: 12 }}
       >
-        <View style={styles.bottomSheetHeader}>
-          <Text style={styles.bottomSheetTitle}>Balances</Text>
-          <Feather name="clock" size={20} color="white" />
-        </View>
+        <View
+          style={{
+            backgroundColor: "#1a0033",
+            marginTop: 20,
+            borderRadius: 20,
+          }}
+        >
+          <View style={styles.bottomSheetHeader}>
+            <Text style={styles.bottomSheetTitle}>Balances</Text>
+            <Feather name="clock" size={20} color="white" />
+          </View>
 
-        <BottomSheetFlatList
-          data={TRANSACTIONS}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={styles.transactionList}
-        />
+          <BottomSheetFlatList
+            data={TRANSACTIONS}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            contentContainerStyle={styles.transactionList}
+          />
+        </View>
       </BottomSheet>
     </SafeAreaView>
   );
 };
 
-
 const styles = StyleSheet.create({
+  gradient: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: "#1E2130",
@@ -266,12 +279,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   bottomSheetBackground: {
-    backgroundColor: "#5EDCF5",
+    backgroundColor: "#7E3887",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
   },
   bottomSheetIndicator: {
-    backgroundColor: "white",
+    backgroundColor: "CCCCCC",
     width: 40,
   },
   bottomSheetHeader: {
@@ -287,6 +300,7 @@ const styles = StyleSheet.create({
     color: "white",
   },
   transactionList: {
+    paddingBottom: "100%",
     paddingHorizontal: 20,
   },
   transactionItem: {
