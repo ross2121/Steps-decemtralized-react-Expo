@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -9,8 +9,26 @@ import {
 } from "react-native-gesture-handler";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { router } from "expo-router";
+import { getGrantedPermissions } from "react-native-health-connect";
 
 const App = () => {
+    useEffect(()=>{
+      const Auth=async()=>{
+        const token=await AsyncStorage.getItem("token");
+         const permissions = await getGrantedPermissions();
+            if(!token){
+              router.push("/(auth)/test");
+            }
+            if(permissions.length==0){
+              router.push("/(googlefit)/test")
+              console.log("no permission")
+           }
+      }
+      Auth();
+    })
   return (
     <GestureHandlerRootView>
       <SafeAreaView style={{ flex: 1 }}>

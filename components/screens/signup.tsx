@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   Alert,
   KeyboardAvoidingView,
+  Button,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -141,7 +142,7 @@ const Signup = () => {
               </View>
 
               <TouchableOpacity style={styles.signUpButton}>
-                <Text style={styles.signUpButtonText}>Sign Up</Text>
+              {loading?<Button title="Sign up" onPress={()=>handleSignup()} ></Button>:<Text>Signing up....</Text>}
               </TouchableOpacity>
 
               <View style={styles.newUserContainer}>

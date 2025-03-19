@@ -1,66 +1,80 @@
 import { useEffect, useState } from "react";
-import { View,Text, Button } from "react-native";
-import { getGrantedPermissions, readRecords } from "react-native-health-connect";
-import {  SafeAreaView } from "react-native-safe-area-context";
-import  WebSocket  from "react-native-websocket";
-import React from "react";
+import { View, Text, Button } from "react-native";
+import { initialize, readRecords } from "react-native-health-connect";
+import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
- const step=()=>{
-    const [steps,setsteps]=useState(0);
-    let userid:any
-    useEffect(()=>{
-      const step=async()=>{
-        userid=await AsyncStorage.getItem("userid");
-      const now = new Date(); 
-      console.log("hey");
-      const twoDaysAgo = new Date(now.getTime() -  24 * 60 * 60 * 1000);
-      const startTime = twoDaysAgo.toISOString();
-      const endTime = now.toISOString();
-      console.log("chek");
-       const permissions = await getGrantedPermissions();
-       console.log("hek");
-            if(permissions.length==0){
-               console.log("no permission")
-            }
-            console.log('Granted permissions:', permissions);
-            const recondr=await readRecords('Steps',{timeRangeFilter:{
-              operator:'between',
-              startTime:startTime,
-              endTime:endTime
-            }})
-           ;
-            console.log(recondr.records[0].count);
-            let count=0;
-            recondr.records.map((recod)=>count+=recod.count);
-            console.log(count);
-            setsteps(count);
+import axios from "axios";
+import React from "react";
+
+const Step = () => {
+  const [error, setError] = useState("");
+  const [steps, setSteps] = useState(0);
+
+  useEffect(() => {
+    const fetchSteps = async () => {
+      try {
+        const userid = await AsyncStorage.getItem("userid");
+        const now = new Date();
+        const midnightToday = new Date(now);
+        midnightToday.setHours(0, 0, 0, 0);
+        const startTime = midnightToday.toISOString();
+        const endTime = now.toISOString();
+          const isInitialized = await initialize();
+          console.log({ isInitialized });
+        
+        console.log("Fetching steps...");
+        const { records } = await readRecords("Steps", {
+          timeRangeFilter: {
+            operator: "between",
+            startTime: startTime,
+            endTime: endTime,
+          },
+        });
+
+        console.log("Retrieved records:", records);
+        let count = 0;
+        records.forEach((record) => {
+          count += record.count || 0;
+        });
+        console.log("Total steps count:", count);
+        setSteps(count);
+      } catch (err) {
+        console.error("Error fetching steps:", err);
+        setError("Failed to fetch steps. Please try again.");
+      }
+    };
+
+    fetchSteps();
+  }, []);
+
+  const sendSteps = async (steps: number) => {
+    try {
+      const userid = await AsyncStorage.getItem("userid");
+      await axios.post("http://10.5.121.76:3000/api/v1/regular/update", {
+        userid: userid,
+        steps: steps,
+      });
+      console.log("Steps sent successfully");
+    } catch (err) {
+      if (err instanceof Error && "response" in err) {
+        const axiosError = err as { response: { data: { message: string } } };
+        setError(axiosError.response.data.message || "An error occurred. Please try again.");
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
     }
-  
-    step();
-    },[])
-    const sendSteps = (steps:any) => {
-      const message = JSON.stringify({ userid, steps });
-      // this.webSocket.send(message);
-  }
-          return(
-           <SafeAreaView>
-             <WebSocket
-                // ref={(ref) => (this.webSocket = ref)}
-                url="ws://10.5.121.76:4000"
-                onOpen={() => console.log('WebSocket connected')}
-                onMessage={(message) => console.log('Message from server:', message)}
-                onError={(error) => console.error('WebSocket error:', error)}
-                onClose={() => console.log('WebSocket closed')}
-            />
-            <View>
-              <Text>Total Steps</Text>
-                <Text>{steps}</Text>
-                <Button
-                title="Send Steps"
-                onPress={() =>sendSteps(steps)}
-            />
-            </View>
-           </SafeAreaView>
-          )
-}
-export default step;
+  };
+
+  return (
+    <SafeAreaView>
+      <View>
+        <Text>Total Steps</Text>
+        <Text>{steps}</Text>
+        {error ? <Text style={{ color: "red" }}>{error}</Text> : null}
+        <Button title="Send Steps" onPress={() => sendSteps(steps)} />
+      </View>
+    </SafeAreaView>
+  );
+};
+
+export default Step;

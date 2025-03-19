@@ -1,17 +1,21 @@
 import  Competion from "@/components/screens/Competion"
 import LeaderboardScreen from "@/components/screens/LeaderboardScreen"
 import React from "react"
+import { Modal } from "react-native"
+import { GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler"
 import { SafeAreaView } from "react-native-safe-area-context"
 const App=()=>{
     return(
-        <SafeAreaView>
+        <Modal>
+             <GestureHandlerRootView style={{ flex: 1}}>
         {/* <Competion>
 
         </Competion> */}
-        <LeaderboardScreen>
+        <LeaderboardScreen/>
             
-        </LeaderboardScreen>
-        </SafeAreaView>
+        
+        </GestureHandlerRootView>
+        </Modal>
     )
 }
 export default App;

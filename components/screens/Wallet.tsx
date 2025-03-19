@@ -62,41 +62,40 @@ const TRANSACTIONS = [
     to: "Subscription",
   },
 ];
-const Wallet = () => {
 
+
+const Wallet = () => {
   const connection = new Connection(
     "https://solana-devnet.g.alchemy.com/v2/r25E3uMjQakYPLTlM3f9rNihLj8SlmE_"
   );
-  const [balance, setbalace] = useState(0);
-  const Onclick = async () => {
-    const publickey = await AsyncStorage.getItem("PublicKey");
-    if (!publickey) {
+  const [balance, setBalance] = useState(0);
+
+  const onClick = async () => {
+    const publicKey = await AsyncStorage.getItem("PublicKey");
+    if (!publicKey) {
       Alert.alert("No public key found");
       return;
     }
     const spl = await connection.requestAirdrop(
-      new PublicKey(publickey),
+      new PublicKey(publicKey),
       LAMPORTS_PER_SOL * 1
     );
-    console.log("chh");
-    console.log(spl);
+    console.log("Airdrop transaction:", spl);
   };
+
   useEffect(() => {
-    console.log("hek");
-    const Wallets = async () => {
-      const publickey = await AsyncStorage.getItem("PublicKey");
-      if (!publickey) {
+    const fetchWallet = async () => {
+      const publicKey = await AsyncStorage.getItem("PublicKey");
+      if (!publicKey) {
         Alert.alert("No public key found");
         return;
       }
-      console.log(publickey);
-      console.log("Check1");
-      const balanced = await connection.getBalance(new PublicKey(publickey));
-      console.log(balanced);
-      setbalace(balanced);
+      const balance = await connection.getBalance(new PublicKey(publicKey));
+      setBalance(balance);
     };
-    Wallets();
-  },[]);
+    fetchWallet();
+  }, []);
+
   // Bottom sheet reference
   const bottomSheetRef = useRef<BottomSheet>(null);
 
@@ -105,13 +104,11 @@ const Wallet = () => {
 
   // Callbacks
   const handleSheetChanges = useCallback((index: number) => {
-    console.log("handleSheetChanges", index);
+    console.log("Bottom sheet index:", index);
   }, []);
 
   // Render transaction item
   const renderItem = useCallback(({ item }: any) => {
-    const isPositive = item.type === "received";
-
     return (
       <View style={styles.transactionItem}>
         <View style={styles.transactionIconContainer}>
@@ -155,67 +152,65 @@ const Wallet = () => {
   }, []);
 
   return (
-    <Modal>
-    <GestureHandlerRootView style={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#1E2130" }}>
       <StatusBar barStyle="light-content" />
-      <SafeAreaView style={styles.container}>
-        {/* Wallet Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Wallet</Text>
-          <TouchableOpacity style={styles.settingsButton}>
-            <Feather name="settings" size={24} color="#5EDCF5" />
-          </TouchableOpacity>
+
+      {/* Wallet Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Wallet</Text>
+        <TouchableOpacity style={styles.settingsButton}>
+          <Feather name="settings" size={24} color="#5EDCF5" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Balance Display */}
+      <View style={styles.balanceContainer}>
+        <Text style={styles.balanceText}>${(balance / LAMPORTS_PER_SOL).toFixed(2)}</Text>
+      </View>
+
+      {/* Action Buttons */}
+      <View style={styles.actionButtonsContainer}>
+        <TouchableOpacity style={styles.actionButton} onPress={onClick}>
+          <Feather name="plus" size={24} color="white" />
+          <Text style={styles.actionButtonText}>Add</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.actionButton}>
+          <Feather name="repeat" size={24} color="white" />
+          <Text style={styles.actionButtonText}>Swap</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.actionButton}>
+          <Feather name="send" size={24} color="white" />
+          <Text style={styles.actionButtonText}>Send</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Bottom Sheet */}
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={0}
+        snapPoints={snapPoints}
+        onChange={handleSheetChanges}
+        backgroundStyle={styles.bottomSheetBackground}
+        handleIndicatorStyle={styles.bottomSheetIndicator}
+      >
+        <View style={styles.bottomSheetHeader}>
+          <Text style={styles.bottomSheetTitle}>Balances</Text>
+          <Feather name="clock" size={20} color="white" />
         </View>
 
-        {/* Balance Display */}
-        <View style={styles.balanceContainer}>
-          <Text style={styles.balanceText}>$0.00</Text>
-        </View>
-
-        {/* Action Buttons */}
-        <View style={styles.actionButtonsContainer}>
-          <TouchableOpacity style={styles.actionButton}>
-            <Feather name="plus" size={24} color="white" />
-            <Text style={styles.actionButtonText}>Add</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionButton}>
-            <Feather name="repeat" size={24} color="white" />
-            <Text style={styles.actionButtonText}>Swap</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionButton}>
-            <Feather name="send" size={24} color="white" />
-            <Text style={styles.actionButtonText}>Send</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Bottom Sheet */}
-        <BottomSheet
-          ref={bottomSheetRef}
-          index={0}
-          snapPoints={snapPoints}
-          onChange={handleSheetChanges}
-          backgroundStyle={styles.bottomSheetBackground}
-          handleIndicatorStyle={styles.bottomSheetIndicator}
-        >
-          <View style={styles.bottomSheetHeader}>
-            <Text style={styles.bottomSheetTitle}>Balances</Text>
-            <Feather name="clock" size={20} color="white" />
-          </View>
-
-          <BottomSheetFlatList
-            data={TRANSACTIONS}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            contentContainerStyle={styles.transactionList}
-          />
-        </BottomSheet>
-      </SafeAreaView>
-    </GestureHandlerRootView>
-    </Modal>
+        <BottomSheetFlatList
+          data={TRANSACTIONS}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.transactionList}
+        />
+      </BottomSheet>
+    </SafeAreaView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
