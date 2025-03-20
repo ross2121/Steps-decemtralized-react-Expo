@@ -696,6 +696,7 @@ const JoinGame = () => {
             justifyContent: "center",
             borderRadius: 10,
           }}
+          onPress={() => router.push("/(nonav)/historyGames")}
         >
           <View
             style={{
@@ -734,9 +735,11 @@ const JoinGame = () => {
           <View>
             <AntDesign name="plus" size={24} color="white" />
           </View>
-          <View>
-            <Text style={styles.gamebttnText}>New Game</Text>
-          </View>
+          <TouchableOpacity onPress={() => router.push("/(nonav)/newGame")}>
+            <View>
+              <Text style={styles.gamebttnText}>New Game</Text>
+            </View>
+          </TouchableOpacity>
         </View>
         <View style={styles.gamebttn}>
           <View>

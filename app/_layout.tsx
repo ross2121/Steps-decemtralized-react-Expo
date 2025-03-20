@@ -24,6 +24,11 @@ export default function RootLayout() {
         name="(nonav)/communityGames"
         options={{ title: "Community Games" }}
       />
+      <Stack.Screen name="(nonav)/newGame" options={{ title: "Create Game" }} />
+      <Stack.Screen
+        name="(nonav)/historyGames"
+        options={{ title: "History" }}
+      />
     </Stack>
   );
 }
