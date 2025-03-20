@@ -22,7 +22,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
-
+import android.util.Log
 
 import expo.modules.ReactActivityDelegateWrapper
 
@@ -79,16 +79,22 @@ class MainActivity : ReactActivity() {
       // because it's doing more than [Activity.moveTaskToBack] in fact.
       super.invokeDefaultOnBackPressed()
   }
-  fun scheduleDailyHealthDataSync(context: Context) {
+ fun scheduleDailyHealthDataSync(context: Context) {
     val constraints = Constraints.Builder()
         .setRequiredNetworkType(NetworkType.CONNECTED) // Ensure network is available
         .build()
 
-    val workRequest =  OneTimeWorkRequestBuilder<HealthDataWorker>()
+    Log.d("HealthDataSync", "Creating work request with constraints: Network = CONNECTED")
+
+    val workRequest = OneTimeWorkRequestBuilder<HealthDataWorker>()
         .setConstraints(constraints)
         .build()
+
+    Log.d("HealthDataSync", "Enqueuing work request...")
+
     WorkManager.getInstance(context).enqueue(workRequest)
 
+    Log.d("HealthDataSync", "Work request enqueued successfully.")
 }
 
 private fun setAlarmForMidnight(context: Context) {

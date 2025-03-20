@@ -1,3 +1,4 @@
+import android.util.Log
 import com.youval21.StepsDecentralized.RetrofitClient
 import com.youval21.StepsDecentralized.StepsRequest
 import android.content.Context
@@ -12,21 +13,32 @@ import androidx.health.connect.client.time.TimeRangeFilter
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
-
 class HealthDataWorker(appContext: Context, workerParams: WorkerParameters) :
     CoroutineWorker(appContext, workerParams) {
+
+    companion object {
+        private const val TAG = "HealthDataWorker"
+    }
+
     override suspend fun doWork(): Result {
         return withContext(Dispatchers.IO) {
             try {
+                Log.d(TAG, "Starting HealthDataWorker...")
+                
                 val steps = fetchStepsFromHealthConnect()
+                Log.d(TAG, "Fetched steps: $steps")
+                
                 val response = RetrofitClient.instance.sendSteps(StepsRequest(steps.toInt()))
+                Log.d(TAG, "Steps sent to server. Response: $response")
+                
                 Result.success()
             } catch (e: Exception) {
-                println("Error: ${e.message}")
+                Log.e(TAG, "Error in HealthDataWorker: ${e.message}", e)
                 Result.failure()
             }
         }
     }
+
     private suspend fun fetchStepsFromHealthConnect(): Long {
         val healthConnectClient = HealthConnectClient.getOrCreate(applicationContext)
         val now = ZonedDateTime.now()
@@ -40,9 +52,13 @@ class HealthDataWorker(appContext: Context, workerParams: WorkerParameters) :
             recordType = StepsRecord::class,
             timeRangeFilter = timeRangeFilter
         )
-
+         
+        Log.d(TAG, "Fetching steps from Health Connect...")
         val response = healthConnectClient.readRecords(request)
         
-        return response.records.sumOf { it.count }
+        val totalSteps = response.records.sumOf { it.count }
+        Log.d(TAG, "Total steps fetched: $totalSteps")
+        
+        return totalSteps
     }
 }
