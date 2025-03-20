@@ -9,6 +9,20 @@ import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
 import com.facebook.react.defaults.DefaultReactActivityDelegate
 import dev.matinzd.healthconnect.permissions.HealthConnectPermissionDelegate
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import java.util.Calendar
+import java.util.concurrent.TimeUnit
+
 
 import expo.modules.ReactActivityDelegateWrapper
 
@@ -21,6 +35,7 @@ class MainActivity : ReactActivity() {
     // @generated begin expo-splashscreen - expo prebuild (DO NOT MODIFY) sync-f3ff59a738c56c9a6119210cb55f0b613eb8b6af
     SplashScreenManager.registerOnActivity(this)
      super.onCreate(savedInstanceState)
+     scheduleDailyHealthDataSync(this)
      HealthConnectPermissionDelegate.setPermissionDelegate(this)
     // @generated end expo-splashscreen
   }
@@ -64,4 +79,39 @@ class MainActivity : ReactActivity() {
       // because it's doing more than [Activity.moveTaskToBack] in fact.
       super.invokeDefaultOnBackPressed()
   }
+  fun scheduleDailyHealthDataSync(context: Context) {
+    val constraints = Constraints.Builder()
+        .setRequiredNetworkType(NetworkType.CONNECTED) // Ensure network is available
+        .build()
+
+    val workRequest =  OneTimeWorkRequestBuilder<HealthDataWorker>()
+        .setConstraints(constraints)
+        .build()
+    WorkManager.getInstance(context).enqueue(workRequest)
+
+}
+
+private fun setAlarmForMidnight(context: Context) {
+    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    val intent = Intent(context, HealthDataWorker::class.java)
+    val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+
+    val calendar = Calendar.getInstance().apply {
+        timeInMillis = System.currentTimeMillis()
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+    }
+
+    // If the time is already past 12:00 AM, schedule for the next day
+    if (Calendar.getInstance().after(calendar)) {
+        calendar.add(Calendar.DAY_OF_MONTH, 1)
+    }
+
+    alarmManager.setExactAndAllowWhileIdle(
+        AlarmManager.RTC_WAKEUP,
+        calendar.timeInMillis,
+        pendingIntent
+    )
+}
 }

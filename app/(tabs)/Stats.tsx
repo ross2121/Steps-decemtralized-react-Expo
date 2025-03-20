@@ -11,13 +11,11 @@ const StatisticsScreen = () => {
   };
   return (
     <SafeAreaView>
-      <LeaderboardScreen>
-        
-      </LeaderboardScreen>
-      {/* <Text>Statistics</Text>
+     
+      <Text>Statistics</Text>
       <Text>Hello</Text>
       <Text>Hello2</Text>
-      <Button title="All challenge" onPress={() => Onclick()}></Button> */}
+      <Button title="All challenge" onPress={() => Onclick()}></Button>
       {/* <Wallet /> */}
     </SafeAreaView>
   );
