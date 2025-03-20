@@ -28,6 +28,7 @@ import axios from "axios";
 import { router } from "expo-router";
 import { getGrantedPermissions } from "react-native-health-connect";
 import BottomSheet, {
+  BottomSheetBackdrop,
   BottomSheetModal,
   BottomSheetModalProvider,
   BottomSheetView,
@@ -88,7 +89,19 @@ const App = () => {
 
             {/* Modal Sheet */}
 
-            <BottomSheetModal ref={bottomSheetModalRef} snapPoints={snapPoints}>
+            <BottomSheetModal
+              ref={bottomSheetModalRef}
+              snapPoints={snapPoints}
+              backgroundStyle={styles.BottomSheetBackground}
+              backdropComponent={(props) => (
+                <BottomSheetBackdrop
+                  {...props}
+                  disappearsOnIndex={-1}
+                  appearsOnIndex={0}
+                  opacity={0.9}
+                />
+              )}
+            >
               <BottomSheetView>
                 {selectedGame ? (
                   <View>
@@ -103,6 +116,7 @@ const App = () => {
                 ) : (
                   <Text style={styles.bottomSheetTitle}>No Game Selected</Text>
                 )}
+                <Text>Hello</Text>
               </BottomSheetView>
             </BottomSheetModal>
           </LinearGradient>
@@ -294,14 +308,14 @@ const OfficialGames = ({ handleJoinClick }) => {
                     </Text>
                   </TouchableOpacity>
 
-                  <BottomSheetModal
+                  {/* <BottomSheetModal
                     ref={bottomSheetModalRef}
                     onChange={handleSheetChanges}
                   >
                     <BottomSheetView>
                       <Text>Hello</Text>
                     </BottomSheetView>
-                  </BottomSheetModal>
+                  </BottomSheetModal> */}
                 </View>
               </View>
               <View
@@ -390,7 +404,7 @@ const OfficialGames = ({ handleJoinClick }) => {
             </View>
           ))}
         </ScrollView>
-      </View>{" "}
+      </View>
     </BottomSheetModalProvider>
   );
 };
@@ -834,6 +848,12 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  BottomSheetBackground: {
+    flex: 1,
+    backgroundColor: "#7E3887",
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
   },
 });
 
