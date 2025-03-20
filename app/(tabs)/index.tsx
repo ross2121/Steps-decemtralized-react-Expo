@@ -21,6 +21,7 @@ import {
   NativeViewGestureHandler,
   ScrollView,
 } from "react-native-gesture-handler";
+import SlideButton from "rn-slide-button";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -104,19 +105,91 @@ const App = () => {
             >
               <BottomSheetView>
                 {selectedGame ? (
-                  <View>
-                    <Text
+                  <View
+                    style={{
+                      paddingHorizontal: 10,
+                    }}
+                  >
+                    <View
                       style={{
-                        color: "black",
+                        backgroundColor: "#1a0033",
+                        borderRadius: 20,
+                        paddingHorizontal: 20,
+                        paddingVertical: 20,
                       }}
                     >
-                      {selectedGame.title}
-                    </Text>
+                      <Text style={styles.bottomSheetTitle}>
+                        {selectedGame.title}
+                      </Text>
+                      <Text
+                        style={{
+                          color: "white",
+                        }}
+                      >
+                        You Pay: {selectedGame.entryPrice}
+                      </Text>
+                      {/* <View style={{ marginTop: 20 }}>
+                        <Text
+                          style={{
+                            color: "white",
+                            fontSize: 16,
+                            marginBottom: 10,
+                          }}
+                        >
+                          Slide to Confirm
+                        </Text>
+                        <View
+                          style={{
+                            backgroundColor: "#4b0082",
+                            borderRadius: 50,
+                            height: 50,
+                            justifyContent: "center",
+                            paddingHorizontal: 5,
+                          }}
+                        >
+                          <TouchableOpacity
+                            style={{
+                              backgroundColor: "#9C89FF",
+                              borderRadius: 50,
+                              height: 40,
+                              width: 100,
+                              justifyContent: "center",
+                              alignItems: "center",
+                              position: "absolute",
+                              left: 5,
+                            }}
+                            onPress={() => console.log("Confirmed!")}
+                          >
+                            <Text
+                              style={{ color: "white", fontWeight: "bold" }}
+                            >
+                              Confirm
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View> */}
+                      <SlideButton
+                        title="Slide To Confirm"
+                        width="80%"
+                        padding="2"
+                        reverseSlideEnabled={false}
+                        animation={true}
+                        titleContainerStyle={{
+                          backgroundColor: "#4b0082",
+                        }}
+                        containerStyle={{
+                          backgroundColor: "#4b0082",
+                        }}
+                        underlayStyle={{
+                          backgroundColor: "#1a0033",
+                        }}
+                        // height="30%"
+                      />
+                    </View>
                   </View>
                 ) : (
                   <Text style={styles.bottomSheetTitle}>No Game Selected</Text>
                 )}
-                <Text>Hello</Text>
               </BottomSheetView>
             </BottomSheetModal>
           </LinearGradient>
@@ -177,7 +250,6 @@ const StepsCount = () => {
                 fontWeight: "bold",
               }}
             >
-              {" "}
               steps
             </Text>
           </View>
@@ -307,15 +379,6 @@ const OfficialGames = ({ handleJoinClick }) => {
                       Join
                     </Text>
                   </TouchableOpacity>
-
-                  {/* <BottomSheetModal
-                    ref={bottomSheetModalRef}
-                    onChange={handleSheetChanges}
-                  >
-                    <BottomSheetView>
-                      <Text>Hello</Text>
-                    </BottomSheetView>
-                  </BottomSheetModal> */}
                 </View>
               </View>
               <View
@@ -795,7 +858,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 24,
     fontWeight: "bold",
-    textAlign: "center",
+    marginLeft: 20,
     marginBottom: 15,
   },
   divider: {

@@ -67,6 +67,7 @@
     "react-native-websocket": "^1.0.2",
     "react-native-webview": "13.12.5",
     "reanimated-bottom-sheet": "^1.0.0-alpha.22",
+    "rn-slide-button": "^1.0.3",
     "tailwindcss": "3.4.17",
     "websocket": "^1.0.35"
   },

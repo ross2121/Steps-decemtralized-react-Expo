@@ -19,9 +19,9 @@ const Step = () => {
         midnightToday.setHours(0, 0, 0, 0);
         const startTime = midnightToday.toISOString();
         const endTime = now.toISOString();
-          const isInitialized = await initialize();
-          console.log({ isInitialized });
-        
+        const isInitialized = await initialize();
+        console.log({ isInitialized });
+
         console.log("Fetching steps...");
         const { records } = await readRecords("Steps", {
           timeRangeFilter: {
@@ -34,7 +34,11 @@ const Step = () => {
         console.log("Retrieved records:", records);
         let count = 0;
         records.forEach((record) => {
-          count += record.count || 0;
+          if (
+            record.metadata?.dataOrigin === "com.google.android.apps.fitness"
+          ) {
+            count += record.count || 0;
+          }
         });
         console.log("Total steps count:", count);
         setSteps(count);
@@ -58,7 +62,10 @@ const Step = () => {
     } catch (err) {
       if (err instanceof Error && "response" in err) {
         const axiosError = err as { response: { data: { message: string } } };
-        setError(axiosError.response.data.message || "An error occurred. Please try again.");
+        setError(
+          axiosError.response.data.message ||
+            "An error occurred. Please try again."
+        );
       } else {
         setError("An unexpected error occurred. Please try again.");
       }
