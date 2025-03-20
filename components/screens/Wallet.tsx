@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as Clipboard from "expo-clipboard";
 import {
   View,
   Text,
@@ -12,7 +13,10 @@ import {
   Modal,
 } from "react-native";
 import React from "react";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import {
+  GestureHandlerRootView,
+  TextInput,
+} from "react-native-gesture-handler";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetFlatList,
@@ -23,6 +27,11 @@ import BottomSheet, {
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import SlideButton from "rn-slide-button";
+// const [copiedText, setCopiedText] = useState("");
+// const copyToClipboard = async () => {
+//   await Clipboard.setStringAsync("hello world");
+// };
 const TRANSACTIONS = [
   {
     id: "1",
@@ -79,7 +88,7 @@ const Wallet = () => {
   const onClick = async () => {
     const publicKey = await AsyncStorage.getItem("PublicKey");
     if (!publicKey) {
-      Alert.alert("No public key found");
+      // Alert.alert("No public key found");
       return;
     }
     const spl = await connection.requestAirdrop(
@@ -93,7 +102,7 @@ const Wallet = () => {
     const fetchWallet = async () => {
       const publicKey = await AsyncStorage.getItem("PublicKey");
       if (!publicKey) {
-        Alert.alert("No public key found");
+        // Alert.alert("No public key found");
         return;
       }
       const balance = await connection.getBalance(new PublicKey(publicKey));
@@ -106,18 +115,7 @@ const Wallet = () => {
 
   const snapPoints = useMemo(() => ["25%", "50%", "75%"], []);
   const snapPointsModal = useMemo(() => ["30%", "50%"], []);
-
-  // const handleSheetChanges = useCallback((index: number) => {
-  //   // console.log("Bottom sheet index:", index);
-  // }, []);
-
-  // Make sure we're using the correct type for the ref
-  // const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-
-  // This function should present the modal
-  const handleAdd = useCallback(() => {
-    bottomSheetModalRef.current?.present();
-  }, []);
+  const snapPointsModal2 = useMemo(() => ["55%", "60%"], []);
 
   const renderItem = useCallback(({ item }: any) => {
     return (
@@ -163,15 +161,21 @@ const Wallet = () => {
   }, []);
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const bottomSheetModalRef2 = useRef<BottomSheetModal>(null);
 
   // callbacks
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
   }, []);
+  const handleSendModal = useCallback(() => {
+    bottomSheetModalRef2.current?.present();
+  }, []);
   const handleSheetChanges = useCallback((index: number) => {
     console.log("handleSheetChanges", index);
   }, []);
-
+  const handleSheetChanges2 = useCallback((index: number) => {
+    console.log("handleSheetChanges", index);
+  }, []);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 1 }}>
@@ -235,10 +239,38 @@ const Wallet = () => {
                 <Text style={styles.actionButtonText}>Swap</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.actionButton}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={handleSendModal}
+              >
                 <Feather name="send" size={24} color="white" />
                 <Text style={styles.actionButtonText}>Send</Text>
               </TouchableOpacity>
+              <BottomSheetModal
+                ref={bottomSheetModalRef2}
+                snapPoints={snapPointsModal2}
+                index={0}
+                handleIndicatorStyle={{
+                  backgroundColor: "#CCCCCC",
+                  width: 40,
+                  height: 5,
+                  borderRadius: 3,
+                }}
+                onChange={handleSheetChanges2}
+                backgroundStyle={styles.bottomModalBackground}
+                backdropComponent={(props) => (
+                  <BottomSheetBackdrop
+                    {...props}
+                    disappearsOnIndex={-1}
+                    appearsOnIndex={0}
+                    opacity={0.9}
+                  />
+                )}
+              >
+                <BottomSheetView>
+                  <SendModal />
+                </BottomSheetView>
+              </BottomSheetModal>
             </View>
           </LinearGradient>
 
@@ -281,66 +313,178 @@ const Wallet = () => {
 };
 
 const AddModal = () => {
+  const [copiedText, setCopiedText] = useState("");
+
+  const copyToClipboard = async () => {
+    const key = await AsyncStorage.getItem("PublicKey");
+    if (key == null) {
+      setCopiedText("No public key found");
+      return;
+    }
+    setCopiedText(key);
+    await Clipboard.setStringAsync(key);
+  };
   return (
     <View
       style={{
         paddingHorizontal: 20,
-        paddingVertical: 10,
       }}
     >
-      <Text
-        style={{
-          color: "white",
-          fontSize: 24,
-        }}
-      >
-        Add crypto
-      </Text>
       <View
         style={{
-          padding: 20,
+          paddingHorizontal: 20,
+          paddingVertical: 10,
+          backgroundColor: "#1a0033",
           borderRadius: 20,
+          marginTop: 20,
         }}
       >
+        <Text style={styles.bottomSheetTitle}>Add crypto</Text>
         <View
           style={{
-            backgroundColor: "#9c96a3",
-            padding: 10,
+            padding: 20,
             borderRadius: 20,
-            marginTop: 20,
           }}
         >
-          <Text
+          <View
             style={{
-              color: "white",
+              backgroundColor: "#9c96a3",
+              padding: 10,
+              borderRadius: 20,
+              marginTop: 20,
             }}
-            numberOfLines={1}
-            ellipsizeMode="tail"
           >
-            sdtyuioujgfdxcgvhbjkjhbxvcvghjkljdfghijjihgcvbnm,nbvhjkokuytfyuijlkbn
-            m,k.lkytyu
-          </Text>
+            <Text
+              style={{
+                color: "white",
+              }}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {copiedText}
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={{
+              backgroundColor: "#7E3887",
+              paddingVertical: 10,
+              width: "20%",
+              borderRadius: 20,
+              marginTop: 20,
+              alignItems: "center",
+              alignSelf: "center",
+            }}
+            onPress={copyToClipboard}
+          >
+            <Text style={{ color: "white" }}>Copy</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={{
-            backgroundColor: "#7E3887",
-            paddingVertical: 10,
-            width: "20%",
-            borderRadius: 20,
-            marginTop: 20,
-            alignItems: "center",
-            alignSelf: "center",
-          }}
-          onPress={() => {
-            const textToCopy =
-              "sdtyuioujgfdxcgvhbjkjhbxvcvghjkljdfghijjihgcvbnm,nbvhjkokuytfyuijlkbnm,k.lkytyu";
-            navigator.clipboard.writeText(textToCopy).then(() => {
-              Alert.alert("Copied to clipboard!");
-            });
-          }}
-        >
-          <Text style={{ color: "white" }}>Copy</Text>
-        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
+const SendModal = () => {
+  return (
+    <View
+      style={{
+        paddingHorizontal: 20,
+      }}
+    >
+      <View
+        style={{ padding: 20, borderRadius: 20, backgroundColor: "#1a0033" }}
+      >
+        <Text style={styles.bottomSheetTitle}>Send Crypto</Text>
+        <View>
+          <Text style={{ color: "white", marginTop: 20 }}>
+            Send crypto to a friend
+          </Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginTop: 20,
+              paddingLeft: 10,
+            }}
+          >
+            <Text style={{ color: "white" }}>Amount</Text>
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: "#9c96a3",
+                padding: 8,
+                marginLeft: 5,
+                borderRadius: 20,
+              }}
+            >
+              <TextInput
+                placeholder="Enter amount"
+                placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                style={{ color: "white" }}
+              />
+            </View>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginTop: 20,
+            }}
+          >
+            <Text style={{ color: "white" }}>Recipient</Text>
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: "#9c96a3",
+                padding: 10,
+                borderRadius: 20,
+                marginLeft: 10,
+              }}
+            >
+              <TextInput
+                placeholder="Enter recipient address"
+                placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                style={{ color: "white" }}
+              />
+            </View>
+          </View>
+          {/* <TouchableOpacity
+            style={{
+              backgroundColor: "#7E3887",
+              paddingVertical: 10,
+              width: "20%",
+              borderRadius: 20,
+              marginTop: 20,
+              alignItems: "center",
+              alignSelf: "center",
+            }}
+          >
+            <Text style={{ color: "white" }}>Send</Text>
+          </TouchableOpacity> */}
+          <View
+            style={{
+              marginTop: 20,
+            }}
+          >
+            <SlideButton
+              title="Slide To Send"
+              width="70%"
+              padding="2"
+              reverseSlideEnabled={false}
+              animation={true}
+              titleContainerStyle={{
+                backgroundColor: "#7E3887",
+              }}
+              containerStyle={{
+                backgroundColor: "#4b0082",
+              }}
+              underlayStyle={{
+                backgroundColor: "#1a0033",
+              }}
+              // height="30%"
+            />
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -353,7 +497,7 @@ const styles = StyleSheet.create({
   // modal
   bottomModalBackground: {
     flex: 1,
-    backgroundColor: "#1a0033",
+    backgroundColor: "#7E3887",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
   },
