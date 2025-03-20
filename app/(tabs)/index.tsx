@@ -64,6 +64,15 @@ const App = () => {
     setSelectedGame(game); // Set the selected game
     bottomSheetModalRef.current?.present(); // Open the BottomSheetModal
   }, []);
+  // function for search Game
+
+  const bottomSheetModalRef2 = useRef<BottomSheetModal>(null);
+  const snapPoints2 = useMemo(() => ["30%"], []);
+  const handleSearchGame = useCallback(() => {
+    console.log("Search Game");
+    bottomSheetModalRef2.current?.present();
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 1 }}>
@@ -84,7 +93,7 @@ const App = () => {
                 <CommunityGames handleJoinClick={handleJoinClick} />
               </View>
               <View>
-                <JoinGame />
+                <JoinGame handleSearchGame={handleSearchGame} />
               </View>
             </ScrollView>
 
@@ -190,6 +199,18 @@ const App = () => {
                 ) : (
                   <Text style={styles.bottomSheetTitle}>No Game Selected</Text>
                 )}
+              </BottomSheetView>
+            </BottomSheetModal>
+
+            <BottomSheetModal
+              ref={bottomSheetModalRef2}
+              snapPoints={snapPoints2}
+              backgroundStyle={styles.BottomSheetBackground}
+            >
+              <BottomSheetView>
+                <View>
+                  <Text style={styles.bottomSheetTitle}>Search Game</Text>
+                </View>
               </BottomSheetView>
             </BottomSheetModal>
           </LinearGradient>
@@ -674,7 +695,7 @@ const CommunityGames = ({ handleJoinClick }) => {
   );
 };
 
-const JoinGame = () => {
+const JoinGame = ({ handleSearchGame }) => {
   return (
     <View
       style={{
@@ -724,31 +745,35 @@ const JoinGame = () => {
           borderRadius: 13,
         }}
       >
-        <View
-          style={[
-            styles.gamebttn,
-            {
-              backgroundColor: "#9C89FF",
-            },
-          ]}
-        >
-          <View>
-            <AntDesign name="plus" size={24} color="white" />
-          </View>
-          <TouchableOpacity onPress={() => router.push("/(nonav)/newGame")}>
+        <TouchableOpacity onPress={() => router.push("/(nonav)/newGame")}>
+          {" "}
+          <View
+            style={[
+              styles.gamebttn,
+              {
+                backgroundColor: "#9C89FF",
+              },
+            ]}
+          >
+            <View>
+              <AntDesign name="plus" size={24} color="white" />
+            </View>
+
             <View>
               <Text style={styles.gamebttnText}>New Game</Text>
             </View>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.gamebttn}>
-          <View>
-            <FontAwesome6 name="magnifying-glass" size={24} color="white" />
+          </View>{" "}
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleSearchGame()}>
+          <View style={styles.gamebttn}>
+            <View>
+              <FontAwesome6 name="magnifying-glass" size={24} color="white" />
+            </View>
+            <View>
+              <Text style={styles.gamebttnText}>Game code</Text>
+            </View>
           </View>
-          <View>
-            <Text style={styles.gamebttnText}>Game code</Text>
-          </View>
-        </View>
+        </TouchableOpacity>
       </View>
     </View>
   );
