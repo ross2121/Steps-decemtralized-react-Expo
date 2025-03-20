@@ -1,11 +1,10 @@
 import {
-  Button,
+  Animated,
   Image,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  Animated,
 } from "react-native";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
@@ -20,25 +19,31 @@ import {
 
 const ProfileScreen = () => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const [selectedTab, setSelectedTab] = useState("friends");
+  const [selectedTab, setSelectedTab] = useState<"friends" | "search">(
+    "friends"
+  );
   const animatedValue = useRef(new Animated.Value(0)).current;
 
-  const friends = Array.from({ length: 50 }, (_, i) => ({
-    id: `${i + 1}`,
-    username: `User ${i + 1}`,
-  }));
+  const friends = useMemo(
+    () =>
+      Array.from({ length: 50 }, (_, i) => ({
+        id: `${i + 1}`,
+        username: `User ${i + 1}`,
+      })),
+    []
+  );
 
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
   }, []);
 
-  const snapPoints = useMemo(() => ["25%", "50%", "75%"], []);
+  const snapPoints = useMemo(() => ["30%", "50%"], []);
 
-  const handleTabPress = (tab: string) => {
+  const handleTabPress = (tab: "friends" | "search") => {
     setSelectedTab(tab);
     Animated.timing(animatedValue, {
       toValue: tab === "friends" ? 0 : 1,
-      duration: 250,
+      duration: 300,
       useNativeDriver: false,
     }).start();
   };
@@ -48,7 +53,7 @@ const ProfileScreen = () => {
       {
         translateX: animatedValue.interpolate({
           inputRange: [0, 1],
-          outputRange: [0, 180],
+          outputRange: [0, 202],
         }),
       },
     ],
@@ -62,6 +67,8 @@ const ProfileScreen = () => {
       >
         <View>
           <Text style={styles.header}>Profile</Text>
+
+          {/* Profile Info */}
           <View style={styles.profileCard}>
             <Image
               source={require("../../assets/images/profile.png")}
@@ -70,6 +77,7 @@ const ProfileScreen = () => {
             <Text style={styles.username}>Username</Text>
           </View>
 
+          {/* Friends List */}
           <TouchableOpacity onPress={handlePresentModalPress}>
             <View style={styles.options}>
               <Text style={styles.optionText}>Friends</Text>
@@ -82,32 +90,36 @@ const ProfileScreen = () => {
             </View>
           </TouchableOpacity>
 
+          {/* Bottom Sheet Modal */}
           <BottomSheetModal
             snapPoints={snapPoints}
             ref={bottomSheetModalRef}
-            backgroundStyle={styles.BottomSheetBackground}
+            backgroundStyle={styles.bottomSheetBackground}
             backdropComponent={(props) => (
               <BottomSheetBackdrop
                 {...props}
                 disappearsOnIndex={-1}
                 appearsOnIndex={0}
-                opacity={0.9}
+                opacity={0.8}
               />
             )}
           >
-            <BottomSheetView style={styles.contentContainer}>
-              <View style={styles.tabContainer}>
-                <TouchableOpacity onPress={() => handleTabPress("friends")}>
+            {/* Tabs */}
+            <View style={styles.tabContainer}>
+              <TouchableOpacity onPress={() => handleTabPress("friends")}>
+                <View>
                   <Text
                     style={[
                       styles.tabText,
                       selectedTab === "friends" && styles.activeTabText,
                     ]}
                   >
-                    My friends
+                    My Friends
                   </Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => handleTabPress("search")}>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleTabPress("search")}>
+                <View>
                   <Text
                     style={[
                       styles.tabText,
@@ -116,38 +128,37 @@ const ProfileScreen = () => {
                   >
                     Search
                   </Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.tabIndicatorContainer}>
-                <Animated.View
-                  style={[styles.tabIndicator, animatedBarStyle]}
-                />
-              </View>
-
-              {selectedTab === "friends" ? (
-                <View style={{ flex: 1, marginTop: 20 }}>
-                  <BottomSheetFlatList
-                    data={friends}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                      <View style={styles.friendItem}>
-                        <Text style={styles.friendText}>{item.username}</Text>
-                      </View>
-                    )}
-                    contentContainerStyle={{ paddingBottom: 20, flex: 1 }}
-                  />
                 </View>
-              ) : (
-                <View style={styles.searchView}>
-                  <Text style={styles.searchText}>
-                    This is the "Search" view.
-                  </Text>
-                </View>
-              )}
-            </BottomSheetView>
+              </TouchableOpacity>
+            </View>
+
+            {/* Tab Indicator */}
+            <View style={styles.tabIndicatorContainer}>
+              <Animated.View style={[styles.tabIndicator, animatedBarStyle]} />
+            </View>
+
+            {/* Friends List or Search View */}
+            {selectedTab === "friends" ? (
+              <BottomSheetFlatList
+                data={friends}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <View style={styles.friendItem}>
+                    <Text style={styles.friendText}>{item.username}</Text>
+                  </View>
+                )}
+                contentContainerStyle={{ paddingBottom: 20 }}
+              />
+            ) : (
+              <View style={styles.searchView}>
+                <Text style={styles.searchText}>
+                  Search feature coming soon...
+                </Text>
+              </View>
+            )}
           </BottomSheetModal>
 
+          {/* Other Options */}
           <TouchableOpacity>
             <View style={styles.options}>
               <Text style={styles.optionText}>Socials</Text>
@@ -172,6 +183,7 @@ const ProfileScreen = () => {
             </View>
           </TouchableOpacity>
 
+          {/* Logout */}
           <View style={styles.logoutContainer}>
             <TouchableOpacity style={styles.logoutButton}>
               <Text style={styles.logoutText}>Logout</Text>
@@ -187,9 +199,7 @@ const ProfileScreen = () => {
 export default ProfileScreen;
 
 const styles = StyleSheet.create({
-  gradient: {
-    flex: 1,
-  },
+  gradient: { flex: 1 },
   header: {
     color: "white",
     fontSize: 20,
@@ -205,8 +215,8 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   profileImage: {
-    width: 200,
-    height: 200,
+    width: 100,
+    height: 100,
     borderRadius: 50,
     alignSelf: "center",
   },
@@ -218,25 +228,16 @@ const styles = StyleSheet.create({
   },
   options: {
     backgroundColor: "#1a0226",
-    justifyContent: "center",
     marginTop: 10,
     padding: 20,
     marginHorizontal: 20,
     borderRadius: 20,
     flexDirection: "row",
-
     alignItems: "center",
   },
-  optionText: {
-    color: "white",
-    fontSize: 15,
-  },
-  optionIcon: {
-    position: "absolute",
-    right: 10,
-  },
-  BottomSheetBackground: {
-    flex: 1,
+  optionText: { color: "white", fontSize: 15 },
+  optionIcon: { position: "absolute", right: 10 },
+  bottomSheetBackground: {
     backgroundColor: "#7E3887",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
@@ -253,57 +254,30 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
     marginTop: 13,
   },
-  tabText: {
-    color: "#9e9a99",
-    fontSize: 13,
-  },
-  activeTabText: {
-    color: "white",
-  },
+  tabText: { color: "#9e9a99", fontSize: 13 },
+  activeTabText: { color: "white", fontWeight: "bold" },
   tabIndicatorContainer: {
-    marginTop: 20,
+    marginTop: 10,
     width: "90%",
-    height: 1,
+    height: 2,
     alignSelf: "center",
-    position: "relative",
+    backgroundColor: "#333",
+    marginBottom: 30,
   },
-  tabIndicator: {
-    width: "45%",
-    height: 1,
-    backgroundColor: "green",
-  },
+  tabIndicator: { width: "45%", height: 2, backgroundColor: "green" },
   friendItem: {
-    padding: 10,
+    padding: 12,
     marginHorizontal: 20,
+
     borderRadius: 10,
     marginBottom: 10,
-    paddingVertical: 12,
     backgroundColor: "#290d44",
-  },
-  friendText: {
-    color: "white",
-    fontSize: 14,
-    textAlign: "center",
-  },
-  searchView: {
-    marginTop: 20,
-  },
-  searchText: {
-    color: "white",
-    fontSize: 16,
-  },
-  logoutContainer: {
-    marginTop: 20,
-    justifyContent: "center",
     alignItems: "center",
   },
-  logoutButton: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  logoutText: {
-    color: "white",
-    fontSize: 15,
-    fontWeight: "bold",
-  },
+  friendText: { color: "white", fontSize: 14 },
+  searchView: { marginTop: 20, alignItems: "center" },
+  searchText: { color: "white", fontSize: 16 },
+  logoutContainer: { marginTop: 20, alignItems: "center" },
+  logoutButton: { flexDirection: "row", gap: 10, alignItems: "center" },
+  logoutText: { color: "white", fontSize: 15, fontWeight: "bold" },
 });
