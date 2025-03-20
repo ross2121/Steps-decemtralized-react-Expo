@@ -19,6 +19,10 @@ export default function RootLayout() {
       <Stack.Screen
         name="(nonav)/officialGames"
         options={{ title: "Official Games" }}
+      />{" "}
+      <Stack.Screen
+        name="(nonav)/communityGames"
+        options={{ title: "Community Games" }}
       />
     </Stack>
   );

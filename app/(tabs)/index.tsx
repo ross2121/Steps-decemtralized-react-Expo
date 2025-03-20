@@ -535,6 +535,7 @@ const CommunityGames = ({ handleJoinClick }) => {
             justifyContent: "center",
             borderRadius: 10,
           }}
+          onPress={() => router.push("/(nonav)/communityGames")}
         >
           <View
             style={{
