@@ -27,30 +27,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { router } from "expo-router";
 import { getGrantedPermissions } from "react-native-health-connect";
-import BottomSheet from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetModal,
+  BottomSheetModalProvider,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet";
 
 const App = () => {
   // Create refs and state
-  const [selectedGame, setSelectedGame] = useState(null);
-  const bottomSheetRef = useRef(null);
-
-  // Define snap points
-  const snapPoints = useMemo(() => ["50%", "75%"], []);
-
-  // Function to handle join button click
-  const handleJoinClick = useCallback((game) => {
-    console.log("Join clicked for game:", game.title);
-    setSelectedGame(game);
-
-    // Make sure to present the bottom sheet after a short delay
-    setTimeout(() => {
-      if (bottomSheetRef.current) {
-        bottomSheetRef.current.expand();
-      } else {
-        console.log("Bottom sheet ref is null");
-      }
-    }, 100);
-  }, []);
+  // const [selectedGame, setSelectedGame] = useState(null);
 
   useEffect(() => {
     const Auth = async () => {
@@ -66,109 +51,62 @@ const App = () => {
     };
     Auth();
   }, []); // Added empty dependency array to prevent continuous execution
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null); // Ref for BottomSheetModal
+  const [selectedGame, setSelectedGame] = useState(null); // State to store the selected game
 
+  const snapPoints = useMemo(() => ["50%", "75%"], []); // Snap points for BottomSheetModal
+
+  // Function to handle the "Join" button click
+  const handleJoinClick = useCallback((game) => {
+    console.log("Join clicked for game:", game.title);
+    setSelectedGame(game); // Set the selected game
+    bottomSheetModalRef.current?.present(); // Open the BottomSheetModal
+  }, []);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 1 }}>
-        <LinearGradient
-          colors={["#1a0033", "#4b0082", "#290d44"]}
-          style={styles.gradient}
-        >
-          {/* Wrap content in ScrollView to make it vertically scrollable */}
-          <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-            <View style={{ padding: 5 }}>
-              <StepsCount />
-            </View>
-            <View>
-              <OfficialGames />
-            </View>
-            <View>
-              <CommunityGames handleJoinClick={handleJoinClick} />
-            </View>
-            <View>
-              <JoinGame />
-            </View>
-          </ScrollView>
-
-          {/* Bottom Sheet */}
-          <BottomSheet
-            ref={bottomSheetRef}
-            index={-1}
-            snapPoints={snapPoints}
-            enablePanDownToClose={true}
-            handleIndicatorStyle={{ backgroundColor: "#9C89FF" }}
-            backgroundStyle={{ backgroundColor: "#290d44" }}
+        <BottomSheetModalProvider>
+          <LinearGradient
+            colors={["#1a0033", "#4b0082", "#290d44"]}
+            style={styles.gradient}
           >
-            <View style={styles.bottomSheetContent}>
-              {selectedGame ? (
-                <>
-                  <Text style={styles.bottomSheetTitle}>
-                    {selectedGame.title} Details
-                  </Text>
-                  <View style={styles.divider} />
+            {/* Wrap content in ScrollView to make it vertically scrollable */}
+            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+              <View style={{ padding: 5 }}>
+                <StepsCount />
+              </View>
+              <View>
+                <OfficialGames handleJoinClick={handleJoinClick} />
+              </View>
+              <View>
+                <CommunityGames handleJoinClick={handleJoinClick} />
+              </View>
+              <View>
+                <JoinGame />
+              </View>
+            </ScrollView>
 
-                  <View style={styles.gameDetailRow}>
-                    <View style={styles.gameDetailItem}>
-                      <Text style={styles.gameDetailLabel}>Entry Fee</Text>
-                      <Text style={styles.gameDetailValue}>
-                        ${selectedGame.entryPrice}
-                      </Text>
-                    </View>
-                    <View style={styles.gameDetailItem}>
-                      <Text style={styles.gameDetailLabel}>Duration</Text>
-                      <Text style={styles.gameDetailValue}>7 days</Text>
-                    </View>
-                  </View>
+            {/* Modal Sheet */}
 
-                  <View style={styles.gameDetailRow}>
-                    <View style={styles.gameDetailItem}>
-                      <Text style={styles.gameDetailLabel}>Time Period</Text>
-                      <Text style={styles.gameDetailValue}>
-                        {selectedGame.time}
-                      </Text>
-                    </View>
-                    <View style={styles.gameDetailItem}>
-                      <Text style={styles.gameDetailLabel}>Players</Text>
-                      <Text style={styles.gameDetailValue}>
-                        {selectedGame.participants}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.gameDetailRow}>
-                    <View style={styles.gameDetailItem}>
-                      <Text style={styles.gameDetailLabel}>
-                        Daily Steps Target
-                      </Text>
-                      <Text style={styles.gameDetailValue}>
-                        {selectedGame.dailySteps}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.gameDescription}>
-                    <Text style={styles.gameDescriptionLabel}>
-                      Game Description
-                    </Text>
-                    <Text style={styles.gameDescriptionText}>
-                      This is a community challenge where participants compete
-                      to reach their daily step goals. Complete the challenge to
-                      win prizes and improve your fitness!
+            <BottomSheetModal ref={bottomSheetModalRef} snapPoints={snapPoints}>
+              <BottomSheetView>
+                {selectedGame ? (
+                  <View>
+                    <Text
+                      style={{
+                        color: "black",
+                      }}
+                    >
+                      {selectedGame.title}
                     </Text>
                   </View>
-
-                  <TouchableOpacity style={styles.joinGameButton}>
-                    <Text style={styles.joinGameButtonText}>Join Game</Text>
-                  </TouchableOpacity>
-                </>
-              ) : (
-                <Text style={styles.bottomSheetTitle}>
-                  Loading game details...
-                </Text>
-              )}
-            </View>
-          </BottomSheet>
-        </LinearGradient>
+                ) : (
+                  <Text style={styles.bottomSheetTitle}>No Game Selected</Text>
+                )}
+              </BottomSheetView>
+            </BottomSheetModal>
+          </LinearGradient>
+        </BottomSheetModalProvider>
       </SafeAreaView>
     </GestureHandlerRootView>
   );
@@ -235,7 +173,7 @@ const StepsCount = () => {
   );
 };
 
-const OfficialGames = () => {
+const OfficialGames = ({ handleJoinClick }) => {
   const games = [
     {
       id: 1,
@@ -278,160 +216,182 @@ const OfficialGames = () => {
       dailySteps: "12k",
     },
   ];
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
+  // callbacks
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+  const handleSheetChanges = useCallback((index: number) => {
+    console.log("handleSheetChanges", index);
+  }, []);
   return (
-    <View style={styles.gamesContainer}>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          paddingRight: 16,
-          marginBottom: 10,
-        }}
-      >
-        <Text style={styles.gamesTitle}>Official Games</Text>
-        <TouchableOpacity
+    <BottomSheetModalProvider>
+      <View style={styles.gamesContainer}>
+        <View
           style={{
-            paddingHorizontal: 10,
-            paddingVertical: 5,
-            justifyContent: "center",
-            borderRadius: 10,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingRight: 16,
+            marginBottom: 10,
           }}
-          onPress={() => router.push("/(nonav)/officialGames")}
         >
-          <View
+          <Text style={styles.gamesTitle}>Official Games</Text>
+          <TouchableOpacity
             style={{
-              flexDirection: "row",
+              paddingHorizontal: 10,
+              paddingVertical: 5,
               justifyContent: "center",
-              alignItems: "center",
-              gap: 5,
+              borderRadius: 10,
             }}
+            onPress={() => router.push("/(nonav)/officialGames")}
           >
-            <Text style={{ color: "white" }}>All</Text>
-            <AntDesign name="arrowright" size={15} color="white" />
-          </View>
-        </TouchableOpacity>
-      </View>
-
-      {/* Horizontal ScrollView for games */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.gamesScrollContent}
-      >
-        {games.map((game) => (
-          <View key={game.id} style={styles.gameCard}>
             <View
               style={{
-                alignItems: "center",
                 flexDirection: "row",
-                justifyContent: "space-between",
-              }}
-            >
-              <View>
-                <Text style={styles.gameHeader}>{game.title}</Text>
-              </View>
-              <View>
-                <TouchableOpacity style={styles.joinbutton}>
-                  <Text
-                    style={{
-                      color: "white",
-                      fontSize: 16,
-                    }}
-                  >
-                    Join
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-            <View
-              style={{
-                marginTop: 10,
                 justifyContent: "center",
                 alignItems: "center",
+                gap: 5,
               }}
             >
+              <Text style={{ color: "white" }}>All</Text>
+              <AntDesign name="arrowright" size={15} color="white" />
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* Horizontal ScrollView for games */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.gamesScrollContent}
+        >
+          {games.map((game) => (
+            <View key={game.id} style={styles.gameCard}>
               <View
                 style={{
-                  width: "90%",
-                  height: 0.5,
-                  marginTop: 15,
-                  backgroundColor: "#e5ccff",
+                  alignItems: "center",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
                 }}
-              />
-            </View>
-            <View>
+              >
+                <View>
+                  <Text style={styles.gameHeader}>{game.title}</Text>
+                </View>
+                <View>
+                  <TouchableOpacity
+                    style={styles.joinbutton}
+                    onPress={() => handleJoinClick(game)}
+                  >
+                    <Text
+                      style={{
+                        color: "white",
+                        fontSize: 16,
+                      }}
+                    >
+                      Join
+                    </Text>
+                  </TouchableOpacity>
+
+                  <BottomSheetModal
+                    ref={bottomSheetModalRef}
+                    onChange={handleSheetChanges}
+                  >
+                    <BottomSheetView>
+                      <Text>Hello</Text>
+                    </BottomSheetView>
+                  </BottomSheetModal>
+                </View>
+              </View>
               <View
                 style={{
                   marginTop: 10,
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  paddingHorizontal: 5,
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
                 <View
-                  style={{ justifyContent: "center", alignItems: "center" }}
-                >
-                  <View>
-                    <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
-                      Entry
-                    </Text>
-                  </View>
-                  <View>
-                    <Text style={{ color: "white", fontSize: 13 }}>
-                      {game.entryPrice}
-                    </Text>
-                  </View>
-                </View>
+                  style={{
+                    width: "90%",
+                    height: 0.5,
+                    marginTop: 15,
+                    backgroundColor: "#e5ccff",
+                  }}
+                />
+              </View>
+              <View>
                 <View
-                  style={{ justifyContent: "center", alignItems: "center" }}
+                  style={{
+                    marginTop: 10,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    paddingHorizontal: 5,
+                  }}
                 >
-                  <View>
-                    <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
-                      7 days
-                    </Text>
+                  <View
+                    style={{ justifyContent: "center", alignItems: "center" }}
+                  >
+                    <View>
+                      <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
+                        Entry
+                      </Text>
+                    </View>
+                    <View>
+                      <Text style={{ color: "white", fontSize: 13 }}>
+                        {game.entryPrice}
+                      </Text>
+                    </View>
                   </View>
-                  <View>
-                    <Text style={{ color: "white", fontSize: 13 }}>
-                      {game.time}
-                    </Text>
+                  <View
+                    style={{ justifyContent: "center", alignItems: "center" }}
+                  >
+                    <View>
+                      <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
+                        7 days
+                      </Text>
+                    </View>
+                    <View>
+                      <Text style={{ color: "white", fontSize: 13 }}>
+                        {game.time}
+                      </Text>
+                    </View>
                   </View>
-                </View>
-                <View
-                  style={{ justifyContent: "center", alignItems: "center" }}
-                >
-                  <View>
-                    <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
-                      Daily Steps
-                    </Text>
+                  <View
+                    style={{ justifyContent: "center", alignItems: "center" }}
+                  >
+                    <View>
+                      <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
+                        Daily Steps
+                      </Text>
+                    </View>
+                    <View>
+                      <Text style={{ color: "white", fontSize: 13 }}>
+                        {game.dailySteps}
+                      </Text>
+                    </View>
                   </View>
-                  <View>
-                    <Text style={{ color: "white", fontSize: 13 }}>
-                      {game.dailySteps}
-                    </Text>
-                  </View>
-                </View>
-                <View
-                  style={{ justifyContent: "center", alignItems: "center" }}
-                >
-                  <View>
-                    <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
-                      Players
-                    </Text>
-                  </View>
-                  <View>
-                    <Text style={{ color: "white", fontSize: 13 }}>
-                      {game.participants}
-                    </Text>
+                  <View
+                    style={{ justifyContent: "center", alignItems: "center" }}
+                  >
+                    <View>
+                      <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
+                        Players
+                      </Text>
+                    </View>
+                    <View>
+                      <Text style={{ color: "white", fontSize: 13 }}>
+                        {game.participants}
+                      </Text>
+                    </View>
                   </View>
                 </View>
               </View>
             </View>
-          </View>
-        ))}
-      </ScrollView>
-    </View>
+          ))}
+        </ScrollView>
+      </View>{" "}
+    </BottomSheetModalProvider>
   );
 };
 
@@ -534,10 +494,7 @@ const CommunityGames = ({ handleJoinClick }) => {
               <View>
                 <TouchableOpacity
                   style={styles.joinbutton}
-                  onPress={() => {
-                    console.log("Join button pressed for game:", game.title);
-                    handleJoinClick(game);
-                  }}
+                  onPress={() => handleJoinClick(game)}
                 >
                   <Text
                     style={{
