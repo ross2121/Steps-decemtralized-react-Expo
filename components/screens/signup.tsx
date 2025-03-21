@@ -157,7 +157,7 @@ const Signup = () => {
 
               <View style={styles.newUserContainer}>
                 <Text style={styles.newUserText}>Already have an account </Text>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => router.push("/(auth)/signin")}>
                   <Text style={styles.joinNowText}>Sign In</Text>
                 </TouchableOpacity>
               </View>

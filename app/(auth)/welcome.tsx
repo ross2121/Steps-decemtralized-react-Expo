@@ -115,7 +115,7 @@ const Welcome = ({ navigation }) => {
       slidesRef.current.scrollToIndex({ index: currentIndex + 1 });
     } else {
       // Navigate to the signup page
-      router.push();
+      router.push("/(auth)/singup");
     }
   };
 

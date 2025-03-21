@@ -1,8 +1,10 @@
 import {
+  ActivityIndicator,
   Animated,
   Image,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -18,6 +20,8 @@ import {
 } from "@gorhom/bottom-sheet";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
+import { FlatList } from "react-native-gesture-handler";
+import axios from "axios";
 
 const ProfileScreen = () => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -34,12 +38,12 @@ const ProfileScreen = () => {
       })),
     []
   );
-  const logout=async()=>{
-  await AsyncStorage.removeItem("token")
-   await AsyncStorage.removeItem("userid")
-  await  AsyncStorage.removeItem("PublicKey")
-  router.push("/");
-  }
+  const logout = async () => {
+    await AsyncStorage.removeItem("token");
+    await AsyncStorage.removeItem("userid");
+    await AsyncStorage.removeItem("PublicKey");
+    router.push("/(auth)/welcome");
+  };
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
   }, []);
@@ -64,6 +68,26 @@ const ProfileScreen = () => {
         }),
       },
     ],
+  };
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+
+    setIsLoading(true);
+    try {
+      const response = await axios.get(
+        `https://example.com/api/search?query=${searchQuery}`
+      );
+      setSearchResults(response.data.results);
+    } catch (error) {
+      console.error("Error fetching search results:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -158,9 +182,43 @@ const ProfileScreen = () => {
               />
             ) : (
               <View style={styles.searchView}>
-                <Text style={styles.searchText}>
-                  Search feature coming soon...
-                </Text>
+                {/* Search Bar */}
+                <View style={styles.searchBar}>
+                  <TextInput
+                    style={styles.searchInput}
+                    placeholder="Search for a user..."
+                    placeholderTextColor="#9e9a99"
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                  />
+                  <TouchableOpacity
+                    style={styles.searchButton}
+                    onPress={handleSearch}
+                  >
+                    <Ionicons name="search" size={20} color="white" />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Loader */}
+                {isLoading ? (
+                  <ActivityIndicator size="large" color="#9C89FF" />
+                ) : (
+                  <FlatList
+                    data={searchResults}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                      <View style={styles.searchResultItem}>
+                        <Text style={styles.searchResultText}>
+                          {item.username}
+                        </Text>
+                        <TouchableOpacity style={styles.addButton}>
+                          <Text style={styles.addButtonText}>Add</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                    contentContainerStyle={{ paddingBottom: 20 }}
+                  />
+                )}
               </View>
             )}
           </BottomSheetModal>
@@ -287,4 +345,40 @@ const styles = StyleSheet.create({
   logoutContainer: { marginTop: 20, alignItems: "center" },
   logoutButton: { flexDirection: "row", gap: 10, alignItems: "center" },
   logoutText: { color: "white", fontSize: 15, fontWeight: "bold" },
+
+  searchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1a0226",
+    borderRadius: 10,
+    paddingHorizontal: 20,
+    marginBottom: 20,
+    marginHorizontal: 20,
+  },
+  searchInput: {
+    flex: 1,
+    color: "white",
+    fontSize: 14,
+    paddingVertical: 10,
+  },
+  searchButton: {
+    padding: 10,
+  },
+  searchResultItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#290d44",
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  searchResultText: { color: "white", fontSize: 14 },
+  addButton: {
+    backgroundColor: "#9C89FF",
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+  },
+  addButtonText: { color: "white", fontSize: 14, fontWeight: "bold" },
 });
