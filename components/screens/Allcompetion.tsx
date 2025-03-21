@@ -2,11 +2,10 @@ import axios from "axios"
 import { useEffect, useState } from "react"
 import { SafeAreaView } from "react-native-safe-area-context"
 import React from "react"
-
 import { Alert, Button,View } from "react-native"
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js"
 import AsyncStorage from "@react-native-async-storage/async-storage"
-import { error } from "console"
+
 interface Challenge{
 name:string,
 memberqty:number,
@@ -70,12 +69,12 @@ id:string
         <SafeAreaView>
       {challenge.map((chll)=>
       <View>
-      <View>{chll.Amount}</View>
-    <View>{chll.memberqty}</View>
-    <View>{chll.name} </View>
-    <View>{chll.Digital_Currency}</View>
-    <View>{chll.days}</View>
-    <View>{chll.Dailystep}</View>
+      <View id={chll.id}>{chll.Amount}</View>
+    <View id={chll.id}>{chll.memberqty}</View>
+    <View id={chll.id}>{chll.name} </View>
+    <View id={chll.id}>{chll.Digital_Currency}</View>
+    <View id={chll.id}>{chll.days}</View>
+    <View id={chll.id}>{chll.Dailystep}</View>
     <Button title="JOin" onPress={()=>Onclick(chll.Amount,chll.id,chll.Amount)} ></Button>
     </View>
       )}

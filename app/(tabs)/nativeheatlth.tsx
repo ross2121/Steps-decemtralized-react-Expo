@@ -30,7 +30,6 @@ const InitializeHealthConnect = () => {
       
       if(permissions.length==0){
          console.log("no permission")
-         Alert.alert("no permission");
       }
       console.log('Granted permissions:', permissions);
      

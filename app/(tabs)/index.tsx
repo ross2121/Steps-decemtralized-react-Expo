@@ -1,19 +1,5 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  BackHandler,
-  Dimensions,
-} from "react-native";
+import React, { useEffect } from "react";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import {
@@ -27,86 +13,50 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { router } from "expo-router";
 import { getGrantedPermissions } from "react-native-health-connect";
-import BottomSheet, {
-  BottomSheetModal,
-  BottomSheetModalProvider,
-  BottomSheetView,
-} from "@gorhom/bottom-sheet";
 
 const App = () => {
-  // Create refs and state
-  // const [selectedGame, setSelectedGame] = useState(null);
-
-  useEffect(() => {
-    const Auth = async () => {
-      const token = await AsyncStorage.getItem("token");
-      const permissions = await getGrantedPermissions();
-      if (!token) {
-        router.push("/(auth)/test");
+    useEffect(()=>{
+      const Auth=async()=>{
+        const token=await AsyncStorage.getItem("token");
+         const permissions = await getGrantedPermissions();
+            if(!token){
+              router.push("/(auth)/test");
+            }
+            if(permissions.length==0){
+              router.push("/(googlefit)/test")
+              console.log("no permission")
+           }
       }
-      if (permissions.length == 0) {
-        router.push("/(googlefit)/test");
-        console.log("no permission");
+      Auth();
+      const fetchdata=async()=>{
+        
       }
-    };
-    Auth();
-  }, []); // Added empty dependency array to prevent continuous execution
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null); // Ref for BottomSheetModal
-  const [selectedGame, setSelectedGame] = useState(null); // State to store the selected game
+    },[])
 
-  const snapPoints = useMemo(() => ["50%", "75%"], []); // Snap points for BottomSheetModal
-
-  // Function to handle the "Join" button click
-  const handleJoinClick = useCallback((game) => {
-    console.log("Join clicked for game:", game.title);
-    setSelectedGame(game); // Set the selected game
-    bottomSheetModalRef.current?.present(); // Open the BottomSheetModal
-  }, []);
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView>
       <SafeAreaView style={{ flex: 1 }}>
-        <BottomSheetModalProvider>
-          <LinearGradient
-            colors={["#1a0033", "#4b0082", "#290d44"]}
-            style={styles.gradient}
-          >
-            {/* Wrap content in ScrollView to make it vertically scrollable */}
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-              <View style={{ padding: 5 }}>
-                <StepsCount />
-              </View>
-              <View>
-                <OfficialGames handleJoinClick={handleJoinClick} />
-              </View>
-              <View>
-                <CommunityGames handleJoinClick={handleJoinClick} />
-              </View>
-              <View>
-                <JoinGame />
-              </View>
-            </ScrollView>
+        <LinearGradient
+          colors={["#1a0033", "#4b0082", "#290d44"]}
+          style={styles.gradient}
+        >
+          {/* Wrap content in ScrollView to make it vertically scrollable */}
+          <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            <View style={{ padding: 5 }}>
+              <StepsCount />
+            </View>
+            <View>
+              <OfficialGames />
+            </View>
+            <View>
+              <CommunityGames />
+            </View>
 
-            {/* Modal Sheet */}
-
-            <BottomSheetModal ref={bottomSheetModalRef} snapPoints={snapPoints}>
-              <BottomSheetView>
-                {selectedGame ? (
-                  <View>
-                    <Text
-                      style={{
-                        color: "black",
-                      }}
-                    >
-                      {selectedGame.title}
-                    </Text>
-                  </View>
-                ) : (
-                  <Text style={styles.bottomSheetTitle}>No Game Selected</Text>
-                )}
-              </BottomSheetView>
-            </BottomSheetModal>
-          </LinearGradient>
-        </BottomSheetModalProvider>
+            <View>
+              <JoinGame />
+            </View>
+          </ScrollView>
+        </LinearGradient>
       </SafeAreaView>
     </GestureHandlerRootView>
   );
@@ -160,7 +110,7 @@ const StepsCount = () => {
                 marginLeft: 5,
                 color: "#9e9a99",
                 fontSize: 15,
-                fontWeight: "bold",
+                fontWeight: "bold", // Changed "heavy" to "bold" as "heavy" is not a valid fontWeight
               }}
             >
               {" "}
@@ -173,7 +123,7 @@ const StepsCount = () => {
   );
 };
 
-const OfficialGames = ({ handleJoinClick }) => {
+const OfficialGames = () => {
   const games = [
     {
       id: 1,
@@ -194,6 +144,7 @@ const OfficialGames = ({ handleJoinClick }) => {
     {
       id: 3,
       title: "Game 3",
+
       entryPrice: "2",
       time: "10/3-16/03",
       participants: "83",
@@ -202,6 +153,7 @@ const OfficialGames = ({ handleJoinClick }) => {
     {
       id: 4,
       title: "Game 4",
+
       entryPrice: "2",
       time: "10/3-16/03",
       participants: "83",
@@ -210,192 +162,170 @@ const OfficialGames = ({ handleJoinClick }) => {
     {
       id: 5,
       title: "Game 5",
+
       entryPrice: "2",
       time: "10/3-16/03",
       participants: "83",
       dailySteps: "12k",
     },
   ];
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
-  // callbacks
-  const handlePresentModalPress = useCallback(() => {
-    bottomSheetModalRef.current?.present();
-  }, []);
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log("handleSheetChanges", index);
-  }, []);
   return (
-    <BottomSheetModalProvider>
-      <View style={styles.gamesContainer}>
-        <View
+    <View style={styles.gamesContainer}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingRight: 16,
+          marginBottom: 10,
+        }}
+      >
+        <Text style={styles.gamesTitle}>Official Games</Text>
+        <TouchableOpacity
           style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            paddingRight: 16,
-            marginBottom: 10,
+            paddingHorizontal: 10,
+            paddingVertical: 5,
+            justifyContent: "center",
+            borderRadius: 10,
           }}
         >
-          <Text style={styles.gamesTitle}>Official Games</Text>
-          <TouchableOpacity
+          <View
             style={{
-              paddingHorizontal: 10,
-              paddingVertical: 5,
+              flexDirection: "row",
               justifyContent: "center",
-              borderRadius: 10,
+              alignItems: "center",
+              gap: 5,
             }}
-            onPress={() => router.push("/(nonav)/officialGames")}
           >
+            <Text style={{ color: "white" }}>All</Text>
+            <AntDesign name="arrowright" size={15} color="white" />
+          </View>
+        </TouchableOpacity>
+      </View>
+
+      {/* Horizontal ScrollView for games */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.gamesScrollContent}
+      >
+        {games.map((game) => (
+          <View key={game.id} style={styles.gameCard}>
             <View
               style={{
-                flexDirection: "row",
-                justifyContent: "center",
                 alignItems: "center",
-                gap: 5,
+                flexDirection: "row",
+                justifyContent: "space-between",
               }}
             >
-              <Text style={{ color: "white" }}>All</Text>
-              <AntDesign name="arrowright" size={15} color="white" />
+              <View>
+                <Text style={styles.gameHeader}>{game.title}</Text>
+              </View>
+              <View>
+                <TouchableOpacity style={styles.joinbutton}>
+                  <Text
+                    style={{
+                      color: "white",
+                      fontSize: 16,
+                    }}
+                  >
+                    Join
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </TouchableOpacity>
-        </View>
-
-        {/* Horizontal ScrollView for games */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.gamesScrollContent}
-        >
-          {games.map((game) => (
-            <View key={game.id} style={styles.gameCard}>
+            <View
+              style={{
+                marginTop: 10,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
               <View
                 style={{
-                  alignItems: "center",
-                  flexDirection: "row",
-                  justifyContent: "space-between",
+                  width: "90%",
+                  height: 0.5,
+                  marginTop: 15,
+                  backgroundColor: "#e5ccff",
                 }}
-              >
-                <View>
-                  <Text style={styles.gameHeader}>{game.title}</Text>
-                </View>
-                <View>
-                  <TouchableOpacity
-                    style={styles.joinbutton}
-                    onPress={() => handleJoinClick(game)}
-                  >
-                    <Text
-                      style={{
-                        color: "white",
-                        fontSize: 16,
-                      }}
-                    >
-                      Join
-                    </Text>
-                  </TouchableOpacity>
-
-                  <BottomSheetModal
-                    ref={bottomSheetModalRef}
-                    onChange={handleSheetChanges}
-                  >
-                    <BottomSheetView>
-                      <Text>Hello</Text>
-                    </BottomSheetView>
-                  </BottomSheetModal>
-                </View>
-              </View>
+              />
+            </View>
+            <View>
               <View
                 style={{
                   marginTop: 10,
-                  justifyContent: "center",
-                  alignItems: "center",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  paddingHorizontal: 5,
                 }}
               >
                 <View
-                  style={{
-                    width: "90%",
-                    height: 0.5,
-                    marginTop: 15,
-                    backgroundColor: "#e5ccff",
-                  }}
-                />
-              </View>
-              <View>
-                <View
-                  style={{
-                    marginTop: 10,
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    paddingHorizontal: 5,
-                  }}
+                  style={{ justifyContent: "center", alignItems: "center" }}
                 >
-                  <View
-                    style={{ justifyContent: "center", alignItems: "center" }}
-                  >
-                    <View>
-                      <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
-                        Entry
-                      </Text>
-                    </View>
-                    <View>
-                      <Text style={{ color: "white", fontSize: 13 }}>
-                        {game.entryPrice}
-                      </Text>
-                    </View>
+                  <View>
+                    <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
+                      Entry
+                    </Text>
                   </View>
-                  <View
-                    style={{ justifyContent: "center", alignItems: "center" }}
-                  >
-                    <View>
-                      <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
-                        7 days
-                      </Text>
-                    </View>
-                    <View>
-                      <Text style={{ color: "white", fontSize: 13 }}>
-                        {game.time}
-                      </Text>
-                    </View>
+                  <View>
+                    <Text style={{ color: "white", fontSize: 13 }}>
+                      {game.entryPrice}
+                    </Text>
                   </View>
-                  <View
-                    style={{ justifyContent: "center", alignItems: "center" }}
-                  >
-                    <View>
-                      <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
-                        Daily Steps
-                      </Text>
-                    </View>
-                    <View>
-                      <Text style={{ color: "white", fontSize: 13 }}>
-                        {game.dailySteps}
-                      </Text>
-                    </View>
+                </View>
+                <View
+                  style={{ justifyContent: "center", alignItems: "center" }}
+                >
+                  <View>
+                    <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
+                      7 days
+                    </Text>
                   </View>
-                  <View
-                    style={{ justifyContent: "center", alignItems: "center" }}
-                  >
-                    <View>
-                      <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
-                        Players
-                      </Text>
-                    </View>
-                    <View>
-                      <Text style={{ color: "white", fontSize: 13 }}>
-                        {game.participants}
-                      </Text>
-                    </View>
+                  <View>
+                    <Text style={{ color: "white", fontSize: 13 }}>
+                      {game.time}
+                    </Text>
+                  </View>
+                </View>
+                <View
+                  style={{ justifyContent: "center", alignItems: "center" }}
+                >
+                  <View>
+                    <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
+                      Daily Steps
+                    </Text>
+                  </View>
+                  <View>
+                    <Text style={{ color: "white", fontSize: 13 }}>
+                      {game.dailySteps}
+                    </Text>
+                  </View>
+                </View>
+                <View
+                  style={{ justifyContent: "center", alignItems: "center" }}
+                >
+                  <View>
+                    <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
+                      Players
+                    </Text>
+                  </View>
+                  <View>
+                    <Text style={{ color: "white", fontSize: 13 }}>
+                      {game.participants}
+                    </Text>
                   </View>
                 </View>
               </View>
             </View>
-          ))}
-        </ScrollView>
-      </View>{" "}
-    </BottomSheetModalProvider>
+          </View>
+        ))}
+      </ScrollView>
+    </View>
   );
 };
 
-const CommunityGames = ({ handleJoinClick }) => {
+const CommunityGames = () => {
   const games = [
     {
       id: 1,
@@ -416,6 +346,7 @@ const CommunityGames = ({ handleJoinClick }) => {
     {
       id: 3,
       title: "Game 3",
+
       entryPrice: "2",
       time: "10/3-16/03",
       participants: "83",
@@ -424,6 +355,7 @@ const CommunityGames = ({ handleJoinClick }) => {
     {
       id: 4,
       title: "Game 4",
+
       entryPrice: "2",
       time: "10/3-16/03",
       participants: "83",
@@ -432,6 +364,7 @@ const CommunityGames = ({ handleJoinClick }) => {
     {
       id: 5,
       title: "Game 5",
+
       entryPrice: "2",
       time: "10/3-16/03",
       participants: "83",
@@ -492,10 +425,7 @@ const CommunityGames = ({ handleJoinClick }) => {
                 <Text style={styles.gameHeader}>{game.title}</Text>
               </View>
               <View>
-                <TouchableOpacity
-                  style={styles.joinbutton}
-                  onPress={() => handleJoinClick(game)}
-                >
+                <TouchableOpacity style={styles.joinbutton}>
                   <Text
                     style={{
                       color: "white",
@@ -517,6 +447,7 @@ const CommunityGames = ({ handleJoinClick }) => {
                 style={{
                   width: "90%",
                   height: 0.5,
+
                   marginTop: 20,
                   backgroundColor: "#e5ccff",
                 }}
@@ -713,6 +644,7 @@ const styles = StyleSheet.create({
   gamesTitle: {
     color: "white",
     fontSize: 22,
+
     fontWeight: "bold",
   },
   gamesScrollContent: {
@@ -721,6 +653,7 @@ const styles = StyleSheet.create({
   gameCard: {
     backgroundColor: "rgba(0, 0, 0, 0.8)",
     borderRadius: 10,
+
     marginRight: 15,
     width: "22%",
     paddingHorizontal: 15,
@@ -756,6 +689,7 @@ const styles = StyleSheet.create({
   },
 
   //games create and join
+
   gamebttn: {
     backgroundColor: "#7E38B7",
     flexDirection: "row",
@@ -769,70 +703,6 @@ const styles = StyleSheet.create({
   gamebttnText: {
     color: "white",
     fontSize: 15,
-    fontWeight: "bold",
-  },
-
-  // Bottom Sheet styles
-  bottomSheetContent: {
-    flex: 1,
-    padding: 20,
-  },
-  bottomSheetTitle: {
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 15,
-  },
-  divider: {
-    width: "100%",
-    height: 1,
-    backgroundColor: "#9C89FF",
-    marginBottom: 20,
-  },
-  gameDetailRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  gameDetailItem: {
-    flex: 1,
-    alignItems: "center",
-  },
-  gameDetailLabel: {
-    color: "#bfbfbf",
-    fontSize: 14,
-    marginBottom: 5,
-  },
-  gameDetailValue: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  gameDescription: {
-    marginTop: 10,
-    marginBottom: 20,
-  },
-  gameDescriptionLabel: {
-    color: "#bfbfbf",
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  gameDescriptionText: {
-    color: "white",
-    fontSize: 14,
-    lineHeight: 22,
-  },
-  joinGameButton: {
-    backgroundColor: "#9C89FF",
-    paddingVertical: 15,
-    borderRadius: 25,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  joinGameButtonText: {
-    color: "white",
-    fontSize: 18,
     fontWeight: "bold",
   },
 });

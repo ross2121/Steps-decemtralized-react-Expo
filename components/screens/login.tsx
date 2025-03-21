@@ -17,7 +17,7 @@ const Login = () => {
     }
     setLoading(true);
     try {
-      const response = await axios.post("https://decentrailzedttrack.onrender.com/api/v1/signin", {
+      const response = await axios.post("/api/v1/signin", {
         email:email,
         password:password,
       });

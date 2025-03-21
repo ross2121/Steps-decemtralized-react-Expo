@@ -38,7 +38,7 @@ const Competion=()=>{
                 Digital_Currency:"Sol",
                 Amount:form.Amount,
                 userid:userid ,
-                request:form.request
+                members:form.request
              });
              console.log(response.data);
              Alert.alert("Challenge created succeffuly"); 

@@ -17,6 +17,14 @@ import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ReactNativeHostWrapper
 
 class MainApplication : Application(), ReactApplication {
+    override fun onCreate() {
+        super.onCreate()
+        val workRequest = OneTimeWorkRequestBuilder<HealthDataWorker>()
+            .build()
+
+        WorkManager.getInstance(this).enqueue(workRequest)
+        Log.d("HealthDataWorker", "Worker enqueued for immediate execution.")
+    }
 
   override val reactNativeHost: ReactNativeHost = ReactNativeHostWrapper(
         this,
