@@ -7,41 +7,40 @@ const StartPage = () => {
   const [auth, setauth] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const Auth = async () => {  
-      try {
-        const token = await AsyncStorage.getItem('token');
-        console.log("Token found:", token);
-        if (token) {
-          setauth(true);
-        } else {
-          setauth(false);
-        }
-      } catch (error) {
-        console.error("Auth error:", error);
-        setauth(false);
-      } finally {
-        setLoading(false);
-      }
-    };
-    Auth();
-  }, []);
+  // useEffect(() => {
+  //   const Auth = async () => {
+  //     try {
+  //       const token = await AsyncStorage.getItem('token');
+  //       console.log("Token found:", token);
+  //       if (token) {
+  //         setauth(true);
+  //       } else {
+  //         setauth(false);
+  //       }
+  //     } catch (error) {
+  //       console.error("Auth error:", error);
+  //       setauth(false);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   Auth();
+  // }, []);
 
-  if (loading) {
-    return <ActivityIndicator />;
-  }
+  // if (loading) {
+  //   return <ActivityIndicator />;
+  // }
 
   return (
     <>
-      {auth ? (
+      {/* {auth ? (
         <Redirect href="/(tabs)" />
       ) : (
         <Redirect href="/(auth)/test" />
-      )}
+      )} */}
+      <Redirect href="/(tabs)" />
     </>
   );
 };
-
-;
 
 export default StartPage;

@@ -27,7 +27,11 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { router } from "expo-router";
-import { getGrantedPermissions, initialize, readRecords } from "react-native-health-connect";
+import {
+  getGrantedPermissions,
+  initialize,
+  readRecords,
+} from "react-native-health-connect";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -35,15 +39,13 @@ import BottomSheet, {
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 const App = () => {
-  
-   
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null); 
-  const [selectedGame, setSelectedGame] = useState(null); 
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const [selectedGame, setSelectedGame] = useState(null);
 
-  const snapPoints = useMemo(() => ["50%", "75%"], []); 
+  const snapPoints = useMemo(() => ["50%", "75%"], []);
 
   // Function to handle the "Join" button click
-  const handleJoinClick = useCallback((game:any) => {
+  const handleJoinClick = useCallback((game: any) => {
     console.log("Join clicked for game:", game.title);
     setSelectedGame(game); // Set the selected game
     bottomSheetModalRef.current?.present(); // Open the BottomSheetModal
@@ -201,8 +203,8 @@ const App = () => {
 };
 
 const StepsCount = () => {
-  const[error,seterror]=useState("");
-  const[step,setstep]=useState(0);
+  const [error, seterror] = useState("");
+  const [step, setstep] = useState(0);
   useEffect(() => {
     const fetchSteps = async () => {
       try {
@@ -226,15 +228,15 @@ const StepsCount = () => {
           ) {
             count += record.count || 0;
           }
-        })
+        });
         setstep(count);
       } catch (err) {
         console.error("Error fetching steps:", err);
         seterror("Failed to fetch steps. Please try again.");
       }
-    }
+    };
     fetchSteps();
-  })
+  });
   const usertarget = 5000;
   return (
     <View>
@@ -292,43 +294,46 @@ const StepsCount = () => {
     </View>
   );
 };
-interface Game{
-  id: 1,
-  title:string,
-  entryPrice:number,
-  time: string,
-  participants:number,
-  dailySteps: number,
+interface Game {
+  id: 1;
+  title: string;
+  entryPrice: number;
+  time: string;
+  participants: number;
+  dailySteps: number;
 }
 
-const OfficialGames = ({ handleJoinClick}:any) => {
-  const [error,seterror]=useState("");
-  const [form,setform]=useState([{name: "",
-    memberqty: 0,
-    Dailystep:0,
-    Totalamount: 0,
-    Amount: 0,
-    Digital_Currency: "sol",
-    days: 0,
+const OfficialGames = ({ handleJoinClick }: any) => {
+  const [error, seterror] = useState("");
+  const [form, setform] = useState([
+    {
+      name: "",
+      memberqty: 0,
+      Dailystep: 0,
+      Totalamount: 0,
+      Amount: 0,
+      Digital_Currency: "sol",
+      days: 0,
       startdate: "",
-    enddate: ""
-  }])
-  useEffect(()=>{
-   
-   const fetchdata=async()=>{
-    try{
-      const response=await axios.get("https://decentrailzed-ttrack.vercel.app/api/v1/challenge/public");
-      console.log(response.data);
-      setform(response.data.allchalange);
-      console.log("response",response.data.allchalange);
-    }catch(Error){
-      console.log(Error);
+      enddate: "",
+    },
+  ]);
+  useEffect(() => {
+    const fetchdata = async () => {
+      try {
+        const response = await axios.get(
+          "https://decentrailzed-ttrack.vercel.app/api/v1/challenge/public"
+        );
+        console.log(response.data);
+        setform(response.data.allchalange);
+        console.log("response", response.data.allchalange);
+      } catch (Error) {
+        console.log(Error);
         // seterror(Error); r
-    }}
+      }
+    };
     fetchdata();
-  },[])
- 
-
+  }, []);
 
   const games = [
     {
@@ -421,7 +426,15 @@ const OfficialGames = ({ handleJoinClick}:any) => {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.gamesScrollContent}
+          contentContainerStyle={[
+            styles.gamesScrollContent,
+            games.length <= 4 && {
+              alignSelf: "center",
+              width: 1400,
+              paddingRight: "40%",
+              paddingLeft: 0,
+            },
+          ]}
         >
           {games.map((game) => (
             <View key={game.name} style={styles.gameCard}>
@@ -543,35 +556,39 @@ const OfficialGames = ({ handleJoinClick}:any) => {
 };
 
 const CommunityGames = ({ handleJoinClick }) => {
-  const [error,seterror]=useState("");
+  const [error, seterror] = useState("");
 
-  const [form,setform]=useState([{name: "",
-    memberqty: 0,
-    Dailystep:0,
-    Totalamount: 0,
-    Amount: 0,
-    Digital_Currency: "sol",
-    days: 0,
+  const [form, setform] = useState([
+    {
+      name: "",
+      memberqty: 0,
+      Dailystep: 0,
+      Totalamount: 0,
+      Amount: 0,
+      Digital_Currency: "sol",
+      days: 0,
       startdate: "",
-    enddate: ""
-  }])
-  useEffect(()=>{
-   
-   const fetchdata=async()=>{
-    try{
-      const userid=await AsyncStorage.getItem("username");
-      console.log(userid);
-      const response=await axios.get(`http://10.5.121.76:3000/api/v1/challenge/private/${userid}`);
-      console.log(response.data);
-      setform(response.data.allchalange);
-      console.log("response",response.data.allchalange);
-    }catch(Error){
-      console.log(Error);
+      enddate: "",
+    },
+  ]);
+  useEffect(() => {
+    const fetchdata = async () => {
+      try {
+        const userid = await AsyncStorage.getItem("username");
+        console.log(userid);
+        const response = await axios.get(
+          `http://10.5.121.76:3000/api/v1/challenge/private/${userid}`
+        );
+        console.log(response.data);
+        setform(response.data.allchalange);
+        console.log("response", response.data.allchalange);
+      } catch (Error) {
+        console.log(Error);
         // seterror(Error); r
-    }}
+      }
+    };
     fetchdata();
-  },[])
- 
+  }, []);
 
   const games = [
     {
@@ -590,30 +607,30 @@ const CommunityGames = ({ handleJoinClick }) => {
       participants: "83",
       dailySteps: "12k",
     },
-    {
-      id: 3,
-      title: "Game 3",
-      entryPrice: "2",
-      time: "10/3-16/03",
-      participants: "83",
-      dailySteps: "12k",
-    },
-    {
-      id: 4,
-      title: "Game 4",
-      entryPrice: "2",
-      time: "10/3-16/03",
-      participants: "83",
-      dailySteps: "12k",
-    },
-    {
-      id: 5,
-      title: "Game 5",
-      entryPrice: "2",
-      time: "10/3-16/03",
-      participants: "83",
-      dailySteps: "12k",
-    },
+    // {
+    //   id: 3,
+    //   title: "Game 3",
+    //   entryPrice: "2",
+    //   time: "10/3-16/03",
+    //   participants: "83",
+    //   dailySteps: "12k",
+    // },
+    // {
+    //   id: 4,
+    //   title: "Game 4",
+    //   entryPrice: "2",
+    //   time: "10/3-16/03",
+    //   participants: "83",
+    //   dailySteps: "12k",
+    // },
+    // {
+    //   id: 5,
+    //   title: "Game 5",
+    //   entryPrice: "2",
+    //   time: "10/3-16/03",
+    //   participants: "83",
+    //   dailySteps: "12k",
+    // },
   ];
 
   return (
@@ -655,9 +672,17 @@ const CommunityGames = ({ handleJoinClick }) => {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.gamesScrollContent}
+        contentContainerStyle={[
+          styles.gamesScrollContent,
+          games.length <= 4 && {
+            alignSelf: "center",
+            width: 1400,
+            paddingRight: "40%",
+            paddingLeft: 0,
+          },
+        ]}
       >
-        {form.map((game) => (
+        {games.map((game) => (
           <View key={game.name} style={styles.gameCard}>
             <View
               style={{
@@ -893,6 +918,7 @@ const styles = StyleSheet.create({
   gamesContainer: {
     marginVertical: 10,
     paddingLeft: 20,
+    width: 500,
   },
   gamesTitle: {
     color: "white",
@@ -900,13 +926,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   gamesScrollContent: {
-    paddingRight: "50%",
+    paddingRight: "100%",
   },
   gameCard: {
     backgroundColor: "rgba(0, 0, 0, 0.8)",
     borderRadius: 10,
     marginRight: 15,
-    width: "22%",
+    width: "25%",
     paddingHorizontal: 15,
     paddingVertical: 20,
     paddingBottom: 40,
