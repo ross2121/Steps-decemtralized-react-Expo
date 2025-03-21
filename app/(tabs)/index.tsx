@@ -577,7 +577,7 @@ const CommunityGames = ({ handleJoinClick }) => {
         const userid = await AsyncStorage.getItem("username");
         console.log(userid);
         const response = await axios.get(
-          `http://10.5.121.76:3000/api/v1/challenge/private/${userid}`
+          `https://decentrailzed-ttrack.vercel.app/api/v1/challenge/private/${userid}`
         );
         console.log(response.data);
         setform(response.data.allchalange);

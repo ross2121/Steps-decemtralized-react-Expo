@@ -15,8 +15,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import axios from "axios";
+import { BACKEND_URL } from "@/Backendurl";
+
 
 const Signup = () => {
+  console.log(BACKEND_URL);
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -38,7 +41,7 @@ const Signup = () => {
     seterror(null);
     try {
       const response = await axios.post(
-        "https://decentrailzed-ttrack.vercel.app/api/v1/register",
+        `${BACKEND_URL}/register`,
         {
           name,
           username,

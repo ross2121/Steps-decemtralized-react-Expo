@@ -1,0 +1,1 @@
+export const BACKEND_URL="https://decentrailzed-ttrack-l7c5.vercel.app/api/v1";

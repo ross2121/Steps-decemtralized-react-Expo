@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   StyleSheet,
@@ -8,8 +8,35 @@ import {
   View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const History = () => {
+ const [form,setform]=useState([{name: "",
+    memberqty: 0,
+    Dailystep:0,
+    Totalamount: 0,
+    Amount: 0,
+    Digital_Currency: "sol",
+    days: 0,
+      startdate: "",
+    enddate: ""
+  }])
+  const [error,seterror]=useState("");
+  useEffect(()=>{
+    const Fetchtournamen=async()=>{
+    try{
+      const userid=await AsyncStorage.getItem("userid");
+       const response=await axios.get(`https://decentrailzed-ttrack.vercel.app/api/v1/history/prevgame/${userid}`)
+       setform(response.data.Tournament);
+    } catch(e){
+        console.log(e);
+        seterror("");
+    } 
+  }
+  Fetchtournamen();
+
+  })
   const [selectedTab, setSelectedTab] = useState<"participated" | "created">(
     "participated"
   );
