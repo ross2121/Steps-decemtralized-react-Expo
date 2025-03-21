@@ -76,7 +76,7 @@ const Login = () => {
         <SafeAreaView style={styles.safeArea}>
           <View style={styles.contentContainer}>
             <View style={styles.headerContainer}>
-              <Text style={styles.title}>Sign Up</Text>
+              <Text style={styles.title}>Log In</Text>
             </View>
 
             <View style={styles.formContainer}>
