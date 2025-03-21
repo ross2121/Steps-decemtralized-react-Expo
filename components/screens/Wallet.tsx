@@ -117,6 +117,8 @@ const Wallet = () => {
         return;
       }
       const balance = await connection.getBalance(new PublicKey(publicKey));
+      const accountinfo=await connection.getParsedAccountInfo(new PublicKey(publicKey))
+      console.log("Accountinfo",accountinfo);
       console.log(balance);
       setBalance(balance);
     };
@@ -322,13 +324,24 @@ const Wallet = () => {
 
 const AddModal = () => {
   const [copiedText, setCopiedText] = useState("");
- 
+ const [pubclickey,setpublic]=useState("")
+   useEffect(()=>{
+    const getpublic=async()=>{
+      const key=await AsyncStorage.getItem("PublicKey")
+      if(key==null){
+        return;
+      }
+      setpublic(key);
+    }
+    getpublic();
+   })
   const copyToClipboard = async () => {
     const key = await AsyncStorage.getItem("PublicKey");
     if (key == null) {
       setCopiedText("No public key found");
       return;
     }
+   
     setCopiedText(key);
     await Clipboard.setStringAsync(key);
   };
@@ -369,7 +382,7 @@ const AddModal = () => {
               numberOfLines={1}
               ellipsizeMode="tail"
             >
-              {copiedText}
+              {pubclickey}
             </Text>
           </View>
           <TouchableOpacity
@@ -400,32 +413,51 @@ const SendModal = () => {
   const[reponse,setrespons]=useState(false);
   const onSend=async()=>{
     setloading(true);
-    const publickey=await AsyncStorage.getItem("PubblicKey");
+    console.log("Cgeek");
+      const publickey=await AsyncStorage.getItem("PublicKey");
     if(!publickey){
+      Alert.alert("No publci key found");
       return;
     }
+    
       const connection=new Connection("https://api.devnet.solana.com");
-      const transaction=new Transaction().add(SystemProgram.transfer({
+      const getBalance=await connection.getBalance(new PublicKey(publickey))
+       console.log(getBalance);
+       console.log(Amount*LAMPORTS_PER_SOL); 
+      if(getBalance<Amount*LAMPORTS_PER_SOL){
+          Alert.alert("Dont have enogh fundd");
+          return;
+      }
+      console.log("check1");
+      console.log("publlic",publicaddress);
+      console.log("amoutn",Amount);
+      console.log(publickey);
+      try{
+        const transaction=new Transaction().add(SystemProgram.transfer({
         fromPubkey:new PublicKey(publickey),
          toPubkey:new PublicKey(publicaddress),
          lamports:LAMPORTS_PER_SOL*Amount
-      }))
+      })
+    )
+    console.log("check2");
       const {blockhash}=await connection.getRecentBlockhash()
+      console.log("check3");
        transaction.recentBlockhash=blockhash;
        transaction.feePayer=new PublicKey(publickey);
        const serializetransaction=transaction.serialize({
         requireAllSignatures:false,
         verifySignatures:false,
        }) 
-      try{
-          const response=await axios.post(`https://decentrailzed-ttrack.vercel.app/api/v1/send/wallet`,{tx:serializetransaction})
-            console.log(response);
-
-      } catch(e:any){
-          seterror(e);
-      } finally{
-        setloading(false)
-      }  
+       const response=await axios.post(`http://10.5.121.76:3000/api/v1/send/wallet`,{tx:serializetransaction})
+       console.log(response);
+       setrespons(true);
+    Alert.alert("Send suvessfull")
+    }catch(e:any){
+        console.log(e);
+        Alert.alert(e);
+        setrespons(false);
+      }
+    
   } 
   return (
     <View
@@ -462,8 +494,9 @@ const SendModal = () => {
               <TextInput
                 placeholder="Enter amount"
                 placeholderTextColor="rgba(255, 255, 255, 0.5)"
-                onChange={(e:any)=>setamount(parseInt(e))}
+                onChangeText={(e:any)=>{setamount(parseInt(e))}}
                 style={{ color: "white" }}
+                keyboardType="number-pad"
               />
             </View>
           </View>
@@ -488,7 +521,7 @@ const SendModal = () => {
                 placeholder="Enter recipient address"
                 placeholderTextColor="rgba(255, 255, 255, 0.5)"
                 style={{ color: "white" }}
-                onChange={(e:any)=>setpublicaddress(e)}
+                onChangeText={(e)=>setpublicaddress(e)}
               />
             </View>
           </View>
@@ -525,6 +558,7 @@ const SendModal = () => {
               underlayStyle={{
                 backgroundColor: "#1a0033",
               }}
+              onSlideEnd={onSend}
               // height="30%"
             />
           </View>
