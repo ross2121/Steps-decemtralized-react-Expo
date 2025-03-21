@@ -316,6 +316,7 @@ const OfficialGames = ({ handleJoinClick }: any) => {
       days: 0,
       startdate: "",
       enddate: "",
+      id: "",
     },
   ]);
   useEffect(() => {
@@ -428,7 +429,7 @@ const OfficialGames = ({ handleJoinClick }: any) => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={[
             styles.gamesScrollContent,
-            games.length <= 4 && {
+            games.length <= 3 && {
               alignSelf: "center",
               width: 1400,
               paddingRight: "40%",
@@ -436,8 +437,8 @@ const OfficialGames = ({ handleJoinClick }: any) => {
             },
           ]}
         >
-          {games.map((game) => (
-            <View key={game.name} style={styles.gameCard}>
+          {form.map((game) => (
+            <View key={game.id} style={styles.gameCard}>
               <View
                 style={{
                   alignItems: "center",
@@ -569,6 +570,7 @@ const CommunityGames = ({ handleJoinClick }) => {
       days: 0,
       startdate: "",
       enddate: "",
+      id: "",
     },
   ]);
   useEffect(() => {
@@ -683,7 +685,7 @@ const CommunityGames = ({ handleJoinClick }) => {
         ]}
       >
         {games.map((game) => (
-          <View key={game.name} style={styles.gameCard}>
+          <View key={game.id} style={styles.gameCard}>
             <View
               style={{
                 alignItems: "center",
@@ -918,7 +920,7 @@ const styles = StyleSheet.create({
   gamesContainer: {
     marginVertical: 10,
     paddingLeft: 20,
-    width: 500,
+    width: 1000,
   },
   gamesTitle: {
     color: "white",
@@ -932,8 +934,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.8)",
     borderRadius: 10,
     marginRight: 15,
-    width: "25%",
-    paddingHorizontal: 15,
+    width: "40%",
+    paddingHorizontal: 25,
     paddingVertical: 20,
     paddingBottom: 40,
     overflow: "hidden",
