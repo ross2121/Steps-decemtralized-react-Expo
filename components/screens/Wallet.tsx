@@ -1,5 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import {
+  Connection,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+} from "@solana/web3.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Clipboard from "expo-clipboard";
@@ -81,14 +87,12 @@ const TRANSACTIONS = [
 ];
 
 const Wallet = () => {
-  const connection = new Connection(
-   "https://api.devnet.solana.com"
-  );
+  const connection = new Connection("https://api.devnet.solana.com");
   const [balance, setBalance] = useState(0);
-  const Airdrop=async()=>{
+  const Airdrop = async () => {
     console.log("chek1");
-   
-    const connection=new Connection("https://api.devnet.solana.com");
+
+    const connection = new Connection("https://api.devnet.solana.com");
     console.log("cheke2");
     const publicKey = await AsyncStorage.getItem("PublicKey");
     console.log("cheke4");
@@ -96,18 +100,19 @@ const Wallet = () => {
       Alert.alert("No public key found");
       return;
     }
-  try {
-    console.log("cheke3");
-    await connection.requestAirdrop(new PublicKey(publicKey),LAMPORTS_PER_SOL);
-    Alert.alert("Success");
-  }
-  catch(e:any){
-    // seterro(e);
-    console.log(e);
-    Alert.alert(e);
-  }
-  }
-  
+    try {
+      console.log("cheke3");
+      await connection.requestAirdrop(
+        new PublicKey(publicKey),
+        LAMPORTS_PER_SOL
+      );
+      Alert.alert("Success");
+    } catch (e: any) {
+      // seterro(e);
+      console.log(e);
+      Alert.alert(e);
+    }
+  };
 
   useEffect(() => {
     const fetchWallet = async () => {
@@ -322,7 +327,7 @@ const Wallet = () => {
 
 const AddModal = () => {
   const [copiedText, setCopiedText] = useState("");
- 
+
   const copyToClipboard = async () => {
     const key = await AsyncStorage.getItem("PublicKey");
     if (key == null) {
@@ -393,40 +398,44 @@ const AddModal = () => {
 };
 
 const SendModal = () => {
-  const [Amount,setamount]=useState(0);
-  const[publicaddress,setpublicaddress]=useState("");
-  const[error,seterror]=useState("")
-  const[loading,setloading]=useState(false);
-  const[reponse,setrespons]=useState(false);
-  const onSend=async()=>{
+  const [Amount, setamount] = useState(0);
+  const [publicaddress, setpublicaddress] = useState("");
+  const [error, seterror] = useState("");
+  const [loading, setloading] = useState(false);
+  const [reponse, setrespons] = useState(false);
+  const onSend = async () => {
     setloading(true);
-    const publickey=await AsyncStorage.getItem("PubblicKey");
-    if(!publickey){
+    const publickey = await AsyncStorage.getItem("PubblicKey");
+    if (!publickey) {
       return;
     }
-      const connection=new Connection("https://api.devnet.solana.com");
-      const transaction=new Transaction().add(SystemProgram.transfer({
-        fromPubkey:new PublicKey(publickey),
-         toPubkey:new PublicKey(publicaddress),
-         lamports:LAMPORTS_PER_SOL*Amount
-      }))
-      const {blockhash}=await connection.getRecentBlockhash()
-       transaction.recentBlockhash=blockhash;
-       transaction.feePayer=new PublicKey(publickey);
-       const serializetransaction=transaction.serialize({
-        requireAllSignatures:false,
-        verifySignatures:false,
-       }) 
-      try{
-          const response=await axios.post(`https://decentrailzed-ttrack.vercel.app/api/v1/send/wallet`,{tx:serializetransaction})
-            console.log(response);
-
-      } catch(e:any){
-          seterror(e);
-      } finally{
-        setloading(false)
-      }  
-  } 
+    const connection = new Connection("https://api.devnet.solana.com");
+    const transaction = new Transaction().add(
+      SystemProgram.transfer({
+        fromPubkey: new PublicKey(publickey),
+        toPubkey: new PublicKey(publicaddress),
+        lamports: LAMPORTS_PER_SOL * Amount,
+      })
+    );
+    const { blockhash } = await connection.getRecentBlockhash();
+    transaction.recentBlockhash = blockhash;
+    transaction.feePayer = new PublicKey(publickey);
+    const serializetransaction = transaction.serialize({
+      requireAllSignatures: false,
+      verifySignatures: false,
+    });
+    try {
+      const response = await axios.post(
+        `https://decentrailzed-ttrack.vercel.app/api/v1/send/wallet`,
+        { tx: serializetransaction }
+      );
+      console.log(response);
+    } catch (e: any) {
+      seterror(e);
+    } finally {
+      setloading(false);
+    }
+  };
   return (
     <View
       style={{
@@ -462,7 +471,7 @@ const SendModal = () => {
               <TextInput
                 placeholder="Enter amount"
                 placeholderTextColor="rgba(255, 255, 255, 0.5)"
-                onChange={(e:any)=>setamount(parseInt(e))}
+                onChange={(e: any) => setamount(parseInt(e))}
                 style={{ color: "white" }}
               />
             </View>
@@ -488,7 +497,7 @@ const SendModal = () => {
                 placeholder="Enter recipient address"
                 placeholderTextColor="rgba(255, 255, 255, 0.5)"
                 style={{ color: "white" }}
-                onChange={(e:any)=>setpublicaddress(e)}
+                onChange={(e: any) => setpublicaddress(e)}
               />
             </View>
           </View>

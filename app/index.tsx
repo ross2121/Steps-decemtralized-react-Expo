@@ -8,9 +8,9 @@ const StartPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const Auth = async () => {  
+    const Auth = async () => {
       try {
-        const token = await AsyncStorage.getItem('token');
+        const token = await AsyncStorage.getItem("token");
         console.log("Token found:", token);
         if (token) {
           setauth(true);
@@ -33,15 +33,9 @@ const StartPage = () => {
 
   return (
     <>
-      {auth ? (
-        <Redirect href="/(tabs)" />
-      ) : (
-        <Redirect href="/(auth)/test" />
-      )}
+      {auth ? <Redirect href="/(tabs)" /> : <Redirect href="/(auth)/welcome" />}
     </>
   );
 };
-
-;
 
 export default StartPage;

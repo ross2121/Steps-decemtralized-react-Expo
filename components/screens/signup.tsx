@@ -17,7 +17,6 @@ import { router } from "expo-router";
 import axios from "axios";
 import { BACKEND_URL } from "@/Backendurl";
 
-
 const Signup = () => {
   console.log(BACKEND_URL);
   const [name, setName] = useState("");
@@ -32,7 +31,7 @@ const Signup = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleSignup = async () => { 
+  const handleSignup = async () => {
     if (!name || !username || !email || !password) {
       Alert.alert("Error", "Please fill in all fields");
       return;
@@ -40,15 +39,12 @@ const Signup = () => {
     setLoading(true);
     seterror(null);
     try {
-      const response = await axios.post(
-        `${BACKEND_URL}/register`,
-        {
-          name,
-          username,
-          email,
-          password,
-        }
-      );
+      const response = await axios.post(`${BACKEND_URL}/register`, {
+        name,
+        username,
+        email,
+        password,
+      });
       Alert.alert("Success", "Account created successfully");
       await AsyncStorage.setItem("username", response.data.user.username);
       await AsyncStorage.setItem("token", response.data.token);
@@ -62,10 +58,14 @@ const Signup = () => {
       console.log("Signup response:", response.data);
     } catch (err: any) {
       if (err instanceof Error && "response" in err) {
-        console.log(err)
-        const axiosError = err as { response: { data: {message:string}  } };
+        console.log(err);
+        const axiosError = err as { response: { data: { message: string } } };
+        Alert.alert(axiosError.response.data.message);
         console.log(axiosError.response.data);
-        seterror(axiosError.response.data.message || "An error occurred. Please try again.");
+        seterror(
+          axiosError.response.data.message ||
+            "An error occurred. Please try again."
+        );
       } else {
         seterror("An unexpected error occurred. Please try again.");
       }
@@ -154,7 +154,7 @@ const Signup = () => {
                   <Text style={styles.signUpButtonText}>{error}</Text>
                 </View>
               )}
-               
+
               <View style={styles.newUserContainer}>
                 <Text style={styles.newUserText}>Already have an account </Text>
                 <TouchableOpacity>
