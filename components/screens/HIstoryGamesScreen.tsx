@@ -16,7 +16,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import SlideButton from "rn-slide-button";
 
-const OfficialGamesScreen = () => {
+const HistoryGamesScreen = () => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [selectedGame, setSelectedGame] = useState(null);
 
@@ -323,4 +323,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default OfficialGamesScreen;
+export default HistoryGamesScreen;

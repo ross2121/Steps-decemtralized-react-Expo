@@ -9,6 +9,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Button,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -28,16 +29,16 @@ const Signup = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleSignup = async () => {
+  const handleSignup = async () => { 
     if (!name || !username || !email || !password) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
     setLoading(true);
-
+    seterror(null);
     try {
       const response = await axios.post(
-        "http://10.5.121.76:3000/api/v1/register",
+        "https://decentrailzed-ttrack.vercel.app/api/v1/register",
         {
           name,
           username,
@@ -56,22 +57,15 @@ const Signup = () => {
         Alert.alert("No public found");
       }
       console.log("Signup response:", response.data);
-    } catch (error: any) {
-      console.log(error);
-      if (error.response) {
-        seterror(error.message);
-        Alert.alert(
-          "Error",
-          error.response.data.message || "An error occurred"
-        );
-      } else if (error.request) {
-        seterror(error.request);
-        Alert.alert("Error", "No response from the server");
+    } catch (err: any) {
+      if (err instanceof Error && "response" in err) {
+        console.log(err)
+        const axiosError = err as { response: { data: {message:string}  } };
+        console.log(axiosError.response.data);
+        seterror(axiosError.response.data.message || "An error occurred. Please try again.");
       } else {
-        seterror(error.request);
-        Alert.alert("Error", "An error occurred");
+        seterror("An unexpected error occurred. Please try again.");
       }
-      console.error("Signup error:", error);
     } finally {
       setLoading(false);
     }
@@ -141,10 +135,23 @@ const Signup = () => {
                 </TouchableOpacity>
               </View>
 
-              <TouchableOpacity style={styles.signUpButton}>
-              {loading?<Button title="Sign up" onPress={()=>handleSignup()} ></Button>:<Text>Signing up....</Text>}
+              <TouchableOpacity
+                style={styles.signUpButton}
+                onPress={handleSignup}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text style={styles.signUpButtonText}>Sign Up</Text>
+                )}
               </TouchableOpacity>
-
+              {error && (
+                <View style={styles.container}>
+                  <Text style={styles.signUpButtonText}>{error}</Text>
+                </View>
+              )}
+               
               <View style={styles.newUserContainer}>
                 <Text style={styles.newUserText}>Already have an account </Text>
                 <TouchableOpacity>

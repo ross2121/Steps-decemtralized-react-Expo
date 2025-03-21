@@ -9,63 +9,18 @@ import {
   Alert,
   KeyboardAvoidingView,
   Button,
-  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import axios from "axios";
 
-const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const CreateGameScreen = () => {
+    const [form,setform]=useState({name:"",memberqty:0,Dailystep:0,Amount:0,Digital_Currency:"",days:0,startdata:"",enddate:""})
   const [loading, setLoading] = useState(false);
   const [error, seterror] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
-  const toggleShowPassword = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const handleSignup = async () => { 
-    if ( !email || !password) {
-      Alert.alert("Error", "Please fill in all fields");
-      return;
-    }
-    setLoading(true);
-    seterror(null);
-    try {
-      const response = await axios.post(
-        "https://decentrailzed-ttrack.vercel.app/api/v1/signin",
-        {
-          email,
-          password,
-        }
-      );
-      Alert.alert("Success", "Account created successfully");
-      await AsyncStorage.setItem("username", response.data.user.username);
-      await AsyncStorage.setItem("token", response.data.token);
-      await AsyncStorage.setItem("PublicKey", response.data.user.publickey);
-      await AsyncStorage.setItem("userid", response.data.user.id);
-      router.push("/(tabs)")
-      if (!AsyncStorage.getItem("PublicKey")) {
-        console.log("No public found");
-        Alert.alert("No public found");
-      }
-      console.log("Signup response:", response.data);
-    } catch (err: any) {
-      if (err instanceof Error && "response" in err) {
-        console.log(err)
-        const axiosError = err as { response: { data: {message:string}  } };
-        console.log(axiosError.response.data);
-        seterror(axiosError.response.data.message || "An error occurred. Please try again.");
-      } else {
-        seterror("An unexpected error occurred. Please try again.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
   return (
     <KeyboardAvoidingView style={{ flex: 1 }}>
       <LinearGradient
@@ -75,19 +30,37 @@ const Login = () => {
         <SafeAreaView style={styles.safeArea}>
           <View style={styles.contentContainer}>
             <View style={styles.headerContainer}>
-              <Text style={styles.title}>Sign Up</Text>
+              <Text style={styles.title}>Create Game </Text>
             </View>
-
+     
             <View style={styles.formContainer}>
-
               <View style={styles.inputContainer}>
                 <TextInput
                   style={styles.input}
-                  placeholder="Email"
+                  placeholder="Name"
                   placeholderTextColor="#999"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
+                  onChangeText={(e)=>{setform({...form,name:e})}} 
+                  keyboardType="name-phone-pad"
+                  autoCapitalize="none"
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Members Quantity"
+                  placeholderTextColor="#999"
+                  onChangeText={(e)=>{setform({...form,memberqty:parseInt(e)})}}
+                  keyboardType="number-pad"
+                  autoCapitalize="none"
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="DailySteps"
+                  placeholderTextColor="#999"
+                  onChangeText={(e)=>setform({...form,Dailystep:parseInt(e)})}
+                  keyboardType="number-pad"
                   autoCapitalize="none"
                 />
               </View>
@@ -95,49 +68,44 @@ const Login = () => {
               <View style={styles.inputContainer}>
                 <TextInput
                   style={styles.input}
-                  placeholder="Password"
+                  placeholder="Amount"
                   placeholderTextColor="#999"
-                  value={password}
-                  onChangeText={setPassword}
+                  onChangeText={(e)=>{setform({...form,Amount:parseInt(e)})}}
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
                 />
-                <TouchableOpacity
-                  onPress={toggleShowPassword}
-                  style={styles.showButton}
-                >
-                  <Text style={styles.showButtonText}>Show</Text>
-                </TouchableOpacity>
+               
               </View>
-
-              <TouchableOpacity
-                style={styles.signUpButton}
-                onPress={handleSignup}
-                disabled={loading}
-              >
+              </View>
+              <View style={styles.inputContainer}>
+              <select onChange={(e)=>setform({...form,Digital_Currency:e.target.value})}>
+     <option value="someOption">SoL</option>
+    <option value="otherOption">Other option</option>
+   </select>
+              </View>
+         
+              <TouchableOpacity style={styles.signUpButton}>
                 {loading ? (
-                  <ActivityIndicator color="white" />
+                  <Button
+                    title="Sign up"
+                    // onPress={() => handleSignup()}
+                  ></Button>
                 ) : (
-                  <Text style={styles.signUpButtonText}>Login</Text>
+                  <Text>Signing up....</Text>
                 )}
               </TouchableOpacity>
-              {error && (
-                <View style={styles.container}>
-                  <Text style={styles.signUpButtonText}>{error}</Text>
-                </View>
-              )}
-               
+
               <View style={styles.newUserContainer}>
-                <Text style={styles.newUserText}>Dont Have an Account</Text>
-                <TouchableOpacity onPress={()=>router.push("/(auth)/singup")}>
-                  <Text style={styles.joinNowText}>Sign Up</Text>
+                <Text style={styles.newUserText}>Already have an account </Text>
+                <TouchableOpacity>
+                  <Text style={styles.joinNowText}>Sign In</Text>
                 </TouchableOpacity>
               </View>
             </View>
-          </View>
         </SafeAreaView>
       </LinearGradient>
     </KeyboardAvoidingView>
+
   );
 };
 
@@ -265,4 +233,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Login;
+export default CreateGameScreen;
