@@ -9,18 +9,52 @@ import {
   Alert,
   KeyboardAvoidingView,
   Button,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import DateTimePicker from '@react-native-community/datetimepicker';
+import {format} from "date-fns"
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import axios from "axios";
 
 const CreateGameScreen = () => {
-    const [form,setform]=useState({name:"",memberqty:0,Dailystep:0,Amount:0,Digital_Currency:"",days:0,startdata:"",enddate:""})
+    const [form,setform]=useState({name:"",memberqty:0,Dailystep:0,Amount:0,Digital_Currency:"sol",days:0,startdata:format(new Date(), "yyyy-MM-dd"),enddate:format(new Date(), "yyyy-MM-dd")})
   const [loading, setLoading] = useState(false);
   const [error, seterror] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
-
+  const [startDate, setStartDate] = useState(new Date());
+const [endDate, setEndDate] = useState(new Date());
+const [showStartPicker, setShowStartPicker] = useState(false);
+const [showEndPicker, setShowEndPicker] = useState(false);
+const handleCreategame = async () => {   
+setLoading(true);
+  seterror(null);
+  try {
+    const response = await axios.post(
+      "http://localhost:3000/api/v1/create/challenge",
+      {
+        form,
+        userid:await AsyncStorage.getItem("userid")
+        
+      }
+    );
+    Alert.alert("Success", "Game Created Sucessfully");
+    router.push("/(tabs)")
+    console.log("Signup response:", response.data);
+  } catch (err: any) {
+    if (err instanceof Error && "response" in err) {
+      console.log(err)
+      const axiosError = err as { response: { data: {message:string}  } };
+      console.log(axiosError.response.data);
+      seterror(axiosError.response.data.message || "An error occurred. Please try again.");
+    } else {
+      console.log(err);
+      seterror("An unexpected error occurred. Please try again.");
+    }
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <KeyboardAvoidingView style={{ flex: 1 }}>
       <LinearGradient
@@ -71,36 +105,90 @@ const CreateGameScreen = () => {
                   placeholder="Amount"
                   placeholderTextColor="#999"
                   onChangeText={(e)=>{setform({...form,Amount:parseInt(e)})}}
-                  secureTextEntry={!showPassword}
                   autoCapitalize="none"
                 />
                
               </View>
-              </View>
               <View style={styles.inputContainer}>
-              <select onChange={(e)=>setform({...form,Digital_Currency:e.target.value})}>
-     <option value="someOption">SoL</option>
-    <option value="otherOption">Other option</option>
-   </select>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Days"
+                  placeholderTextColor="#999"
+                  onChangeText={(e)=>{setform({...form,days:parseInt(e)})}}
+                  autoCapitalize="none"
+                />
+               
               </View>
-         
-              <TouchableOpacity style={styles.signUpButton}>
-                {loading ? (
-                  <Button
-                    title="Sign up"
-                    // onPress={() => handleSignup()}
-                  ></Button>
-                ) : (
-                  <Text>Signing up....</Text>
-                )}
-              </TouchableOpacity>
+             
+              
+            
 
-              <View style={styles.newUserContainer}>
-                <Text style={styles.newUserText}>Already have an account </Text>
-                <TouchableOpacity>
-                  <Text style={styles.joinNowText}>Sign In</Text>
-                </TouchableOpacity>
-              </View>
+         {/* <View style={styles.inputContainer}> */}
+         <TouchableOpacity 
+    style={styles.dateButton}
+    onPress={() => setShowStartPicker(true)}>
+    <Text style={styles.dateButtonText}>
+      Start Date: {startDate.toLocaleDateString()}
+    </Text>
+  </TouchableOpacity>
+  {showStartPicker && (
+    <DateTimePicker
+      value={startDate}
+      mode="date"
+      display="default"
+      minimumDate={new Date()}
+      onChange={(event:any, selectedDate:any) => {
+        setShowStartPicker(false);
+        if (selectedDate) {
+          setStartDate(selectedDate);
+          setform({...form,startdata: selectedDate});
+        }
+      }}
+    />
+  )}
+            {/* </View> */}
+            <View style={styles.inputContainer}>
+  <TouchableOpacity 
+    style={styles.dateButton}
+    onPress={() => setShowEndPicker(true)}>
+            <Text style={styles.dateButtonText}>
+      End Date: {endDate.toLocaleDateString()}
+    </Text>
+  </TouchableOpacity>
+  {showEndPicker && (
+    <DateTimePicker
+      value={endDate}
+      mode="date"
+      display="default"
+      minimumDate={startDate}
+      onChange={(event, selectedDate) => {
+        setShowEndPicker(false);
+        if (selectedDate) {
+          setEndDate(selectedDate);
+          setform({...form,enddate:selectedDate});
+        }
+      }}
+    />
+  )}
+</View>
+</View>
+                  <TouchableOpacity
+                              style={styles.signUpButton}
+                               onPress={handleCreategame}
+                              disabled={loading}
+                            >
+                              {loading ? (
+                                <ActivityIndicator color="white" />
+                              ) : (
+                                <Text style={styles.signUpButtonText}>Create Tournament</Text>
+                              )}
+                            </TouchableOpacity>
+                            {error && (
+                              <View style={styles.container}>
+                                <Text style={styles.signUpButtonText}>{error}</Text>
+                              </View>
+                            )}
+
             </View>
         </SafeAreaView>
       </LinearGradient>
@@ -231,6 +319,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
   },
+  dateButton: {
+    padding: 10,
+    backgroundColor: 'rgba(30, 30, 30, 0.7)',
+    borderRadius: 5,
+    marginVertical: 5,
+  },
+  dateButtonText: {
+    color: 'white',
+    fontSize: 16,
+  }
 });
 
 export default CreateGameScreen;

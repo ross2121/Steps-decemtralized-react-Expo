@@ -27,38 +27,23 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { router } from "expo-router";
-import { getGrantedPermissions } from "react-native-health-connect";
+import { getGrantedPermissions, initialize, readRecords } from "react-native-health-connect";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetModal,
   BottomSheetModalProvider,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-
 const App = () => {
- 
-
-  useEffect(() => {
-    const Auth = async () => {
-      const token = await AsyncStorage.getItem("token");
-      const permissions = await getGrantedPermissions();
-      if (!token) {
-        router.push("/(auth)/test");
-      }
-      if (permissions.length == 0) {
-        router.push("/(googlefit)/test");
-        console.log("no permission");
-      }
-    };
-    Auth();
-  }, []); 
+  
+   
   const bottomSheetModalRef = useRef<BottomSheetModal>(null); 
   const [selectedGame, setSelectedGame] = useState(null); 
 
   const snapPoints = useMemo(() => ["50%", "75%"], []); 
 
   // Function to handle the "Join" button click
-  const handleJoinClick = useCallback((game) => {
+  const handleJoinClick = useCallback((game:any) => {
     console.log("Join clicked for game:", game.title);
     setSelectedGame(game); // Set the selected game
     bottomSheetModalRef.current?.present(); // Open the BottomSheetModal
@@ -80,7 +65,6 @@ const App = () => {
             colors={["#1a0033", "#4b0082", "#290d44"]}
             style={styles.gradient}
           >
-            {/* Wrap content in ScrollView to make it vertically scrollable */}
             <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
               <View style={{ padding: 5 }}>
                 <StepsCount />
@@ -95,9 +79,6 @@ const App = () => {
                 <JoinGame handleSearchGame={handleSearchGame} />
               </View>
             </ScrollView>
-
-            {/* Modal Sheet */}
-
             <BottomSheetModal
               ref={bottomSheetModalRef}
               snapPoints={snapPoints}
@@ -220,8 +201,41 @@ const App = () => {
 };
 
 const StepsCount = () => {
-  const usersetp = 0;
-  const usertarget = 1000;
+  const[error,seterror]=useState("");
+  const[step,setstep]=useState(0);
+  useEffect(() => {
+    const fetchSteps = async () => {
+      try {
+        const now = new Date();
+        const midnightToday = new Date(now);
+        midnightToday.setHours(0, 0, 0, 0);
+        const startTime = midnightToday.toISOString();
+        const endTime = now.toISOString();
+        const isInitialized = await initialize();
+        const { records } = await readRecords("Steps", {
+          timeRangeFilter: {
+            operator: "between",
+            startTime: startTime,
+            endTime: endTime,
+          },
+        });
+        let count = 0;
+        records.forEach((record) => {
+          if (
+            record.metadata?.dataOrigin === "com.google.android.apps.fitness"
+          ) {
+            count += record.count || 0;
+          }
+        })
+        setstep(count);
+      } catch (err) {
+        console.error("Error fetching steps:", err);
+        seterror("Failed to fetch steps. Please try again.");
+      }
+    }
+    fetchSteps();
+  })
+  const usertarget = 5000;
   return (
     <View>
       <View>
@@ -259,7 +273,7 @@ const StepsCount = () => {
             }}
           />
           <View style={styles.setpsdiv}>
-            <Text style={styles.steptext}>{usersetp}</Text>
+            <Text style={styles.steptext}>{step}</Text>
             <Text style={{ color: "white", fontSize: 20 }}>/</Text>
             <Text style={styles.texttarget}>{usertarget}</Text>
             <Text
@@ -278,8 +292,44 @@ const StepsCount = () => {
     </View>
   );
 };
+interface Game{
+  id: 1,
+  title:string,
+  entryPrice:number,
+  time: string,
+  participants:number,
+  dailySteps: number,
+}
 
-const OfficialGames = ({ handleJoinClick }) => {
+const OfficialGames = ({ handleJoinClick}:any) => {
+  const [error,seterror]=useState("");
+  const [form,setform]=useState([{name: "",
+    memberqty: 0,
+    Dailystep:0,
+    Totalamount: 0,
+    Amount: 0,
+    Digital_Currency: "sol",
+    days: 0,
+      startdate: "",
+    enddate: ""
+  }])
+  useEffect(()=>{
+   
+   const fetchdata=async()=>{
+    try{
+      const response=await axios.get("https://decentrailzed-ttrack.vercel.app/api/v1/challenge/public");
+      console.log(response.data);
+      setform(response.data.allchalange);
+      console.log("response",response.data.allchalange);
+    }catch(Error){
+      console.log(Error);
+        // seterror(Error); r
+    }}
+    fetchdata();
+  },[])
+ 
+
+
   const games = [
     {
       id: 1,
@@ -374,7 +424,7 @@ const OfficialGames = ({ handleJoinClick }) => {
           contentContainerStyle={styles.gamesScrollContent}
         >
           {games.map((game) => (
-            <View key={game.id} style={styles.gameCard}>
+            <View key={game.name} style={styles.gameCard}>
               <View
                 style={{
                   alignItems: "center",
@@ -383,7 +433,7 @@ const OfficialGames = ({ handleJoinClick }) => {
                 }}
               >
                 <View>
-                  <Text style={styles.gameHeader}>{game.title}</Text>
+                  <Text style={styles.gameHeader}>{game.name}</Text>
                 </View>
                 <View>
                   <TouchableOpacity
@@ -436,7 +486,7 @@ const OfficialGames = ({ handleJoinClick }) => {
                     </View>
                     <View>
                       <Text style={{ color: "white", fontSize: 13 }}>
-                        {game.entryPrice}
+                        {game.Amount}
                       </Text>
                     </View>
                   </View>
@@ -450,7 +500,7 @@ const OfficialGames = ({ handleJoinClick }) => {
                     </View>
                     <View>
                       <Text style={{ color: "white", fontSize: 13 }}>
-                        {game.time}
+                        {game.days}
                       </Text>
                     </View>
                   </View>
@@ -464,7 +514,7 @@ const OfficialGames = ({ handleJoinClick }) => {
                     </View>
                     <View>
                       <Text style={{ color: "white", fontSize: 13 }}>
-                        {game.dailySteps}
+                        {game.Dailystep}
                       </Text>
                     </View>
                   </View>
@@ -478,7 +528,7 @@ const OfficialGames = ({ handleJoinClick }) => {
                     </View>
                     <View>
                       <Text style={{ color: "white", fontSize: 13 }}>
-                        {game.participants}
+                        {game.memberqty}
                       </Text>
                     </View>
                   </View>
@@ -493,6 +543,36 @@ const OfficialGames = ({ handleJoinClick }) => {
 };
 
 const CommunityGames = ({ handleJoinClick }) => {
+  const [error,seterror]=useState("");
+
+  const [form,setform]=useState([{name: "",
+    memberqty: 0,
+    Dailystep:0,
+    Totalamount: 0,
+    Amount: 0,
+    Digital_Currency: "sol",
+    days: 0,
+      startdate: "",
+    enddate: ""
+  }])
+  useEffect(()=>{
+   
+   const fetchdata=async()=>{
+    try{
+      const userid=await AsyncStorage.getItem("username");
+      console.log(userid);
+      const response=await axios.get(`http://10.5.121.76:3000/api/v1/challenge/private/${userid}`);
+      console.log(response.data);
+      setform(response.data.allchalange);
+      console.log("response",response.data.allchalange);
+    }catch(Error){
+      console.log(Error);
+        // seterror(Error); r
+    }}
+    fetchdata();
+  },[])
+ 
+
   const games = [
     {
       id: 1,
@@ -577,8 +657,8 @@ const CommunityGames = ({ handleJoinClick }) => {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.gamesScrollContent}
       >
-        {games.map((game) => (
-          <View key={game.id} style={styles.gameCard}>
+        {form.map((game) => (
+          <View key={game.name} style={styles.gameCard}>
             <View
               style={{
                 alignItems: "center",
@@ -587,7 +667,7 @@ const CommunityGames = ({ handleJoinClick }) => {
               }}
             >
               <View>
-                <Text style={styles.gameHeader}>{game.title}</Text>
+                <Text style={styles.gameHeader}>{game.name}</Text>
               </View>
               <View>
                 <TouchableOpacity
@@ -639,7 +719,7 @@ const CommunityGames = ({ handleJoinClick }) => {
                   </View>
                   <View>
                     <Text style={{ color: "white", fontSize: 13 }}>
-                      {game.entryPrice}
+                      {game.Amount}
                     </Text>
                   </View>
                 </View>
@@ -653,7 +733,7 @@ const CommunityGames = ({ handleJoinClick }) => {
                   </View>
                   <View>
                     <Text style={{ color: "white", fontSize: 13 }}>
-                      {game.time}
+                      {game.days}
                     </Text>
                   </View>
                 </View>
@@ -667,7 +747,7 @@ const CommunityGames = ({ handleJoinClick }) => {
                   </View>
                   <View>
                     <Text style={{ color: "white", fontSize: 13 }}>
-                      {game.dailySteps}
+                      {game.Dailystep}
                     </Text>
                   </View>
                 </View>
@@ -681,7 +761,7 @@ const CommunityGames = ({ handleJoinClick }) => {
                   </View>
                   <View>
                     <Text style={{ color: "white", fontSize: 13 }}>
-                      {game.participants}
+                      {game.memberqty}
                     </Text>
                   </View>
                 </View>
