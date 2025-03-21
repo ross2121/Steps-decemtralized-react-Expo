@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   BackHandler,
   Dimensions,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -38,12 +39,16 @@ import BottomSheet, {
   BottomSheetModalProvider,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
+import { BACKEND_URL } from "@/Backendurl";
+import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+const escrowpublickey="AL3YQV36ADyq3xwjuETH8kceNTH9fuP43esbFiLF1V1A"
 const App = () => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [selectedGame, setSelectedGame] = useState(null);
-
+  
+  const connection=new Connection("https://api.devnet.solana.com")
   const snapPoints = useMemo(() => ["50%", "75%"], []);
-
+  
   // Function to handle the "Join" button click
   const handleJoinClick = useCallback((game: any) => {
     console.log("Join clicked for game:", game.title);
@@ -51,7 +56,42 @@ const App = () => {
     bottomSheetModalRef.current?.present(); // Open the BottomSheetModal
   }, []);
   // function for search Game
+  const Onsend=async()=>{
+   try{ const publickey =await AsyncStorage.getItem("PublicKey");
+    if(!publickey){
+      Alert.alert("NO public key found")
+      return
+    }
+    const balance=await connection.getBalance(new PublicKey(publickey));
+    if(balance<selectedGame.Amount){
+       Alert.alert("Not enough credit");
+       return;  
+    }
+    console.log("chh");
+    console.log(publickey);
+    const signature=new Transaction().add(SystemProgram.transfer({
+      fromPubkey:new PublicKey(publickey),
+      toPubkey:new PublicKey(escrowpublickey),
+      lamports:LAMPORTS_PER_SOL*selectedGame.Amount
+    }))
+    const {blockhash}=await connection.getLatestBlockhash();
+     signature.recentBlockhash=blockhash;
+     signature.feePayer=new PublicKey(publickey)
+    const serilize=signature.serialize({
+      requireAllSignatures:false,
+      verifySignatures:false
+    }) 
+    console.log("chekc1");
+    const response=await axios.post(`http://10.5.121.76:3000/api/v1/challenge/join/public/${selectedGame.id}`,{tx:serilize});
+    if(response.status==200){
+      Alert.alert("ADDed to the contest");
+    }}catch(e:any){
+      console.log(e);
+       Alert.alert(e);
+    }
+    
 
+  } 
   const bottomSheetModalRef2 = useRef<BottomSheetModal>(null);
   const snapPoints2 = useMemo(() => ["30%"], []);
   const handleSearchGame = useCallback(() => {
@@ -72,7 +112,7 @@ const App = () => {
                 <StepsCount />
               </View>
               <View>
-                <OfficialGames handleJoinClick={handleJoinClick} />
+                <OfficialGames handleJoinClick={handleJoinClick}  />
               </View>
               <View>
                 <CommunityGames handleJoinClick={handleJoinClick} />
@@ -101,6 +141,7 @@ const App = () => {
                       paddingHorizontal: 10,
                     }}
                   >
+                   
                     <View
                       style={{
                         backgroundColor: "#1a0033",
@@ -110,14 +151,14 @@ const App = () => {
                       }}
                     >
                       <Text style={styles.bottomSheetTitle}>
-                        {selectedGame.title}
+                        {selectedGame.name}
                       </Text>
                       <Text
                         style={{
                           color: "white",
                         }}
                       >
-                        You Pay: {selectedGame.entryPrice}
+                        You Pay: {selectedGame.Amount}
                       </Text>
                       {/* <View style={{ marginTop: 20 }}>
                         <Text
@@ -174,6 +215,7 @@ const App = () => {
                         underlayStyle={{
                           backgroundColor: "#1a0033",
                         }}
+                        onSlideEnd={Onsend}
                         // height="30%"
                       />
                     </View>
@@ -316,14 +358,14 @@ const OfficialGames = ({ handleJoinClick }: any) => {
       days: 0,
       startdate: "",
       enddate: "",
-      id: "",
+      id:"",
     },
   ]);
   useEffect(() => {
     const fetchdata = async () => {
       try {
         const response = await axios.get(
-          "https://decentrailzed-ttrack.vercel.app/api/v1/challenge/public"
+          `${BACKEND_URL}/challenge/public`
         );
         console.log(response.data);
         setform(response.data.allchalange);
@@ -429,7 +471,7 @@ const OfficialGames = ({ handleJoinClick }: any) => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={[
             styles.gamesScrollContent,
-            games.length <= 3 && {
+            games.length <= 4 && {
               alignSelf: "center",
               width: 1400,
               paddingRight: "40%",
@@ -570,7 +612,6 @@ const CommunityGames = ({ handleJoinClick }) => {
       days: 0,
       startdate: "",
       enddate: "",
-      id: "",
     },
   ]);
   useEffect(() => {
@@ -685,7 +726,7 @@ const CommunityGames = ({ handleJoinClick }) => {
         ]}
       >
         {games.map((game) => (
-          <View key={game.id} style={styles.gameCard}>
+          <View key={game.name} style={styles.gameCard}>
             <View
               style={{
                 alignItems: "center",
@@ -920,7 +961,7 @@ const styles = StyleSheet.create({
   gamesContainer: {
     marginVertical: 10,
     paddingLeft: 20,
-    width: 1000,
+    width: 500,
   },
   gamesTitle: {
     color: "white",
@@ -934,8 +975,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.8)",
     borderRadius: 10,
     marginRight: 15,
-    width: "40%",
-    paddingHorizontal: 25,
+    width: "25%",
+    paddingHorizontal: 15,
     paddingVertical: 20,
     paddingBottom: 40,
     overflow: "hidden",

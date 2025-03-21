@@ -85,6 +85,8 @@ const Wallet = () => {
    "https://api.devnet.solana.com"
   );
   const [balance, setBalance] = useState(0);
+  const [history,sethistory]=useState([{id:0,amount:0,topublickey:"",type:"",time:"",frompublickey:""}])
+
   const Airdrop=async()=>{
     console.log("chek1");
    
@@ -107,20 +109,87 @@ const Wallet = () => {
     Alert.alert(e);
   }
   }
-  
-
   useEffect(() => {
     const fetchWallet = async () => {
       const publicKey = await AsyncStorage.getItem("PublicKey");
       if (!publicKey) {
-        // Alert.alert("No public key found");
+        Alert.alert("No public key found");
         return;
       }
       const balance = await connection.getBalance(new PublicKey(publicKey));
-      const accountinfo=await connection.getParsedAccountInfo(new PublicKey(publicKey))
-      console.log("Accountinfo",accountinfo);
       console.log(balance);
-      setBalance(balance);
+      try{
+        const accountinfo=await connection.getSignaturesForAddress(new PublicKey(publicKey),{
+        limit:10
+      })
+      console.log("acc",accountinfo);
+      let histories = [];
+
+    for (const account of accountinfo) {
+        try {
+            const signature = await connection.getParsedTransaction(account.signature);
+           
+            if (!signature) {
+                console.log('Transaction not found for signature:', account.signature);
+                continue;
+            }
+            console.log("test",signature.transaction.message.accountKeys);   
+          let amount=0;
+          let type="";
+          let from="";
+          let to="";
+              if(signature.transaction.message.accountKeys[0].signer==true&&signature.transaction.message.accountKeys[0].pubkey.toBase58()==publicKey){
+                const postbalance = signature.meta?.postBalances[0];
+                const prebalance = signature.meta?.preBalances[0];  
+            if (!postbalance || !prebalance) {
+              console.log('Balance data missing for signature:', account.signature);
+              continue;
+          }
+                  amount=prebalance-postbalance 
+                   type="Send"; 
+                   from=publicKey.toString()
+                   to=signature.transaction.message.accountKeys[1].pubkey.toBase58();
+              }else if(signature.transaction.message.accountKeys[0].signer==true&&signature.transaction.message.accountKeys[0].pubkey.toBase58()!==publicKey){
+                const postbalance = signature.meta?.postBalances[1];
+                const prebalance = signature.meta?.preBalances[1]; 
+                if (!postbalance || !prebalance) {
+                  console.log('Balance data missing for signature:', account.signature);
+                  continue;
+              }
+                amount=postbalance-prebalance  
+                type="Recieve"
+                from=signature.transaction.message.accountKeys[0].pubkey.toBase58();
+                 to=signature.transaction.message.accountKeys[1].pubkey.toBase58();
+              }
+            const publickey = signature.transaction.message.accountKeys[1].pubkey;  
+            console.log("sign",signature.meta);
+            amount = Math.abs(amount);
+
+            const time = signature.blockTime;
+            const transactionTime = time ? new Date(time * 1000).toLocaleString() : 'Unknown';
+
+            histories.push({
+                amount,
+                toPublicKey: publickey,
+                type,
+                time: transactionTime.toString(),
+                frompublickey:from.toString(),
+                id:Math.random()+1
+            });
+
+            console.log(histories)
+            sethistory(histories)
+
+        } catch (error) {
+            console.error('Error fetching transaction details:', error);
+        }
+    }     
+      }catch(e){
+        console.log(e);
+      }
+     
+      console.log(balance);
+      setBalance(balance);``
     };
     fetchWallet();
   }, []);
@@ -135,24 +204,24 @@ const Wallet = () => {
     return (
       <View style={styles.transactionItem}>
         <View style={styles.transactionIconContainer}>
-          {item.type === "received" ? (
+          {item.type === "Recieve" ? (
             <Feather name="arrow-down-left" size={20} color="#4CD964" />
-          ) : item.type === "sent" ? (
-            <Feather name="arrow-up-right" size={20} color="#FF3B30" />
           ) : (
-            <Feather name="repeat" size={20} color="#007AFF" />
-          )}
+            <Feather name="arrow-up-right" size={20} color="#FF3B30" />
+          ) 
+            // <Feather name="repeat" size={20} color="#007AFF" />
+          }
         </View>
 
         <View style={styles.transactionDetails}>
           <Text style={styles.transactionTitle}>
-            {item.type === "received"
-              ? `From ${item.from}`
-              : item.type === "sent"
-              ? `To ${item.to}`
-              : "Swap"}
+            {item.type === "Recieve"
+              ? `From ${item.frompublickey}`
+              : 
+              `To ${item.toPublicKey}`
+              }
           </Text>
-          <Text style={styles.transactionDate}>{item.date}</Text>
+          <Text style={styles.transactionDate}>{item.time}</Text>
         </View>
 
         <Text
@@ -160,9 +229,9 @@ const Wallet = () => {
             styles.transactionAmount,
             {
               color:
-                item.type === "received"
+                item.type === "Recieve"
                   ? "#4CD964"
-                  : item.type === "sent"
+                  : item.type === "Send"
                   ? "#FF3B30"
                   : "#007AFF",
             },
@@ -309,8 +378,8 @@ const Wallet = () => {
               </View>
 
               <BottomSheetFlatList
-                data={TRANSACTIONS}
-                keyExtractor={(item) => item.id}
+                data={history}
+                keyExtractor={(item) =>item.id.toString() }
                 renderItem={renderItem}
                 contentContainerStyle={styles.transactionList}
               />
@@ -448,7 +517,7 @@ const SendModal = () => {
         requireAllSignatures:false,
         verifySignatures:false,
        }) 
-       const response=await axios.post(`http://10.5.121.76:3000/api/v1/send/wallet`,{tx:serializetransaction})
+       const response=await axios.post(`https://decentrailzed-ttrack-l7c5.vercel.app/api/v1/send/wallet`,{tx:serializetransaction})
        console.log(response);
        setrespons(true);
     Alert.alert("Send suvessfull")
