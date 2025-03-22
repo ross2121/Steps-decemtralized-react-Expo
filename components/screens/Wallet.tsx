@@ -29,6 +29,7 @@ import { StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import SlideButton from "rn-slide-button";
 import axios from "axios";
+import { BACKEND_URL } from "@/Backendurl";
 
 
 
@@ -38,10 +39,10 @@ const Wallet = () => {
   );
   const [balance, setBalance] = useState(0);
   const [history,sethistory]=useState([{id:0,amount:0,topublickey:"",type:"",time:"",frompublickey:""}])
-    const[sol,setsol]=useState(0);  
+    const[sol,setsol]=useState(0); 
+    const[error,seterror]=useState(""); 
   const Airdrop=async()=>{
     console.log("chek1");
-      
     const connection=new Connection("https://api.devnet.solana.com");
     console.log("cheke2");
     const publicKey = await AsyncStorage.getItem("PublicKey");
@@ -49,16 +50,16 @@ const Wallet = () => {
     if (!publicKey) {
       Alert.alert("No public key found");
       return;
-    }
+    }  
   try {
     console.log("cheke3");
-    await connection.requestAirdrop(new PublicKey(publicKey),LAMPORTS_PER_SOL);
+    await connection.requestAirdrop(new PublicKey(publicKey),1*LAMPORTS_PER_SOL);
     Alert.alert("Success");
   }
   catch(e:any){
     // seterro(e);
     console.log(e);
-    Alert.alert(e);
+    seterror(e);
   }
   }
   useEffect(() => {
@@ -71,7 +72,7 @@ const Wallet = () => {
         return;
       }
       
-     const response= await axios.get("https://decentrailzed-ttrack-l7c5.vercel.app/test");
+     const response= await axios.get("https://decentrailzed-ttrack-3yr8.vercel.app/test");
           console.log(response.data);  
       //  const usdprice=response.data.solana.usd;
       //  console.log(response.data);
@@ -283,8 +284,8 @@ const Wallet = () => {
                 </BottomSheetView>
               </BottomSheetModal>
               <TouchableOpacity style={styles.actionButton} onPress={Airdrop}>
-                <Feather name="repeat" size={24} color="white" />
-                <Text style={styles.actionButtonText}>Swap</Text>
+                <Feather name="dollar-sign" size={24} color="white" />
+                <Text style={styles.actionButtonText}>Airdrop</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -482,7 +483,7 @@ const SendModal = () => {
         requireAllSignatures:false,
         verifySignatures:false,
        }) 
-       const response=await axios.post(`https://decentrailzed-ttrack-l7c5.vercel.app/api/v1/send/wallet`,{tx:serializetransaction})
+       const response=await axios.post(`${BACKEND_URL}/send/wallet`,{tx:serializetransaction})
        console.log(response);
        setrespons(true);
     Alert.alert("Send suvessfull")

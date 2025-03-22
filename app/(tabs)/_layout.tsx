@@ -31,7 +31,7 @@ const Layout = () => {
         headerShown: false,
         tabBarShowLabel: true,
         tabBarStyle: {
-          position: "absolute",
+          // position: "absolute",
 
           left: "10%",
           right: "10%",
