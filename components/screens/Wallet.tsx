@@ -1,5 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import {
+  Connection,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+} from "@solana/web3.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Clipboard from "expo-clipboard";
@@ -11,6 +17,7 @@ import {
   TouchableOpacity,
   StatusBar,
   Modal,
+  Image,
 } from "react-native";
 import React from "react";
 import {
@@ -31,127 +38,162 @@ import SlideButton from "rn-slide-button";
 import axios from "axios";
 import { BACKEND_URL } from "@/Backendurl";
 
-
-
 const Wallet = () => {
-  const connection = new Connection(
-   "https://api.devnet.solana.com"
-  );
+  const connection = new Connection("https://api.devnet.solana.com");
   const [balance, setBalance] = useState(0);
-  const [history,sethistory]=useState([{id:0,amount:0,topublickey:"",type:"",time:"",frompublickey:""}])
-    const[sol,setsol]=useState(0); 
-    const[error,seterror]=useState(""); 
-  const Airdrop=async()=>{
+  const [history, sethistory] = useState([
+    {
+      id: 0,
+      amount: 0,
+      topublickey: "",
+      type: "",
+      time: "",
+      frompublickey: "",
+    },
+  ]);
+  const [sol, setsol] = useState(0);
+  const [error, seterror] = useState("");
+  const Airdrop = async () => {
     console.log("chek1");
-    const connection=new Connection("https://api.devnet.solana.com");
+    const connection = new Connection("https://api.devnet.solana.com");
     console.log("cheke2");
     const publicKey = await AsyncStorage.getItem("PublicKey");
     console.log("cheke4");
     if (!publicKey) {
       Alert.alert("No public key found");
       return;
-    }  
-  try {
-    console.log("cheke3");
-    await connection.requestAirdrop(new PublicKey(publicKey),1*LAMPORTS_PER_SOL);
-    Alert.alert("Success");
-  }
-  catch(e:any){
-    // seterro(e);
-    console.log(e);
-    seterror(e);
-  }
-  }
+    }
+    try {
+      console.log("cheke3");
+      await connection.requestAirdrop(
+        new PublicKey(publicKey),
+        1 * LAMPORTS_PER_SOL
+      );
+      Alert.alert("Success");
+    } catch (e: any) {
+      // seterro(e);
+      console.log(e);
+      seterror(e);
+    }
+  };
   useEffect(() => {
     const fetchWallet = async () => {
-
       const publicKey = await AsyncStorage.getItem("PublicKey");
       console.log(publicKey);
       if (!publicKey) {
         Alert.alert("No public key found");
         return;
       }
-      
-     const response= await axios.get("https://decentrailzed-ttrack-3yr8.vercel.app/test");
-          console.log(response.data);  
+
+      const response = await axios.get(
+        "https://decentrailzed-ttrack-3yr8.vercel.app/test"
+      );
+      console.log(response.data);
       //  const usdprice=response.data.solana.usd;
       //  console.log(response.data);
       const balance = await connection.getBalance(new PublicKey(publicKey));
-    
-      console.log(balance);
-      try{
-        const accountinfo=await connection.getSignaturesForAddress(new PublicKey(publicKey),{
-        limit:10
-      })
-      console.log("acc",accountinfo);
-      let histories = [];
 
-    for (const account of accountinfo) {
-        try {
-            const signature = await connection.getParsedTransaction(account.signature);
-           
-            if (!signature) {
-                console.log('Transaction not found for signature:', account.signature);
-                continue;
-            }
-            console.log("test",signature.transaction.message.accountKeys);   
-          let amount=0;
-          let type="";
-          let from="";
-          let to="";
-              if(signature.transaction.message.accountKeys[0].signer==true&&signature.transaction.message.accountKeys[0].pubkey.toBase58()==publicKey){
-                const postbalance = signature.meta?.postBalances[0];
-                const prebalance = signature.meta?.preBalances[0];  
-            if (!postbalance || !prebalance) {
-              console.log('Balance data missing for signature:', account.signature);
-              continue;
+      console.log(balance);
+      try {
+        const accountinfo = await connection.getSignaturesForAddress(
+          new PublicKey(publicKey),
+          {
+            limit: 10,
           }
-                  amount=prebalance-postbalance 
-                   type="Send"; 
-                   from=publicKey.toString()
-                   to=signature.transaction.message.accountKeys[1].pubkey.toBase58();
-              }else if(signature.transaction.message.accountKeys[0].signer==true&&signature.transaction.message.accountKeys[0].pubkey.toBase58()!==publicKey){
-                const postbalance = signature.meta?.postBalances[1];
-                const prebalance = signature.meta?.preBalances[1]; 
-                if (!postbalance || !prebalance) {
-                  console.log('Balance data missing for signature:', account.signature);
-                  continue;
+        );
+        console.log("acc", accountinfo);
+        let histories = [];
+
+        for (const account of accountinfo) {
+          try {
+            const signature = await connection.getParsedTransaction(
+              account.signature
+            );
+
+            if (!signature) {
+              console.log(
+                "Transaction not found for signature:",
+                account.signature
+              );
+              continue;
+            }
+            console.log("test", signature.transaction.message.accountKeys);
+            let amount = 0;
+            let type = "";
+            let from = "";
+            let to = "";
+            if (
+              signature.transaction.message.accountKeys[0].signer == true &&
+              signature.transaction.message.accountKeys[0].pubkey.toBase58() ==
+                publicKey
+            ) {
+              const postbalance = signature.meta?.postBalances[0];
+              const prebalance = signature.meta?.preBalances[0];
+              if (!postbalance || !prebalance) {
+                console.log(
+                  "Balance data missing for signature:",
+                  account.signature
+                );
+                continue;
               }
-                amount=postbalance-prebalance  
-                type="Recieve"
-                from=signature.transaction.message.accountKeys[0].pubkey.toBase58();
-                 to=signature.transaction.message.accountKeys[1].pubkey.toBase58();
+              amount = prebalance - postbalance;
+              type = "Send";
+              from = publicKey.toString();
+              to =
+                signature.transaction.message.accountKeys[1].pubkey.toBase58();
+            } else if (
+              signature.transaction.message.accountKeys[0].signer == true &&
+              signature.transaction.message.accountKeys[0].pubkey.toBase58() !==
+                publicKey
+            ) {
+              const postbalance = signature.meta?.postBalances[1];
+              const prebalance = signature.meta?.preBalances[1];
+              if (!postbalance || !prebalance) {
+                console.log(
+                  "Balance data missing for signature:",
+                  account.signature
+                );
+                continue;
               }
-            const publickey = signature.transaction.message.accountKeys[1].pubkey;  
-            console.log("sign",signature.meta);
-            amount = Math.abs(amount);
+              amount = postbalance - prebalance;
+              type = "Recieve";
+              from =
+                signature.transaction.message.accountKeys[0].pubkey.toBase58();
+              to =
+                signature.transaction.message.accountKeys[1].pubkey.toBase58();
+            }
+            const publickey =
+              signature.transaction.message.accountKeys[1].pubkey;
+            console.log("sign", signature.meta);
+            amount = Math.abs(amount) / 1000000000;
 
             const time = signature.blockTime;
-            const transactionTime = time ? new Date(time * 1000).toLocaleString() : 'Unknown';
+            const transactionTime = time
+              ? new Date(time * 1000).toLocaleString()
+              : "Unknown";
 
             histories.push({
-                amount,
-                toPublicKey: publickey,
-                type,
-                time: transactionTime.toString(),
-                frompublickey:from.toString(),
-                id:Math.random()+1
+              amount,
+              toPublicKey: publickey,
+              type,
+              time: transactionTime.toString(),
+              frompublickey: from.toString(),
+              id: Math.random() + 1,
             });
 
-            console.log(histories)
-            sethistory(histories)
-
-        } catch (error) {
-            console.error('Error fetching transaction details:', error);
+            console.log(histories);
+            sethistory(histories);
+          } catch (error) {
+            console.error("Error fetching transaction details:", error);
+          }
         }
-    }     
-      }catch(e){
+      } catch (e) {
         console.log(e);
       }
-     
+
       console.log(balance);
-      setBalance(balance*response.data.sol);
-      setsol(balance/1000000000);
+      setBalance(balance * response.data.sol);
+      setsol(balance / 1000000000);
     };
     fetchWallet();
   }, []);
@@ -166,11 +208,12 @@ const Wallet = () => {
     return (
       <View style={styles.transactionItem}>
         <View style={styles.transactionIconContainer}>
-          {item.type === "Recieve" ? (
-            <Feather name="arrow-down-left" size={20} color="#4CD964" />
-          ) : (
-            <Feather name="arrow-up-right" size={20} color="#FF3B30" />
-          ) 
+          {
+            item.type === "Recieve" ? (
+              <Feather name="arrow-down-left" size={20} color="#4CD964" />
+            ) : (
+              <Feather name="arrow-up-right" size={20} color="#FF3B30" />
+            )
             // <Feather name="repeat" size={20} color="#007AFF" />
           }
         </View>
@@ -179,9 +222,7 @@ const Wallet = () => {
           <Text style={styles.transactionTitle}>
             {item.type === "Recieve"
               ? `From ${item.frompublickey}`
-              : 
-              `To ${item.toPublicKey}`
-              }
+              : `To ${item.toPublicKey}`}
           </Text>
           <Text style={styles.transactionDate}>{item.time}</Text>
         </View>
@@ -243,11 +284,27 @@ const Wallet = () => {
                 ${(balance / LAMPORTS_PER_SOL).toFixed(2)}
               </Text>
             </View>
-              <View>
-                <Text>
-                  {sol};
-                </Text>
-              </View>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                marginBottom: 30,
+                gap: 10,
+              }}
+            >
+              <Image
+                source={require("../../assets/images/Sol.png")}
+                style={{ width: 30, height: 30 }}
+              />
+              <Text
+                style={{
+                  color: "white",
+                }}
+              >
+                {sol}
+              </Text>
+            </View>
             {/* Action Buttons */}
             <View style={styles.actionButtonsContainer}>
               <TouchableOpacity
@@ -345,7 +402,7 @@ const Wallet = () => {
 
               <BottomSheetFlatList
                 data={history}
-                keyExtractor={(item) =>item.id.toString() }
+                keyExtractor={(item) => item.id.toString()}
                 renderItem={renderItem}
                 contentContainerStyle={styles.transactionList}
               />
@@ -359,24 +416,24 @@ const Wallet = () => {
 
 const AddModal = () => {
   const [copiedText, setCopiedText] = useState("");
- const [pubclickey,setpublic]=useState("")
-   useEffect(()=>{
-    const getpublic=async()=>{
-      const key=await AsyncStorage.getItem("PublicKey")
-      if(key==null){
+  const [pubclickey, setpublic] = useState("");
+  useEffect(() => {
+    const getpublic = async () => {
+      const key = await AsyncStorage.getItem("PublicKey");
+      if (key == null) {
         return;
       }
       setpublic(key);
-    }
+    };
     getpublic();
-   })
+  });
   const copyToClipboard = async () => {
     const key = await AsyncStorage.getItem("PublicKey");
     if (key == null) {
       setCopiedText("No public key found");
       return;
     }
-   
+
     setCopiedText(key);
     await Clipboard.setStringAsync(key);
   };
@@ -441,59 +498,61 @@ const AddModal = () => {
 };
 
 const SendModal = () => {
-  const [Amount,setamount]=useState(0);
-  const[publicaddress,setpublicaddress]=useState("");
-  const[error,seterror]=useState("")
-  const[loading,setloading]=useState(false);
-  const[reponse,setrespons]=useState(false);
-  const onSend=async()=>{
+  const [Amount, setamount] = useState(0);
+  const [publicaddress, setpublicaddress] = useState("");
+  const [error, seterror] = useState("");
+  const [loading, setloading] = useState(false);
+  const [reponse, setrespons] = useState(false);
+  const onSend = async () => {
     setloading(true);
     console.log("Cgeek");
-      const publickey=await AsyncStorage.getItem("PublicKey");
-    if(!publickey){
+    const publickey = await AsyncStorage.getItem("PublicKey");
+    if (!publickey) {
       Alert.alert("No publci key found");
       return;
     }
-    
-      const connection=new Connection("https://api.devnet.solana.com");
-      const getBalance=await connection.getBalance(new PublicKey(publickey))
-       console.log(getBalance);
-       console.log(Amount*LAMPORTS_PER_SOL); 
-      if(getBalance<Amount*LAMPORTS_PER_SOL){
-          Alert.alert("Dont have enogh fundd");
-          return;
-      }
-      console.log("check1");
-      console.log("publlic",publicaddress);
-      console.log("amoutn",Amount);
-      console.log(publickey);
-      try{
-        const transaction=new Transaction().add(SystemProgram.transfer({
-        fromPubkey:new PublicKey(publickey),
-         toPubkey:new PublicKey(publicaddress),
-         lamports:LAMPORTS_PER_SOL*Amount
-      })
-    )
-    console.log("check2");
-      const {blockhash}=await connection.getRecentBlockhash()
+
+    const connection = new Connection("https://api.devnet.solana.com");
+    const getBalance = await connection.getBalance(new PublicKey(publickey));
+    console.log(getBalance);
+    console.log(Amount * LAMPORTS_PER_SOL);
+    if (getBalance < Amount * LAMPORTS_PER_SOL) {
+      Alert.alert("Dont have enogh fundd");
+      return;
+    }
+    console.log("check1");
+    console.log("publlic", publicaddress);
+    console.log("amoutn", Amount);
+    console.log(publickey);
+    try {
+      const transaction = new Transaction().add(
+        SystemProgram.transfer({
+          fromPubkey: new PublicKey(publickey),
+          toPubkey: new PublicKey(publicaddress),
+          lamports: LAMPORTS_PER_SOL * Amount,
+        })
+      );
+      console.log("check2");
+      const { blockhash } = await connection.getRecentBlockhash();
       console.log("check3");
-       transaction.recentBlockhash=blockhash;
-       transaction.feePayer=new PublicKey(publickey);
-       const serializetransaction=transaction.serialize({
-        requireAllSignatures:false,
-        verifySignatures:false,
-       }) 
-       const response=await axios.post(`${BACKEND_URL}/send/wallet`,{tx:serializetransaction})
-       console.log(response);
-       setrespons(true);
-    Alert.alert("Send suvessfull")
-    }catch(e:any){
-        console.log(e);
-        Alert.alert(e);
-        setrespons(false);
-      }
-    
-  } 
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = new PublicKey(publickey);
+      const serializetransaction = transaction.serialize({
+        requireAllSignatures: false,
+        verifySignatures: false,
+      });
+      const response = await axios.post(`${BACKEND_URL}/send/wallet`, {
+        tx: serializetransaction,
+      });
+      console.log(response);
+      setrespons(true);
+      Alert.alert("Send suvessfull");
+    } catch (e: any) {
+      console.log(e);
+      Alert.alert(e);
+      setrespons(false);
+    }
+  };
   return (
     <View
       style={{
@@ -529,7 +588,9 @@ const SendModal = () => {
               <TextInput
                 placeholder="Enter amount"
                 placeholderTextColor="rgba(255, 255, 255, 0.5)"
-                onChangeText={(e:any)=>{setamount(parseInt(e))}}
+                onChangeText={(e: any) => {
+                  setamount(parseInt(e));
+                }}
                 style={{ color: "white" }}
                 keyboardType="number-pad"
               />
@@ -556,7 +617,7 @@ const SendModal = () => {
                 placeholder="Enter recipient address"
                 placeholderTextColor="rgba(255, 255, 255, 0.5)"
                 style={{ color: "white" }}
-                onChangeText={(e)=>setpublicaddress(e)}
+                onChangeText={(e) => setpublicaddress(e)}
               />
             </View>
           </View>
