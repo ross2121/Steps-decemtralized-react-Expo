@@ -6,7 +6,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Layout = () => {
-  const insets = useSafeAreaInsets();
+  // const insets = useSafeAreaInsets();
 
   return (
     <Tabs
