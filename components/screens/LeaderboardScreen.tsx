@@ -6,6 +6,7 @@ import { LinearGradient } from "expo-linear-gradient";
 const data = [
   {
     id: "1",
+    userName:"Soum",
     avatar:
       "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
     totalXp: 1000,
@@ -13,6 +14,7 @@ const data = [
   },
   {
     id: "2",
+    userName:"Soum",
     avatar:
       "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
     totalXp: 900,
@@ -20,6 +22,7 @@ const data = [
   },
   {
     id: "3",
+    userName:"Soum",
     avatar:
       "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
     totalXp: 800,
@@ -27,6 +30,7 @@ const data = [
   },
   {
     id: "4",
+    userName:"Soum",
     avatar:
       "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
     totalXp: 700,
@@ -34,6 +38,7 @@ const data = [
   },
   {
     id: "5",
+    userName:"Soum",
     avatar:
       "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
     totalXp: 600,
@@ -41,6 +46,7 @@ const data = [
   },
   {
     id: "6",
+    userName:"Soum",
     avatar:
       "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
     totalXp: 500,
@@ -48,6 +54,7 @@ const data = [
   },
   {
     id: "7",
+    userName:"Soum",
     avatar:
       "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
     totalXp: 400,
@@ -55,6 +62,7 @@ const data = [
   },
   {
     id: "8",
+    userName:"Soum",
     avatar:
       "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
     totalXp: 300,
@@ -62,6 +70,7 @@ const data = [
   },
   {
     id: "9",
+    userName:"Soum",
     avatar:
       "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
     totalXp: 200,
@@ -69,6 +78,7 @@ const data = [
   },
   {
     id: "10",
+    userName:"Soum",
     avatar:
       "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
     totalXp: 100,
@@ -98,7 +108,9 @@ export default function LeaderboardScreen() {
       <View style={styles.itemContainer}>
         <Text style={styles.index}>{index + 1}</Text>
         <Image source={{ uri: item.avatar }} style={styles.avatar} />
-        <Text style={styles.text}> {item.totalXp}</Text>
+        
+        <Text style={styles.text}> {item.userName}</Text>
+      
         <Text style={styles.text}> {item.fitnessXp}</Text>
       </View>
     );
@@ -189,7 +201,7 @@ export default function LeaderboardScreen() {
           <View style={styles.headings}>
             <Text style={styles.headingFont}>Rank</Text>
             <Text style={styles.headingFont}>Avatar</Text>
-            <Text style={styles.headingFont}>Total XP</Text>
+            <Text style={styles.headingFont}>User</Text>
             <Text style={styles.headingFont}>Fitness XP</Text>
           </View>
 
@@ -249,6 +261,7 @@ const styles = StyleSheet.create({
   },
   headings: {
     flexDirection: "row",
+    marginLeft:13,
     justifyContent: "space-around",
   },
   headingFont: {

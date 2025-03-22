@@ -49,6 +49,7 @@ import {
   SystemProgram,
   Transaction,
 } from "@solana/web3.js";
+import { set } from "date-fns";
 const escrowpublickey = "AL3YQV36ADyq3xwjuETH8kceNTH9fuP43esbFiLF1V1A";
 const App = () => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -63,6 +64,7 @@ const App = () => {
     setSelectedGame(game); // Set the selected game
     bottomSheetModalRef.current?.present(); // Open the BottomSheetModal
   }, []);
+  
   // function for search Game
   const Onsend = async () => {
     try {
@@ -131,7 +133,6 @@ const App = () => {
               <View style={{ padding: 5 }}>
                 <StepsCount />
               </View>
-              <Button title="Test"></Button>
               <View>
                 <OfficialGames handleJoinClick={handleJoinClick} />
               </View>
@@ -267,6 +268,15 @@ const App = () => {
 const StepsCount = () => {
   const [error, seterror] = useState("");
   const [step, setstep] = useState(0);
+  const Onsenddd=async()=>{
+    try{
+      const userid=await AsyncStorage.getItem("userid");
+      const response=await axios.post(`${BACKEND_URL}/regular/update`,{userid,steps:step})
+       console.log(response.data);    
+    }catch(e:any){
+       seterror(e);
+    }
+  }
   useEffect(() => {
     const fetchSteps = async () => {
       try {
@@ -336,6 +346,8 @@ const StepsCount = () => {
               marginTop: 20,
             }}
           />
+              <Button title="Test" onPress={Onsenddd}></Button>
+
           <View style={styles.setpsdiv}>
             <Text style={styles.steptext}>{step}</Text>
             <Text style={{ color: "white", fontSize: 20 }}>/</Text>
