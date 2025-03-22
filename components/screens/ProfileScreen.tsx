@@ -97,7 +97,28 @@ const ProfileScreen = () => {
         style={styles.gradient}
       >
         <View>
-          <Text style={styles.header}>Profile</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
+            <Text style={styles.header}>Profile</Text>
+
+            <TouchableOpacity
+              onPress={() => router.push("/(nonav)/notification")}
+              style={{
+                padding: 10,
+              }}
+            >
+              <Ionicons
+                name="notifications"
+                size={24}
+                color="white"
+                style={{ position: "absolute", right: 20, top: 20 }}
+              />
+            </TouchableOpacity>
+          </View>
 
           {/* Profile Info */}
           <View style={styles.profileCard}>

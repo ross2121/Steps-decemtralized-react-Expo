@@ -2,7 +2,6 @@ import React from "react";
 import { Stack } from "expo-router";
 
 export default function RootLayout() {
-  console.log("RootLayout rendered"); // Debugging line
   return (
     <Stack
       screenOptions={{
@@ -31,7 +30,11 @@ export default function RootLayout() {
       />
       <Stack.Screen name="(auth)/welcome" options={{ headerShown: false }} />
       <Stack.Screen name="(auth)/login" options={{ title: "Login" }} />
-      <Stack.Screen name="(auth)/signup" options={{ headerShown:false }} />
+      <Stack.Screen name="(auth)/signup" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="(nonav)/notification.tsx"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }
