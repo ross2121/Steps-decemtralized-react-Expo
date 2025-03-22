@@ -1,9 +1,6 @@
-import InitializeHealthConnect from "@/app/(tabs)/nativeheatlth";
+import InitializeHealthConnect from "@/app/notused/nativeheatlth";
 import React from "react";
-const Health=()=>{
-    return(
-        <InitializeHealthConnect>
-        </InitializeHealthConnect>
-    )
-}
+const Health = () => {
+  return <InitializeHealthConnect></InitializeHealthConnect>;
+};
 export default Health;
