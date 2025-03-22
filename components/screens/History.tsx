@@ -10,6 +10,9 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { ScrollView } from "react-native-gesture-handler";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BACKEND_URL } from "@/Backendurl";
 
 const History = () => {
   // Dummy data for the history
@@ -63,6 +66,20 @@ const History = () => {
       enddate: "2023-11-08",
     },
   ]);
+  const[participated,setparticipated]=useState([
+    {
+      id: "1",
+      name: "Tournament 1",
+      memberqty: 10,
+      Dailystep: 5000,
+      Totalamount: 1000,
+      Amount: 100,
+      Digital_Currency: "sol",
+      days: 7,
+      startdate: "2023-10-01",
+      enddate: "2023-10-07",
+    },
+  ]);
 
   const [selectedTab, setSelectedTab] = useState<"participated" | "created">(
     "participated"
@@ -72,32 +89,36 @@ const History = () => {
   const [participatedData, setParticipatedData] = useState([]);
   const [createdData, setCreatedData] = useState([]);
   const animatedValue = useRef(new Animated.Value(0)).current;
-  // useEffect(() => {
-  //   const fetchHistory = async () => {
-  //     try {
-  //       const userid = await AsyncStorage.getItem("userid");
-  //       if (!userid) {
-  //         setError("User ID not found.");
-  //         setIsLoading(false);
-  //         return;
-  //       }
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const userid = await AsyncStorage.getItem("userid");
+        if (!userid) {
+          setError("User ID not found.");
+          setIsLoading(false);
+          return;
+        }
 
-  //       const response = await axios.get(
-  //         `https://decentrailzed-ttrack.vercel.app/api/v1/history/prevgame/${userid}`
-  //       );
+        const response = await axios.get(
+          `${BACKEND_URL}/history/prevgame/${userid}`
+        ); 
+         const previeoudata=await axios.get(
+          `${BACKEND_URL}/history/prev/${userid}`
+         )
+          setparticipated(previeoudata.data.Tournament);
+          console
+        setform(response.data.Tournament);
+        console.log(response.data)
+      } catch (e) {
+        console.error("Error fetching history:", e);
+        setError("Failed to fetch history. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  //       setParticipatedData(response.data.Tournament || []);
-  //       setCreatedData(response.data.Created || []); // Assuming "Created" is another key in the response
-  //     } catch (e) {
-  //       console.error("Error fetching history:", e);
-  //       setError("Failed to fetch history. Please try again.");
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-
-  //   fetchHistory();
-  // }, []);
+    fetchHistory();
+  }, []);
   const handleTabPress = (tab: "participated" | "created") => {
     setSelectedTab(tab);
     Animated.timing(animatedValue, {
@@ -127,6 +148,7 @@ const History = () => {
       <Text style={styles.text}>Amount: {item.Amount}</Text>
       <Text style={styles.text}>Currency: {item.Digital_Currency}</Text>
       <Text style={styles.text}>Days: {item.days}</Text>
+      <Text style={styles.text}>Days: {item.status}</Text>
       <Text style={styles.text}>Start Date: {item.startdate}</Text>
       <Text style={styles.text}>End Date: {item.enddate}</Text>
     </View>
@@ -158,7 +180,7 @@ const History = () => {
         {selectedTab === "participated" ? (
           <View>
             <FlatList
-              data={form}
+              data={participated}
               scrollEnabled={true}
               style={{ marginBottom: 130 }}
               renderItem={({ item }) => <Item item={item} />}
@@ -177,7 +199,26 @@ const History = () => {
             />
           </View>
         ) : (
-          <Text style={{ color: "white" }}>Hello</Text>
+          <View>
+            <FlatList
+              data={form}
+              scrollEnabled={true}
+              style={{ marginBottom: 130 }}
+              renderItem={({ item }) => <Item item={item} />}
+              keyExtractor={(item) => item.id}
+              ListEmptyComponent={
+                <Text
+                  style={{
+                    color: "white",
+                    textAlign: "center",
+                    marginTop: 50,
+                  }}
+                >
+                  No data found
+                </Text>
+              }
+            />
+          </View>
         )}
       </View>
     </LinearGradient>
