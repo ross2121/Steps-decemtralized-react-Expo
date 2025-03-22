@@ -9,9 +9,10 @@ import {
   TouchableOpacity,
   FlatList,
   Animated,
+  Easing,
 } from "react-native";
 import { useFonts } from "expo-font";
-import { Redirect, router } from "expo-router"; // Import router
+import { router } from "expo-router";
 
 const { width, height } = Dimensions.get("window");
 
@@ -50,16 +51,63 @@ const slides = [
   },
 ];
 
-const Slide = ({ item }) => {
+const Slide = ({ item, scrollX, index }) => {
+  const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
+
+  // Parallax effect for the image
+  const translateX = scrollX.interpolate({
+    inputRange,
+    outputRange: [width * 0.3, 0, -width * 0.3],
+    extrapolate: "clamp",
+  });
+
+  // Fade and scale effect for the title and description
+  const opacity = scrollX.interpolate({
+    inputRange,
+    outputRange: [0, 1, 0],
+    extrapolate: "clamp",
+  });
+
+  const scale = scrollX.interpolate({
+    inputRange,
+    outputRange: [0.8, 1, 0.8],
+    extrapolate: "clamp",
+  });
+
   return (
     <View style={styles.slideContainer}>
-      <Image
+      <Animated.Image
         source={{ uri: item.image }}
-        style={styles.image}
+        style={[
+          styles.image,
+          {
+            transform: [{ translateX }],
+          },
+        ]}
         resizeMode="contain"
       />
-      <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.description}>{item.description}</Text>
+      <Animated.Text
+        style={[
+          styles.title,
+          {
+            opacity,
+            transform: [{ scale }],
+          },
+        ]}
+      >
+        {item.title}
+      </Animated.Text>
+      <Animated.Text
+        style={[
+          styles.description,
+          {
+            opacity,
+            transform: [{ scale }],
+          },
+        ]}
+      >
+        {item.description}
+      </Animated.Text>
     </View>
   );
 };
@@ -99,10 +147,11 @@ const Paginator = ({ data, scrollX }) => {
   );
 };
 
-const Welcome = ({ navigation }) => {
+const Welcome = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
   const slidesRef = useRef(null);
+  const buttonScale = useRef(new Animated.Value(1)).current;
 
   const viewableItemsChanged = useRef(({ viewableItems }) => {
     setCurrentIndex(viewableItems[0].index);
@@ -114,9 +163,23 @@ const Welcome = ({ navigation }) => {
     if (currentIndex < slides.length - 1) {
       slidesRef.current.scrollToIndex({ index: currentIndex + 1 });
     } else {
-      // Navigate to the signup page
       router.push("/(auth)/singup");
     }
+  };
+
+  const animateButton = () => {
+    Animated.sequence([
+      Animated.timing(buttonScale, {
+        toValue: 0.9,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(buttonScale, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
   };
 
   return (
@@ -128,7 +191,9 @@ const Welcome = ({ navigation }) => {
         <View style={styles.slidesContainer}>
           <FlatList
             data={slides}
-            renderItem={({ item }) => <Slide item={item} />}
+            renderItem={({ item, index }) => (
+              <Slide item={item} scrollX={scrollX} index={index} />
+            )}
             horizontal
             showsHorizontalScrollIndicator={false}
             pagingEnabled
@@ -147,10 +212,23 @@ const Welcome = ({ navigation }) => {
 
         <Paginator data={slides} scrollX={scrollX} />
 
-        <TouchableOpacity style={styles.button} onPress={scrollTo}>
-          <Text style={styles.buttonText}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            animateButton();
+            scrollTo();
+          }}
+        >
+          <Animated.Text
+            style={[
+              styles.buttonText,
+              {
+                transform: [{ scale: buttonScale }],
+              },
+            ]}
+          >
             {currentIndex === slides.length - 1 ? "Get Started" : "Next"}
-          </Text>
+          </Animated.Text>
         </TouchableOpacity>
       </View>
     </LinearGradient>
