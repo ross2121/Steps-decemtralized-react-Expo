@@ -242,6 +242,10 @@ const Wallet = () => {
         >
           {item.amount}
         </Text>
+        <Image
+          source={require("../../assets/images/Sol.png")}
+          style={{ width: 20, height: 30, marginLeft: 10 }}
+        />
       </View>
     );
   }, []);
