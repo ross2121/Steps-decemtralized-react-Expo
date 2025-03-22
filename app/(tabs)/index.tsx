@@ -63,7 +63,8 @@ const App = () => {
       return
     }
     const balance=await connection.getBalance(new PublicKey(publickey));
-    if(balance<selectedGame.Amount){
+    console.log(selectedGame.Amount);
+    if(balance<selectedGame.Amount*LAMPORTS_PER_SOL){
        Alert.alert("Not enough credit");
        return;  
     }

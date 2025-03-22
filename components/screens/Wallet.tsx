@@ -29,56 +29,8 @@ import { StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import SlideButton from "rn-slide-button";
 import axios from "axios";
-// const [copiedText, setCopiedText] = useState("");
-// const copyToClipboard = async () => {
-//   await Clipboard.setStringAsync("hello world");
-// };
-const TRANSACTIONS = [
-  {
-    id: "1",
-    type: "received",
-    amount: "+$250.00",
-    date: "Mar 15, 2025",
-    from: "John Doe",
-  },
-  {
-    id: "2",
-    type: "sent",
-    amount: "-$120.50",
-    date: "Mar 12, 2025",
-    to: "Coffee Shop",
-  },
-  { id: "3", type: "swap", amount: "$75.00 → ETH", date: "Mar 10, 2025" },
-  {
-    id: "4",
-    type: "received",
-    amount: "+$500.00",
-    date: "Mar 5, 2025",
-    from: "Salary",
-  },
-  {
-    id: "5",
-    type: "sent",
-    amount: "-$35.20",
-    date: "Mar 3, 2025",
-    to: "Grocery Store",
-  },
-  { id: "6", type: "swap", amount: "ETH → $42.75", date: "Feb 28, 2025" },
-  {
-    id: "7",
-    type: "received",
-    amount: "+$20.00",
-    date: "Feb 25, 2025",
-    from: "Friend",
-  },
-  {
-    id: "8",
-    type: "sent",
-    amount: "-$15.99",
-    date: "Feb 22, 2025",
-    to: "Subscription",
-  },
-];
+
+
 
 const Wallet = () => {
   const connection = new Connection(
@@ -86,10 +38,10 @@ const Wallet = () => {
   );
   const [balance, setBalance] = useState(0);
   const [history,sethistory]=useState([{id:0,amount:0,topublickey:"",type:"",time:"",frompublickey:""}])
-
+    const[sol,setsol]=useState(0);  
   const Airdrop=async()=>{
     console.log("chek1");
-   
+      
     const connection=new Connection("https://api.devnet.solana.com");
     console.log("cheke2");
     const publicKey = await AsyncStorage.getItem("PublicKey");
@@ -111,12 +63,20 @@ const Wallet = () => {
   }
   useEffect(() => {
     const fetchWallet = async () => {
+
       const publicKey = await AsyncStorage.getItem("PublicKey");
+      console.log(publicKey);
       if (!publicKey) {
         Alert.alert("No public key found");
         return;
       }
+      
+     const response= await axios.get("https://decentrailzed-ttrack-l7c5.vercel.app/test");
+          console.log(response.data);  
+      //  const usdprice=response.data.solana.usd;
+      //  console.log(response.data);
       const balance = await connection.getBalance(new PublicKey(publicKey));
+    
       console.log(balance);
       try{
         const accountinfo=await connection.getSignaturesForAddress(new PublicKey(publicKey),{
@@ -189,7 +149,8 @@ const Wallet = () => {
       }
      
       console.log(balance);
-      setBalance(balance);``
+      setBalance(balance*response.data.sol);
+      setsol(balance/1000000000);
     };
     fetchWallet();
   }, []);
@@ -281,7 +242,11 @@ const Wallet = () => {
                 ${(balance / LAMPORTS_PER_SOL).toFixed(2)}
               </Text>
             </View>
-
+              <View>
+                <Text>
+                  {sol};
+                </Text>
+              </View>
             {/* Action Buttons */}
             <View style={styles.actionButtonsContainer}>
               <TouchableOpacity
