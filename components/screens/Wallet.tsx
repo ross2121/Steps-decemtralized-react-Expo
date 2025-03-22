@@ -550,7 +550,7 @@ const SendModal = () => {
       });
       console.log(response);
       setrespons(true);
-      Alert.alert("Send suvessfull");
+      Alert.alert("Sent sucessfully");
     } catch (e: any) {
       console.log(e);
       Alert.alert(e);
@@ -672,7 +672,7 @@ const styles = StyleSheet.create({
   gradient: {
     flex: 1,
   },
-  // modal
+
   bottomModalBackground: {
     flex: 1,
     backgroundColor: "#7E3887",
