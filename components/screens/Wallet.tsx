@@ -626,18 +626,18 @@ const SendModal = () => {
             </View>
           </View>
           {/* <TouchableOpacity
-            style={{
-              backgroundColor: "#7E3887",
-              paddingVertical: 10,
-              width: "20%",
-              borderRadius: 20,
-              marginTop: 20,
-              alignItems: "center",
-              alignSelf: "center",
-            }}
-          >
-            <Text style={{ color: "white" }}>Send</Text>
-          </TouchableOpacity> */}
+              style={{
+                backgroundColor: "#7E3887",
+                paddingVertical: 10,
+                width: "20%",
+                borderRadius: 20,
+                marginTop: 20,
+                alignItems: "center",
+                alignSelf: "center",
+              }}
+            >
+              <Text style={{ color: "white" }}>Send</Text>
+            </TouchableOpacity> */}
           <View
             style={{
               marginTop: 20,
@@ -778,8 +778,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   transactionTitle: {
-    fontSize: 16,
-    fontWeight: "500",
+    fontSize: 13,
+    fontWeight: "200",
     color: "white",
   },
   transactionDate: {

@@ -15,6 +15,7 @@ import {
   Dimensions,
   Alert,
   StatusBar,
+  Button,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -130,6 +131,7 @@ const App = () => {
               <View style={{ padding: 5 }}>
                 <StepsCount />
               </View>
+              <Button title="Test"></Button>
               <View>
                 <OfficialGames handleJoinClick={handleJoinClick} />
               </View>
