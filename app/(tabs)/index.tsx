@@ -11,8 +11,6 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
-  BackHandler,
-  Dimensions,
   Alert,
   StatusBar,
   Button,
@@ -21,7 +19,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   GestureHandlerRootView,
-  NativeViewGestureHandler,
   ScrollView,
 } from "react-native-gesture-handler";
 import SlideButton from "rn-slide-button";
@@ -30,11 +27,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { router } from "expo-router";
-import {
-  getGrantedPermissions,
-  initialize,
-  readRecords,
-} from "react-native-health-connect";
+import { initialize, readRecords } from "react-native-health-connect";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -58,14 +51,12 @@ const App = () => {
   const connection = new Connection("https://api.devnet.solana.com");
   const snapPoints = useMemo(() => ["50%", "75%"], []);
 
-  // Function to handle the "Join" button click
   const handleJoinClick = useCallback((game: any) => {
     console.log("Join clicked for game:", game.title);
-    setSelectedGame(game); // Set the selected game
-    bottomSheetModalRef.current?.present(); // Open the BottomSheetModal
+    setSelectedGame(game);
+    bottomSheetModalRef.current?.present();
   }, []);
-  
-  // function for search Game
+
   const Onsend = async () => {
     try {
       const publickey = await AsyncStorage.getItem("PublicKey");
@@ -268,15 +259,18 @@ const App = () => {
 const StepsCount = () => {
   const [error, seterror] = useState("");
   const [step, setstep] = useState(0);
-  const Onsenddd=async()=>{
-    try{
-      const userid=await AsyncStorage.getItem("userid");
-      const response=await axios.post(`${BACKEND_URL}/regular/update`,{userid,steps:step})
-       console.log(response.data);    
-    }catch(e:any){
-       seterror(e);
+  const Onsenddd = async () => {
+    try {
+      const userid = await AsyncStorage.getItem("userid");
+      const response = await axios.post(`${BACKEND_URL}/regular/update`, {
+        userid,
+        steps: step,
+      });
+      console.log(response.data);
+    } catch (e: any) {
+      seterror(e);
     }
-  }
+  };
   useEffect(() => {
     const fetchSteps = async () => {
       try {
@@ -346,7 +340,7 @@ const StepsCount = () => {
               marginTop: 20,
             }}
           />
-              <Button title="Test" onPress={Onsenddd}></Button>
+          <Button title="Test" onPress={Onsenddd}></Button>
 
           <View style={styles.setpsdiv}>
             <Text style={styles.steptext}>{step}</Text>
@@ -581,7 +575,7 @@ const OfficialGames = ({ handleJoinClick }: any) => {
                   >
                     <View>
                       <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
-                        7 days
+                        days
                       </Text>
                     </View>
                     <View>
@@ -713,7 +707,7 @@ const CommunityGames = ({ handleJoinClick }) => {
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
-          paddingRight: 16,
+          // paddingRight: 16,
           marginBottom: 10,
         }}
       >
@@ -825,9 +819,7 @@ const CommunityGames = ({ handleJoinClick }) => {
                   style={{ justifyContent: "center", alignItems: "center" }}
                 >
                   <View>
-                    <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
-                      7 days
-                    </Text>
+                    <Text style={{ color: "#bfbfbf", fontSize: 12 }}>days</Text>
                   </View>
                   <View>
                     <Text style={{ color: "white", fontSize: 13 }}>
@@ -991,7 +983,7 @@ const styles = StyleSheet.create({
   gamesContainer: {
     marginVertical: 10,
     paddingLeft: 20,
-    width: 500,
+    // width: 500,
   },
   gamesTitle: {
     color: "white",
