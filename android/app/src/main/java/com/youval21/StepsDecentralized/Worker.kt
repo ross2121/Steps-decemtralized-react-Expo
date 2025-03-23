@@ -15,22 +15,17 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 class HealthDataWorker(appContext: Context, workerParams: WorkerParameters) :
     CoroutineWorker(appContext, workerParams) {
-
     companion object {
         private const val TAG = "HealthDataWorker"
     }
-
     override suspend fun doWork(): Result {
         return withContext(Dispatchers.IO) {
             try {
                 Log.d(TAG, "Starting HealthDataWorker...")
-                
-                val steps = fetchStepsFromHealthConnect()
-                Log.d(TAG, "Fetched steps: $steps")
-                
-                val response = RetrofitClient.instance.sendSteps(StepsRequest(steps.toInt()))
-                Log.d(TAG, "Steps sent to server. Response: $response")
-                
+                 val responses = RetrofitClient.instance.getstep();
+                val response = RetrofitClient.instance.sendSteps(StepsRequest(67));
+                Log.d(TAG, "Steps sent to server. Response: $response")   
+                 
                 Result.success()
             } catch (e: Exception) {
                 Log.e(TAG, "Error in HealthDataWorker: ${e.message}", e)
@@ -38,7 +33,6 @@ class HealthDataWorker(appContext: Context, workerParams: WorkerParameters) :
             }
         }
     }
-
     private suspend fun fetchStepsFromHealthConnect(): Long {
         val healthConnectClient = HealthConnectClient.getOrCreate(applicationContext)
         val now = ZonedDateTime.now()

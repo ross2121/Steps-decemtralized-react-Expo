@@ -1,98 +1,39 @@
-import React, { useCallback, useRef, useMemo, useState } from "react";
+import React, { useCallback, useRef, useMemo, useState, useEffect } from "react";
 import { StyleSheet, View, Text, Image, Switch } from "react-native";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { LinearGradient } from "expo-linear-gradient";
+import axios from "axios";
+import { BACKEND_URL } from "@/Backendurl";
 
-const data = [
-  {
-    id: "1",
-    userName:"Soum",
-    avatar:
-      "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
-    totalXp: 1000,
-    fitnessXp: 500,
-  },
-  {
-    id: "2",
-    userName:"Soum",
-    avatar:
-      "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
-    totalXp: 900,
-    fitnessXp: 450,
-  },
-  {
-    id: "3",
-    userName:"Soum",
-    avatar:
-      "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
-    totalXp: 800,
-    fitnessXp: 400,
-  },
-  {
-    id: "4",
-    userName:"Soum",
-    avatar:
-      "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
-    totalXp: 700,
-    fitnessXp: 350,
-  },
-  {
-    id: "5",
-    userName:"Soum",
-    avatar:
-      "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
-    totalXp: 600,
-    fitnessXp: 300,
-  },
-  {
-    id: "6",
-    userName:"Soum",
-    avatar:
-      "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
-    totalXp: 500,
-    fitnessXp: 250,
-  },
-  {
-    id: "7",
-    userName:"Soum",
-    avatar:
-      "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
-    totalXp: 400,
-    fitnessXp: 200,
-  },
-  {
-    id: "8",
-    userName:"Soum",
-    avatar:
-      "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
-    totalXp: 300,
-    fitnessXp: 150,
-  },
-  {
-    id: "9",
-    userName:"Soum",
-    avatar:
-      "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
-    totalXp: 200,
-    fitnessXp: 100,
-  },
-  {
-    id: "10",
-    userName:"Soum",
-    avatar:
-      "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
-    totalXp: 100,
-    fitnessXp: 50,
-  },
-];
+
+const [data,setdata]=useState([{
+  id:1,
+  username:"",
+  avatar:
+  "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
+  steps:""
+}])
 
 export default function LeaderboardScreen() {
   const [isEnabled, setIsEnabled] = useState(false);
+  const[error,seterror]=useState("");
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
-
+ useEffect(()=>{
+  const fetchdata=async()=>{
+    try{
+      const response= await axios.get(`${BACKEND_URL}/total/steps`)
+      console.log(response.data);
+      setdata(response.data.data);
+}
+catch(e:any){
+  seterror(e)
+}
+  }
+  fetchdata();
+   
+ })
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["30%", "53%", "75%"], []);
-
   const handleSheetChange = useCallback((index: any) => {
     console.log("handleSheetChange", index);
   }, []);
@@ -109,9 +50,9 @@ export default function LeaderboardScreen() {
         <Text style={styles.index}>{index + 1}</Text>
         <Image source={{ uri: item.avatar }} style={styles.avatar} />
         
-        <Text style={styles.text}> {item.userName}</Text>
+        <Text style={styles.text}> {item.username}</Text>
       
-        <Text style={styles.text}> {item.fitnessXp}</Text>
+        <Text style={styles.text}> {item.steps}</Text>
       </View>
     );
   };

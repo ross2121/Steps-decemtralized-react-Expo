@@ -81,7 +81,7 @@ class MainActivity : ReactActivity() {
   }
  fun scheduleDailyHealthDataSync(context: Context) {
     val constraints = Constraints.Builder()
-        .setRequiredNetworkType(NetworkType.CONNECTED) // Ensure network is available
+        .setRequiredNetworkType(NetworkType.CONNECTED)
         .build()
 
     Log.d("HealthDataSync", "Creating work request with constraints: Network = CONNECTED")
