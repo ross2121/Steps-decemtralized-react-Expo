@@ -16,6 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import axios from "axios";
 import { BACKEND_URL } from "@/Backendurl";
+import SharedPreferences from "react-native-shared-preferences";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -28,27 +29,28 @@ const Login = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleSignup = async () => { 
-    if ( !email || !password) {
+  const handleSignup = async () => {
+    if (!email || !password) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
     setLoading(true);
     seterror(null);
     try {
-      const response = await axios.post(
-      `${BACKEND_URL}/signin`,
-        {
-          email,
-          password,
-        }
-      );
+      const response = await axios.post(`${BACKEND_URL}/signin`, {
+        email,
+        password,
+      });
       Alert.alert("Success", "Account created successfully");
       await AsyncStorage.setItem("username", response.data.user.username);
       await AsyncStorage.setItem("token", response.data.token);
       await AsyncStorage.setItem("PublicKey", response.data.user.publickey);
       await AsyncStorage.setItem("userid", response.data.user.id);
-      router.push("/(tabs)")
+      SharedPreferences.setItem("userid", response.data.user.id);
+      SharedPreferences.getItem("userid", function (value) {
+        console.log(value);
+      });
+      router.push("/(tabs)");
       if (!AsyncStorage.getItem("PublicKey")) {
         console.log("No public found");
         Alert.alert("No public found");
@@ -56,10 +58,13 @@ const Login = () => {
       console.log("Signup response:", response.data);
     } catch (err: any) {
       if (err instanceof Error && "response" in err) {
-        console.log(err)
-        const axiosError = err as { response: { data: {message:string}  } };
+        console.log(err);
+        const axiosError = err as { response: { data: { message: string } } };
         console.log(axiosError.response.data);
-        seterror(axiosError.response.data.message || "An error occurred. Please try again.");
+        seterror(
+          axiosError.response.data.message ||
+            "An error occurred. Please try again."
+        );
       } else {
         seterror("An unexpected error occurred. Please try again.");
       }
@@ -80,7 +85,6 @@ const Login = () => {
             </View>
 
             <View style={styles.formContainer}>
-
               <View style={styles.inputContainer}>
                 <TextInput
                   style={styles.input}
@@ -127,10 +131,10 @@ const Login = () => {
                   <Text style={styles.signUpButtonText}>{error}</Text>
                 </View>
               )}
-               
+
               <View style={styles.newUserContainer}>
                 <Text style={styles.newUserText}>Dont Have an Account</Text>
-                <TouchableOpacity onPress={()=>router.push("/(auth)/singup")}>
+                <TouchableOpacity onPress={() => router.push("/(auth)/singup")}>
                   <Text style={styles.joinNowText}>Sign Up</Text>
                 </TouchableOpacity>
               </View>
