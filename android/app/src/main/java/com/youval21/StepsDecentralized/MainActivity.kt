@@ -81,7 +81,7 @@ class MainActivity : ReactActivity() {
   }
  fun scheduleDailyHealthDataSync(context: Context) {
     val constraints = Constraints.Builder()
-        .setRequiredNetworkType(NetworkType.CONNECTED) // Ensure network is available
+        .setRequiredNetworkType(NetworkType.CONNECTED)
         .build()
 
     Log.d("HealthDataSync", "Creating work request with constraints: Network = CONNECTED")
@@ -97,27 +97,5 @@ class MainActivity : ReactActivity() {
     Log.d("HealthDataSync", "Work request enqueued successfully.")
 }
 
-private fun setAlarmForMidnight(context: Context) {
-    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    val intent = Intent(context, HealthDataWorker::class.java)
-    val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
-    val calendar = Calendar.getInstance().apply {
-        timeInMillis = System.currentTimeMillis()
-        set(Calendar.HOUR_OF_DAY, 0)
-        set(Calendar.MINUTE, 0)
-        set(Calendar.SECOND, 0)
-    }
-
-    // If the time is already past 12:00 AM, schedule for the next day
-    if (Calendar.getInstance().after(calendar)) {
-        calendar.add(Calendar.DAY_OF_MONTH, 1)
-    }
-
-    alarmManager.setExactAndAllowWhileIdle(
-        AlarmManager.RTC_WAKEUP,
-        calendar.timeInMillis,
-        pendingIntent
-    )
-}
 }

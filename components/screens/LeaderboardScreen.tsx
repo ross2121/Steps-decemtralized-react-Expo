@@ -1,7 +1,9 @@
-import React, { useCallback, useRef, useMemo, useState } from "react";
+import React, { useCallback, useRef, useMemo, useState, useEffect } from "react";
 import { StyleSheet, View, Text, Image, Switch } from "react-native";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { LinearGradient } from "expo-linear-gradient";
+import axios from "axios";
+import { BACKEND_URL } from "@/Backendurl";
 
 const data = [
   {
@@ -85,33 +87,61 @@ const data = [
     fitnessXp: 50,
   },
 ];
+interface FORM{
+  steps:string,
+  username:string
+  id:string,
+  avatar:string
+}
 
 export default function LeaderboardScreen() {
+  const [form,setform]=useState([{
+    steps:"",
+    username:""
+  }])
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
-
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["30%", "53%", "75%"], []);
 
   const handleSheetChange = useCallback((index: any) => {
     console.log("handleSheetChange", index);
-  }, []);
+  }, []); 
+
+  useEffect(()=>{
+    const fetchstep=async()=>{
+     try{const response=await axios.get(`${BACKEND_URL}/total/steps`)
+      console.log(response.data.data);
+      const formateddata=response.data.data.map((dat:any)=>({
+        id: "1",
+        username: dat.username,
+        steps: dat.steps,
+        avatar: "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg"
+      }))
+       setform(formateddata);
+      }
+       catch(e){
+        console.log(e)
+       }
+    }
+    fetchstep();
+  },[])
 
   const renderItem = ({
     item,
     index,
   }: {
-    item: { id: string; avatar: string; totalXp: number; fitnessXp: number };
+    item:FORM;
     index: number;
   }) => {
     return (
       <View style={styles.itemContainer}>
         <Text style={styles.index}>{index + 1}</Text>
         <Image source={{ uri: item.avatar }} style={styles.avatar} />
-        
-        <Text style={styles.text}> {item.userName}</Text>
+  
+        <Text style={styles.text}> {item.username}</Text>
       
-        <Text style={styles.text}> {item.fitnessXp}</Text>
+        <Text style={styles.text}> {item.steps}</Text>
       </View>
     );
   };
@@ -207,7 +237,7 @@ export default function LeaderboardScreen() {
 
           {/* List of Items */}
           <BottomSheetFlatList
-            data={data}
+            data={form}
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
             contentContainerStyle={styles.contentContainer}
