@@ -24,34 +24,16 @@ import expo.modules.ReactActivityDelegateWrapper
 class MainActivity : ReactActivity() {
     private lateinit var healthConnectClient: HealthConnectClient
 
-    private val requestPermission = registerForActivityResult(
-        PermissionController.createRequestPermissionResultContract()
-    ) { grantedPermissions: Set<String> ->
-        if (PERMISSION_READ_HEALTH_DATA_IN_BACKGROUND in grantedPermissions) {
-            Log.d("HealthDataSync", "Permission granted! Now you can read health data in the background.")
-        } else {
-            Log.d("HealthDataSync", "Permission not granted")
-        }
-    }
+    
 
     override fun onCreate(savedInstanceState: Bundle?) {
         SplashScreenManager.registerOnActivity(this)
         super.onCreate(savedInstanceState)
-        healthConnectClient = HealthConnectClient.getOrCreate(this)
-
-        initializePermissionRequest()
         scheduleDailyHealthDataSync(this)
         HealthConnectPermissionDelegate.setPermissionDelegate(this)
     }
 
-    private fun initializePermissionRequest() {
-        val permissions = setOf(
-            HealthPermission.getReadPermission(StepsRecord::class),
-            PERMISSION_READ_HEALTH_DATA_IN_BACKGROUND
-        )
-        requestPermission.launch(permissions)
-    }
-
+   
     override fun getMainComponentName(): String = "main"
 
     override fun createReactActivityDelegate(): ReactActivityDelegate {
@@ -87,7 +69,6 @@ class MainActivity : ReactActivity() {
             TimeUnit.MINUTES
         ).setConstraints(constraints)
             .build()
-
         Log.d("HealthDataSync", "Enqueuing work request...")
 
         workManager.enqueueUniquePeriodicWork(
@@ -97,9 +78,5 @@ class MainActivity : ReactActivity() {
         )
 
         Log.d("HealthDataSync", "Work request enqueued successfully.")
-    }
-
-    companion object {
-        const val PERMISSION_READ_HEALTH_DATA_IN_BACKGROUND = "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND"
     }
 }
