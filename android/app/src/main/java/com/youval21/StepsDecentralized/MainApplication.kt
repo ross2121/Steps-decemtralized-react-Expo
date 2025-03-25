@@ -1,10 +1,12 @@
-package com.youval21.stepsdecentralized
+package com.youval21.StepsDecentralized
 
+
+import HealthDataWorker
 import android.app.Application
 import android.content.res.Configuration
 import android.util.Log
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
@@ -16,8 +18,10 @@ import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.soloader.SoLoader
 import com.swmansion.reanimated.ReanimatedPackage
+import com.youval21.stepsdecentralized.BuildConfig
 import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ReactNativeHostWrapper
+import java.util.concurrent.TimeUnit
 
 class MainApplication : Application(), ReactApplication {
 
@@ -28,7 +32,7 @@ class MainApplication : Application(), ReactApplication {
                 val packages = PackageList(this).packages
                 packages.add(ReanimatedPackage())
                 // Packages that cannot be autolinked yet can be added manually here, for example:
-                // packages.add(MyReactNativePackage())
+                // packages.add(MyReactNativePackage()
                 return packages
             }
 
@@ -48,9 +52,17 @@ class MainApplication : Application(), ReactApplication {
         super.onCreate()
 
         // Initialize WorkManager and enqueue the worker
-        val workRequest = OneTimeWorkRequestBuilder<HealthDataWorker>()
-            .build()
-        WorkManager.getInstance(this).enqueue(workRequest)
+        val workManager = WorkManager.getInstance(this)
+        Log.d("HealthDataSync", "Creating work request with constraints: Network = CONNECTED")
+
+        val periodicWorkRequest = PeriodicWorkRequestBuilder<HealthDataWorker>(
+            15, TimeUnit.MINUTES
+        ).build()
+        workManager.enqueueUniquePeriodicWork(
+            "HealthDataWorker",
+            ExistingPeriodicWorkPolicy.UPDATE,
+            periodicWorkRequest
+        )
         Log.d("HealthDataWorker", "Worker enqueued for immediate execution.")
 
         // Initialize SoLoader

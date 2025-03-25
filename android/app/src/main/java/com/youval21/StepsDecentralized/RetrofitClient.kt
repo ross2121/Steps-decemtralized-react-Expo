@@ -4,10 +4,10 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "http://10.5.121.76:3000/api/v1"
+    private const val BASE_URL = "https://v0-express-api-deployment.vercel.app/api/"
     val instance: BackendApiService by lazy {
         Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl("https://decentrailzed-ttrack-3yr8.vercel.app/api/v1/regular/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(BackendApiService::class.java)
