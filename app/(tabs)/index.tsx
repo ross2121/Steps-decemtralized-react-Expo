@@ -43,6 +43,7 @@ import {
   Transaction,
 } from "@solana/web3.js";
 import { set } from "date-fns";
+import AppS from "@/components/screens/test";
 const escrowpublickey = "AL3YQV36ADyq3xwjuETH8kceNTH9fuP43esbFiLF1V1A";
 const App = () => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -123,6 +124,9 @@ const App = () => {
             <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
               <View style={{ padding: 5 }}>
                 <StepsCount />
+              </View>
+              <View>
+                <AppS />
               </View>
               <View>
                 <OfficialGames handleJoinClick={handleJoinClick} />
