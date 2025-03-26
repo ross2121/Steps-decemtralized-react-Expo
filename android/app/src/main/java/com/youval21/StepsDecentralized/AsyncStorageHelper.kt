@@ -5,50 +5,52 @@ import android.util.Log
 
 class AsyncStorageHelper(context: Context) : SQLiteOpenHelper(
     context,
-    "/data/data/${context.packageName}/databases/RKStorage",
+    "RKStorage",
     null,
     1
 ) {
-    override fun onCreate(db: SQLiteDatabase) {}
+    companion object {
+        private const val TAG = "AsyncStorageHelper"
+    }
+
+    override fun onCreate(db: SQLiteDatabase) {
+        // Create the table if it does not exist
+        db.execSQL("CREATE TABLE IF NOT EXISTS catalystLocalStorage (key TEXT PRIMARY KEY, value TEXT)")
+    }
+
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {}
 
     fun getAsyncStorageValue(key: String): String? {
-        val db = readableDatabase
-        var value: String? = null
+        return try {
+            val db = readableDatabase
+            try {
+                // Ensure the table exists
+                onCreate(db)
 
-        try {
-            // Check if the table exists
-            val cursor = db.rawQuery(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name='catalystLocalStorage'",
-                null
-            )
-            val tableExists = cursor.moveToFirst()
-            cursor.close()
+                // Query the table
+                val queryCursor = db.query(
+                    "catalystLocalStorage",
+                    arrayOf("value"),
+                    "key = ?",
+                    arrayOf(key),
+                    null, null, null
+                )
 
-            if (!tableExists) {
-                Log.w("AsyncStorage", "Table 'catalystLocalStorage' does not exist")
-                return null
+                try {
+                    if (queryCursor.moveToFirst()) {
+                        queryCursor.getString(0)
+                    } else {
+                        null
+                    }
+                } finally {
+                    queryCursor.close()
+                }
+            } finally {
+                db.close()
             }
-
-            // Query the table if it exists
-            val queryCursor = db.query(
-                "catalystLocalStorage",
-                arrayOf("value"),
-                "key = ?",
-                arrayOf(key),
-                null, null, null
-            )
-
-            if (queryCursor.moveToFirst()) {
-                value = queryCursor.getString(0)
-            }
-            queryCursor.close()
         } catch (e: Exception) {
-            Log.e("AsyncStorage", "Error reading from RKStorage", e)
-        } finally {
-            db.close()
+            Log.e(TAG, "Error reading from RKStorage", e)
+            null
         }
-
-        return value
     }
 }

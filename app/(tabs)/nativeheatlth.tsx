@@ -33,9 +33,6 @@ const InitializeHealthConnect = () => {
       // }
       const permisdsions = await requestPermission([
         { accessType: "read", recordType: "Steps" },
-        { accessType: "read", recordType: "Distance" },
-        { accessType: "read", recordType: "FloorsClimbed" },
-        
       ]);
       if (permisdsions) {
         router.push("/(tabs)");

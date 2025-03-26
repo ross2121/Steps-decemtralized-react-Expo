@@ -1,7 +1,5 @@
 package com.youval21.StepsDecentralized
 
-
-import HealthDataWorker
 import android.app.Application
 import android.content.res.Configuration
 import android.util.Log

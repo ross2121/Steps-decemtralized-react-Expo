@@ -1,4 +1,5 @@
-
+package com.youval21.StepsDecentralized
+import HealthDataWorker
 import expo.modules.splashscreen.SplashScreenManager
 import android.os.Build
 import android.os.Bundle
@@ -21,6 +22,7 @@ import androidx.work.WorkManager
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import android.util.Log
+import expo.modules.BuildConfig
 import expo.modules.ReactActivityDelegateWrapper
 
 class MainActivity : ReactActivity() {

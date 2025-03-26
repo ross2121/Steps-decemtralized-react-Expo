@@ -21,7 +21,9 @@ const requestPermissions = async () => {
       );
     }
 
-    const results = await PermissionsAndroid.requestMultiple(permissionsToRequest);
+    const results = await PermissionsAndroid.requestMultiple(
+      permissionsToRequest
+    );
 
     const allGranted = Object.values(results).every(
       (result) => result === PermissionsAndroid.RESULTS.GRANTED
