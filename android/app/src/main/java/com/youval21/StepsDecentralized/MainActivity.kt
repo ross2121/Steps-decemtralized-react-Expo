@@ -25,6 +25,13 @@ import android.util.Log
 import expo.modules.ReactActivityDelegateWrapper
 
 class MainActivity : ReactActivity() {
+<<<<<<< HEAD
+    private lateinit var healthConnectClient: HealthConnectClient
+
+    
+
+=======
+>>>>>>> b71217cacb060243dbaf02a3ac03996251872f21
     override fun onCreate(savedInstanceState: Bundle?) {
         // Set the theme to AppTheme BEFORE onCreate to support
         // coloring the background, status bar, and navigation bar.
@@ -38,10 +45,14 @@ class MainActivity : ReactActivity() {
         // @generated end expo-splashscreen
     }
 
+<<<<<<< HEAD
+   
+=======
     /**
      * Returns the name of the main component registered from JavaScript. This is used to schedule
      * rendering of the component.
      */
+>>>>>>> b71217cacb060243dbaf02a3ac03996251872f21
     override fun getMainComponentName(): String = "main"
 
     /**
