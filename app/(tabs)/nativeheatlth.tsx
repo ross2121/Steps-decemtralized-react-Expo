@@ -35,6 +35,7 @@ const InitializeHealthConnect = () => {
         { accessType: "read", recordType: "Steps" },
         { accessType: "read", recordType: "Distance" },
         { accessType: "read", recordType: "FloorsClimbed" },
+        
       ]);
       if (permisdsions) {
         router.push("/(tabs)");

@@ -30,12 +30,28 @@ class HealthDataWorker(appContext: Context, workerParams: WorkerParameters) :
 
     companion object {
         private const val TAG = "HealthDataWorker"
-      
     }
 
     override suspend fun doWork(): Result {
         return withContext(Dispatchers.IO) {
-            try {
+            
+                val PERMISSIONS = setOf(
+                    HealthPermission.getReadPermission(StepsRecord::class),
+                    "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND"
+                )
+                val healthConnectClient = HealthConnectClient.getOrCreate(applicationContext)
+                val granted = healthConnectClient.permissionController.getGrantedPermissions()
+                if (!granted.containsAll(PERMISSIONS)) {
+                    val contract = PermissionController.createRequestPermissionResultContract()
+                    val intent = contract.createIntent(applicationContext, PERMISSIONS)
+
+                    Log.d(TAG, "PEermisir :${granted}")
+
+                    applicationContext.startActivity(intent.apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    })
+                }
+                Log.d(TAG, "PEermisir :${granted}")
                 val asyncStorage = AsyncStorageHelper(applicationContext)
                 val userId = asyncStorage.getAsyncStorageValue("userid")
                 Log.d(TAG, "userid: $userId")
@@ -44,13 +60,6 @@ class HealthDataWorker(appContext: Context, workerParams: WorkerParameters) :
                 } else {
                     Log.d(TAG, "no user id")
                 }
-
-                val healthConnectClient = HealthConnectClient.getOrCreate(applicationContext)
-                val granted = healthConnectClient.permissionController.getGrantedPermissions()
-
-                Log.d(TAG, "PEermisir :${granted}");
-
-
                 Log.d(TAG, "Starting HealthDataWorker...")
                 val steps = fetchStepsFromHealthConnect()
                 Log.d(TAG, "Fetched steps: $steps")
@@ -58,14 +67,11 @@ class HealthDataWorker(appContext: Context, workerParams: WorkerParameters) :
                     StepsRequest(steps.toString(), userId ?: "")
                 )
                 Log.d(TAG, "Steps sent to server. Response: $response")
-
                 Result.success()
-            } catch (e: Exception) {
-                Log.e(TAG, "Error in HealthDataWorker: ${e.message}", e)
-                Result.failure()
-            }
+            
         }
     }
+
     private suspend fun fetchStepsFromHealthConnect(): Long {
         val healthConnectClient = HealthConnectClient.getOrCreate(applicationContext)
         val now = ZonedDateTime.now()
@@ -87,5 +93,4 @@ class HealthDataWorker(appContext: Context, workerParams: WorkerParameters) :
 
         return totalSteps
     }
-
 }

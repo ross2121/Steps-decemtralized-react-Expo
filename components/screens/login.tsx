@@ -16,7 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import axios from "axios";
 import { BACKEND_URL } from "@/Backendurl";
-import SharedPreferences from "react-native-shared-preferences";
+
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -46,10 +46,7 @@ const Login = () => {
       await AsyncStorage.setItem("token", response.data.token);
       await AsyncStorage.setItem("PublicKey", response.data.user.publickey);
       await AsyncStorage.setItem("userid", response.data.user.id);
-      SharedPreferences.setItem("userid", response.data.user.id);
-      SharedPreferences.getItem("userid", function (value) {
-        console.log(value);
-      });
+      
       router.push("/(tabs)");
       if (!AsyncStorage.getItem("PublicKey")) {
         console.log("No public found");

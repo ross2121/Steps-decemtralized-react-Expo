@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import {
@@ -22,6 +22,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { FlatList } from "react-native-gesture-handler";
 import axios from "axios";
+import { BACKEND_URL } from "@/Backendurl";
+import { useEvent } from "react-native-reanimated";
 
 const ProfileScreen = () => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -29,15 +31,12 @@ const ProfileScreen = () => {
     "friends"
   );
   const animatedValue = useRef(new Animated.Value(0)).current;
-
-  const friends = useMemo(
-    () =>
-      Array.from({ length: 50 }, (_, i) => ({
-        id: `${i + 1}`,
-        username: `User ${i + 1}`,
-      })),
-    []
-  );
+   
+   
+  interface Friend{
+    username:string,
+    status:string
+  }
   const logout = async () => {
     await AsyncStorage.removeItem("token");
     await AsyncStorage.removeItem("userid");
@@ -55,6 +54,7 @@ const ProfileScreen = () => {
     Animated.timing(animatedValue, {
       toValue: tab === "friends" ? 0 : 1,
       duration: 300,
+
       useNativeDriver: false,
     }).start();
   };
@@ -71,18 +71,31 @@ const ProfileScreen = () => {
   };
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState<Friend[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [friends,setfriends]=useState([]);
+  useEffect(()=>{
+    const Fetchfriend=async()=>{
+      try{
+        const userid=await AsyncStorage.getItem("userid");
+        const response=await axios.get(`${BACKEND_URL}/get/friends/${userid}`)
+        setfriends(response.data.user);    
+       }catch(e){
+         console.log(e);
+       }
+       Fetchfriend();
+    }
+  
+  },[])
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
-
     setIsLoading(true);
     try {
+      const userid=await AsyncStorage.getItem("userid");
       const response = await axios.get(
-        `https://example.com/api/search?query=${searchQuery}`
+        `${BACKEND_URL}/all/users/${userid}?search=${searchQuery}`
       );
-      setSearchResults(response.data.results);
+      setSearchResults(response.data.users);
     } catch (error) {
       console.error("Error fetching search results:", error);
     } finally {
@@ -119,8 +132,6 @@ const ProfileScreen = () => {
               />
             </TouchableOpacity>
           </View>
-
-          {/* Profile Info */}
           <View style={styles.profileCard}>
             <Image
               source={require("../../assets/images/profile.png")}
@@ -128,8 +139,7 @@ const ProfileScreen = () => {
             />
             <Text style={styles.username}>Username</Text>
           </View>
-
-          {/* Friends List */}
+          <View>
           <TouchableOpacity onPress={handlePresentModalPress}>
             <View style={styles.options}>
               <Text style={styles.optionText}>Friends</Text>
@@ -140,9 +150,9 @@ const ProfileScreen = () => {
                 style={styles.optionIcon}
               />
             </View>
-          </TouchableOpacity>
 
-          {/* Bottom Sheet Modal */}
+          </TouchableOpacity>
+          </View>
           <BottomSheetModal
             snapPoints={snapPoints}
             ref={bottomSheetModalRef}
@@ -158,6 +168,7 @@ const ProfileScreen = () => {
           >
             {/* Tabs */}
             <View style={styles.tabContainer}>
+              <View>
               <TouchableOpacity onPress={() => handleTabPress("friends")}>
                 <View>
                   <Text
@@ -170,6 +181,8 @@ const ProfileScreen = () => {
                   </Text>
                 </View>
               </TouchableOpacity>
+              </View>
+              <View>
               <TouchableOpacity onPress={() => handleTabPress("search")}>
                 <View>
                   <Text
@@ -182,18 +195,17 @@ const ProfileScreen = () => {
                   </Text>
                 </View>
               </TouchableOpacity>
+              </View>
             </View>
 
-            {/* Tab Indicator */}
+
             <View style={styles.tabIndicatorContainer}>
               <Animated.View style={[styles.tabIndicator, animatedBarStyle]} />
             </View>
-
-            {/* Friends List or Search View */}
             {selectedTab === "friends" ? (
               <BottomSheetFlatList
                 data={friends}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item:any) => item.id}
                 renderItem={({ item }) => (
                   <View style={styles.friendItem}>
                     <Text style={styles.friendText}>{item.username}</Text>
@@ -209,7 +221,6 @@ const ProfileScreen = () => {
                     style={styles.searchInput}
                     placeholder="Search for a user..."
                     placeholderTextColor="#9e9a99"
-                    value={searchQuery}
                     onChangeText={setSearchQuery}
                   />
                   <TouchableOpacity
@@ -226,12 +237,13 @@ const ProfileScreen = () => {
                 ) : (
                   <FlatList
                     data={searchResults}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item:any) => item.id}
                     renderItem={({ item }) => (
                       <View style={styles.searchResultItem}>
                         <Text style={styles.searchResultText}>
                           {item.username}
                         </Text>
+          
                         <TouchableOpacity style={styles.addButton}>
                           <Text style={styles.addButtonText}>Add</Text>
                         </TouchableOpacity>
@@ -393,6 +405,8 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 10,
     marginBottom: 10,
+    height:60,
+    width:330
   },
   searchResultText: { color: "white", fontSize: 14 },
   addButton: {

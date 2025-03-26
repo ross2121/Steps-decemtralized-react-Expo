@@ -25,14 +25,7 @@ import android.util.Log
 import expo.modules.ReactActivityDelegateWrapper
 
 class MainActivity : ReactActivity() {
-<<<<<<< HEAD
-    private lateinit var healthConnectClient: HealthConnectClient
-
-    
-
-=======
->>>>>>> b71217cacb060243dbaf02a3ac03996251872f21
-    override fun onCreate(savedInstanceState: Bundle?) {
+        override fun onCreate(savedInstanceState: Bundle?) {
         // Set the theme to AppTheme BEFORE onCreate to support
         // coloring the background, status bar, and navigation bar.
         // This is required for expo-splash-screen.
@@ -45,20 +38,10 @@ class MainActivity : ReactActivity() {
         // @generated end expo-splashscreen
     }
 
-<<<<<<< HEAD
-   
-=======
-    /**
-     * Returns the name of the main component registered from JavaScript. This is used to schedule
-     * rendering of the component.
-     */
->>>>>>> b71217cacb060243dbaf02a3ac03996251872f21
+    
     override fun getMainComponentName(): String = "main"
 
-    /**
-     * Returns the instance of the [ReactActivityDelegate]. We use [DefaultReactActivityDelegate]
-     * which allows you to enable New Architecture with a single boolean flags [fabricEnabled]
-     */
+ 
     override fun createReactActivityDelegate(): ReactActivityDelegate {
         return ReactActivityDelegateWrapper(
             this,
@@ -70,11 +53,7 @@ class MainActivity : ReactActivity() {
             ){})
     }
 
-    /**
-     * Align the back button behavior with Android S
-     * where moving root activities to background instead of finishing activities.
-     * @see <a href="https://developer.android.com/reference/android/app/Activity#onBackPressed()">onBackPressed</a>
-     */
+  
     override fun invokeDefaultOnBackPressed() {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
             if (!moveTaskToBack(false)) {
