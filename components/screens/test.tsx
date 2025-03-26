@@ -2,41 +2,47 @@ import React from "react";
 import {
   Button,
   PermissionsAndroid,
+  Platform,
   StatusBar,
   StyleSheet,
   Text,
 } from "react-native";
 import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 
-const requestCameraPermission = async () => {
+const requestPermissions = async () => {
   try {
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.BODY_SENSORS,
-      {
-        title: "Cool Photo App Camera Permission",
-        message:
-          "Cool Photo App needs access to your camera " +
-          "so you can take awesome pictures.",
-        buttonNeutral: "Ask Me Later",
-        buttonNegative: "Cancel",
-        buttonPositive: "OK",
-      }
+    const permissionsToRequest = [
+      PermissionsAndroid.PERMISSIONS.ACTIVITY_RECOGNITION,
+    ];
+
+    if (Platform.OS === "android") {
+      // Manually add Health Connect background permission as a string
+      permissionsToRequest.push(
+        "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND" as never
+      );
+    }
+
+    const results = await PermissionsAndroid.requestMultiple(permissionsToRequest);
+
+    const allGranted = Object.values(results).every(
+      (result) => result === PermissionsAndroid.RESULTS.GRANTED
     );
-    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      console.log("You can use the camera");
+
+    if (allGranted) {
+      console.log("All permissions granted!");
     } else {
-      console.log(" permission denied");
+      console.log("Some permissions were denied:", results);
     }
   } catch (err) {
-    console.warn(err);
+    console.warn("Error requesting permissions:", err);
   }
 };
 
 const AppS = () => (
   <SafeAreaProvider>
     <SafeAreaView style={styles.container}>
-      <Text style={styles.item}>Try permissions</Text>
-      <Button title="request permissions" onPress={requestCameraPermission} />
+      <Text style={styles.item}>Request Permissions</Text>
+      <Button title="Request Permissions" onPress={requestPermissions} />
     </SafeAreaView>
   </SafeAreaProvider>
 );

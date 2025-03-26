@@ -44,40 +44,10 @@ class HealthDataWorker(appContext: Context, workerParams: WorkerParameters) :
                 } else {
                     Log.d(TAG, "no user id")
                 }
-                val providerPackageName = "com.google.android.apps.fitness"
-                val availabilityStatus = HealthConnectClient.getSdkStatus(applicationContext, providerPackageName)
-                if (availabilityStatus == HealthConnectClient.SDK_UNAVAILABLE) {
-                    return@withContext Result.failure()
-                }
-                if (availabilityStatus == HealthConnectClient.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED) {
-                    val uriString = "market://details?id=$providerPackageName&url=healthconnect%3A%2F%2Fonboarding"
-                    applicationContext.startActivity(
-                        Intent(Intent.ACTION_VIEW).apply {
-                            setPackage("com.android.vending")
-                            data = Uri.parse(uriString)
-                            putExtra("overlay", true)
-                            putExtra("callerId", applicationContext.packageName)
-                        }
-                    )
-                    return@withContext Result.failure()
-                }
 
-                val PERMISSIONS = setOf(
-                    HealthPermission.getReadPermission(StepsRecord::class),
-                    "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND"
-                 )
                 val healthConnectClient = HealthConnectClient.getOrCreate(applicationContext)
                 val granted = healthConnectClient.permissionController.getGrantedPermissions()
-                if (!granted.containsAll(PERMISSIONS)) {
-                    val contract = PermissionController.createRequestPermissionResultContract()
-                    val intent = contract.createIntent(applicationContext, PERMISSIONS)
 
-                    Log.d(TAG, "PEermisir :${granted}");
-
-                    applicationContext.startActivity(intent.apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    })
-                }
                 Log.d(TAG, "PEermisir :${granted}");
 
 
