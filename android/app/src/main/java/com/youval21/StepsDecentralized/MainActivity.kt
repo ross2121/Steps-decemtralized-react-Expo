@@ -1,5 +1,4 @@
-package com.youval21.stepsdecentralized
-import HealthDataWorker
+
 import expo.modules.splashscreen.SplashScreenManager
 import android.os.Build
 import android.os.Bundle

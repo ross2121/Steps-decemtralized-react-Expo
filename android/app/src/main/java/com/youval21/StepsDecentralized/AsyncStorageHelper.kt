@@ -17,7 +17,21 @@ class AsyncStorageHelper(context: Context) : SQLiteOpenHelper(
         var value: String? = null
 
         try {
-            val cursor = db.query(
+            // Check if the table exists
+            val cursor = db.rawQuery(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='catalystLocalStorage'",
+                null
+            )
+            val tableExists = cursor.moveToFirst()
+            cursor.close()
+
+            if (!tableExists) {
+                Log.w("AsyncStorage", "Table 'catalystLocalStorage' does not exist")
+                return null
+            }
+
+            // Query the table if it exists
+            val queryCursor = db.query(
                 "catalystLocalStorage",
                 arrayOf("value"),
                 "key = ?",
@@ -25,10 +39,10 @@ class AsyncStorageHelper(context: Context) : SQLiteOpenHelper(
                 null, null, null
             )
 
-            if (cursor.moveToFirst()) {
-                value = cursor.getString(0)
+            if (queryCursor.moveToFirst()) {
+                value = queryCursor.getString(0)
             }
-            cursor.close()
+            queryCursor.close()
         } catch (e: Exception) {
             Log.e("AsyncStorage", "Error reading from RKStorage", e)
         } finally {

@@ -1,9 +1,11 @@
+package com.youval21.StepsDecentralized
 import AsyncStorageHelper
 import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.database.sqlite.SQLiteException
 import android.net.Uri
 import android.util.Log
 import androidx.core.content.ContextCompat
@@ -34,40 +36,31 @@ class HealthDataWorker(appContext: Context, workerParams: WorkerParameters) :
 
     override suspend fun doWork(): Result {
         return withContext(Dispatchers.IO) {
-            
-                val PERMISSIONS = setOf(
-                    HealthPermission.getReadPermission(StepsRecord::class),
-                    "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND"
-                )
-                val healthConnectClient = HealthConnectClient.getOrCreate(applicationContext)
-                val granted = healthConnectClient.permissionController.getGrantedPermissions()
-                if (!granted.containsAll(PERMISSIONS)) {
-                    val contract = PermissionController.createRequestPermissionResultContract()
-                    val intent = contract.createIntent(applicationContext, PERMISSIONS)
 
-                    Log.d(TAG, "PEermisir :${granted}")
-
-                    applicationContext.startActivity(intent.apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    })
-                }
-                Log.d(TAG, "PEermisir :${granted}")
-                val asyncStorage = AsyncStorageHelper(applicationContext)
-                val userId = asyncStorage.getAsyncStorageValue("userid")
-                Log.d(TAG, "userid: $userId")
-                if (userId != null) {
-                    Log.d(TAG, userId)
-                } else {
-                    Log.d(TAG, "no user id")
-                }
-                Log.d(TAG, "Starting HealthDataWorker...")
-                val steps = fetchStepsFromHealthConnect()
-                Log.d(TAG, "Fetched steps: $steps")
-                val response = RetrofitClient.instance.sendSteps(
-                    StepsRequest(steps.toString(), userId ?: "")
-                )
-                Log.d(TAG, "Steps sent to server. Response: $response")
-                Result.success()
+                try {
+                    val asyncStorage = AsyncStorageHelper(applicationContext)
+                   val userId = asyncStorage.getAsyncStorageValue("userid")
+                   
+                    if (userId.isNullOrEmpty()) {
+                        Log.w("Worker", "User ID not found or user not signed up")
+                        Result.success() 
+                    }
+                    Log.d(TAG, "User ID: ${userId ?: "not found"}")
+                    val steps = fetchStepsFromHealthConnect()
+                    Log.d(TAG, "Fetched steps: $steps")
+                    val response = RetrofitClient.instance.sendSteps(
+                        StepsRequest(steps.toString(), userId)
+                    )
+                    Log.d(TAG, "Starting HealthDataWorker for user $userId")           
+                    Log.d(TAG, "Server response: $response")
+                    Result.success()
+                } catch (e: SQLiteException) {
+                    Log.w(TAG, "LocalStorage table not found (user not signed up)", e)
+                     Result.success() 
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error accessing AsyncStorage", e)
+                     Result.success() 
+                }  
             
         }
     }
