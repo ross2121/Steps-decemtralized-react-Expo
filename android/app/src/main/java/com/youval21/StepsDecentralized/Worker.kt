@@ -22,72 +22,53 @@ class HealthDataWorker(appContext: Context, workerParams: WorkerParameters) :
         private const val TAG = "HealthDataWorker"
     }
 
-    override suspend fun doWork(): Result {
+       override suspend fun doWork(): Result {
         return withContext(Dispatchers.IO) {
             try {
-                // Try to get user ID, but continue even if not found
-                val userId = try {
-                    AsyncStorageHelper(applicationContext).getAsyncStorageValue("userid")
-                } catch (e: Exception) {
-                    Log.w(TAG, "Couldn't access AsyncStorage, continuing without user ID", e)
-                    null
-                }
-
-                if (userId.isNullOrEmpty()) {
-                    Log.w(TAG, "User ID not found or user not signed up - continuing steps collection")
+                val asyncStorage = AsyncStorageHelper(applicationContext)
+                val userId = asyncStorage.getAsyncStorageValue("userid")
+                Log.d(TAG, "userid: $userId")
+                if (userId != null) {
+                    Log.d(TAG, userId)
                 } else {
-                    Log.d(TAG, "User ID: $userId")
+                    Log.d(TAG, "no user id")
                 }
-
-                // Always fetch steps regardless of user ID status
+                val healthConnectClient = HealthConnectClient.getOrCreate(applicationContext)
+                val granted = healthConnectClient.permissionController.getGrantedPermissions()
+                Log.d(TAG, "PEermisir :${granted}");
+                Log.d(TAG, "Starting HealthDataWorker...")
                 val steps = fetchStepsFromHealthConnect()
                 Log.d(TAG, "Fetched steps: $steps")
-
-                // Only send to server if we have a user ID
-                if (!userId.isNullOrEmpty()) {
-                    try {
-                        val response = RetrofitClient.instance.sendSteps(
-                            StepsRequest(steps.toString(), userId)
-                        )
-                        Log.d(TAG, "Server response: $response")
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error sending steps to server", e)
-                        // Continue even if server communication fails
-                    }
-                }
-
+                val response = RetrofitClient.instance.sendSteps(
+                    StepsRequest(steps.toString(), userId ?: "")
+                )
+                Log.d(TAG, "Steps sent to server. Response: $response")
                 Result.success()
             } catch (e: Exception) {
-                Log.e(TAG, "Error in HealthDataWorker", e)
-                // Return success even if there's an error to prevent retry loops
-                Result.success()
+                Log.e(TAG, "Error in HealthDataWorker: ${e.message}", e)
+                Result.failure()
             }
         }
     }
-
     private suspend fun fetchStepsFromHealthConnect(): Long {
-        return try {
-            val healthConnectClient = HealthConnectClient.getOrCreate(applicationContext)
-            val now = ZonedDateTime.now()
-            val startOfDay = now.toLocalDate().atStartOfDay(ZoneId.systemDefault())
-            val endOfDay = now
-            val timeRangeFilter = TimeRangeFilter.between(
-                startOfDay.toInstant(),
-                endOfDay.toInstant()
-            )
-            val request = ReadRecordsRequest(
-                recordType = StepsRecord::class,
-                timeRangeFilter = timeRangeFilter
-            )
+        val healthConnectClient = HealthConnectClient.getOrCreate(applicationContext)
+        val now = ZonedDateTime.now()
+        val startOfDay = now.toLocalDate().atStartOfDay(ZoneId.systemDefault())
+        val endOfDay = now
+        val timeRangeFilter = TimeRangeFilter.between(
+            startOfDay.toInstant(),
+            endOfDay.toInstant()
+        )
+        val request = ReadRecordsRequest(
+            recordType = StepsRecord::class,
+            timeRangeFilter = timeRangeFilter
+        )
 
-            Log.d(TAG, "Fetching steps from Health Connect...")
-            val response = healthConnectClient.readRecords(request)
-            val totalSteps = response.records.sumOf { it.count }
-            Log.d(TAG, "Total steps fetched: $totalSteps")
-            totalSteps
-        } catch (e: Exception) {
-            Log.e(TAG, "Error fetching steps from Health Connect", e)
-            0 // Return 0 if steps can't be fetched
-        }
+        Log.d(TAG, "Fetching steps from Health Connect...")
+        val response = healthConnectClient.readRecords(request)
+        val totalSteps = response.records.sumOf { it.count }
+        Log.d(TAG, "Total steps fetched: $totalSteps")
+
+        return totalSteps
     }
-}
+    }

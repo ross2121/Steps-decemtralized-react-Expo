@@ -24,6 +24,7 @@ import {
   BottomSheetModalProvider,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
+import { BACKEND_URL } from "@/Backendurl";
 
 const CreateGameScreen = () => {
   const [form, setform] = useState({
@@ -49,8 +50,6 @@ const CreateGameScreen = () => {
   const animatedValue = useRef(new Animated.Value(0)).current;
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-
-  // Open modal when "community" tab is selected
   useEffect(() => {
     if (selectedTab === "community") {
       bottomSheetModalRef.current?.present();
@@ -59,11 +58,6 @@ const CreateGameScreen = () => {
     }
   }, [selectedTab]);
 
-  const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setShow(false);
-    setDate(currentDate);
-  };
 
   const showMode = (currentMode) => {
     setShow(true);
@@ -74,14 +68,14 @@ const CreateGameScreen = () => {
     showMode("date");
   };
 
-  const handleStartDateChange = (event, selectedDate) => {
+  const handleStartDateChange = (event:any, selectedDate:any) => {
     const currentDate = selectedDate || startDate;
     setShow(false);
     setStartDate(currentDate);
     setform({ ...form, startdate: format(currentDate, "yyyy-MM-dd") });
   };
 
-  const handleEndDateChange = (event, selectedDate) => {
+  const handleEndDateChange = (event:any, selectedDate:any) => {
     const currentDate = selectedDate || endDate;
     setShow(false);
     setEndDate(currentDate);
@@ -93,7 +87,7 @@ const CreateGameScreen = () => {
     seterror(null);
     try {
       const response = await axios.post(
-        `http://10.5.121.76:3000/api/v1/create/challenge`,
+        `${BACKEND_URL}/create/challenge`,
         {
           name: form.name,
           memberqty: form.memberqty,
@@ -281,8 +275,6 @@ const CreateGameScreen = () => {
     </KeyboardAvoidingView>
   );
 };
-
-// GameForm Component
 const GameForm = ({
   form,
   setform,
@@ -342,6 +334,7 @@ const GameForm = ({
           onChangeText={(e) => {
             setform({ ...form, Amount: parseInt(e) });
           }}
+          keyboardType="number-pad"
           autoCapitalize="none"
         />
       </View>
@@ -353,6 +346,7 @@ const GameForm = ({
           onChangeText={(e) => {
             setform({ ...form, days: parseInt(e) });
           }}
+          keyboardType="number-pad"
           autoCapitalize="none"
         />
       </View>

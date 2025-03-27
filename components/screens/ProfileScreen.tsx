@@ -92,9 +92,12 @@ const ProfileScreen = () => {
     setIsLoading(true);
     try {
       const userid=await AsyncStorage.getItem("userid");
+      console.log(userid);
+      console.log(BACKEND_URL);
       const response = await axios.get(
         `${BACKEND_URL}/all/users/${userid}?search=${searchQuery}`
       );
+      console.log(response.data.users);
       setSearchResults(response.data.users);
     } catch (error) {
       console.error("Error fetching search results:", error);
@@ -102,6 +105,17 @@ const ProfileScreen = () => {
       setIsLoading(false);
     }
   };
+  const Addfriend=async(username:string)=>{
+    try {
+      const userid=await AsyncStorage.getItem("userid");
+      console.log(userid);
+      console.log(username);
+      const response=await axios.post(`${BACKEND_URL}/add/friend`,{username:username,userid:userid})
+      console.log(response.data);
+    } catch (error) {
+       console.log(error);
+    }
+  }
 
   return (
     <BottomSheetModalProvider>
@@ -150,7 +164,6 @@ const ProfileScreen = () => {
                 style={styles.optionIcon}
               />
             </View>
-
           </TouchableOpacity>
           </View>
           <BottomSheetModal
@@ -234,29 +247,36 @@ const ProfileScreen = () => {
                 {/* Loader */}
                 {isLoading ? (
                   <ActivityIndicator size="large" color="#9C89FF" />
-                ) : (
-                  <FlatList
-                    data={searchResults}
-                    keyExtractor={(item:any) => item.id}
-                    renderItem={({ item }) => (
-                      <View style={styles.searchResultItem}>
-                        <Text style={styles.searchResultText}>
-                          {item.username}
-                        </Text>
-          
-                        <TouchableOpacity style={styles.addButton}>
+                ) : (<FlatList
+                  data={searchResults}
+                  keyExtractor={(item: any) => item.id}
+                  renderItem={({ item }) => (
+                    <View style={styles.searchResultItem}>
+                      <Text style={styles.searchResultText}>{item.username}</Text>
+                      {item.status === "requested" ? (
+                        <View style={[styles.addButton, styles.requestedButton]}>
+                          <Text style={styles.addButtonText}>Requested</Text>
+                        </View>
+                      ) : item.status === "accepted" ? (
+                        <View style={[styles.addButton, styles.friendButton]}>
+                          <Text style={styles.addButtonText}>Accepted</Text>
+                        </View>
+                      ) : (
+                        <TouchableOpacity 
+                          style={[styles.addButton, styles.addButtonActive]} 
+                          onPress={() => Addfriend(item.username)}
+                        >
                           <Text style={styles.addButtonText}>Add</Text>
                         </TouchableOpacity>
-                      </View>
-                    )}
-                    contentContainerStyle={{ paddingBottom: 20 }}
-                  />
+                      )}
+                    </View>
+                  )}
+                />
+                  
                 )}
               </View>
             )}
           </BottomSheetModal>
-
-          {/* Other Options */}
           <TouchableOpacity>
             <View style={styles.options}>
               <Text style={styles.optionText}>Socials</Text>
@@ -281,7 +301,6 @@ const ProfileScreen = () => {
             </View>
           </TouchableOpacity>
 
-          {/* Logout */}
           <View style={styles.logoutContainer}>
             <TouchableOpacity style={styles.logoutButton} onPress={logout}>
               <Text style={styles.logoutText}>Logout</Text>
@@ -361,6 +380,15 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     backgroundColor: "#333",
     marginBottom: 30,
+  },
+  addButtonActive: {
+    backgroundColor: '#007AFF',
+  },
+  requestedButton: {
+    backgroundColor: '#AAAAAA',
+  },
+  friendButton: {
+    backgroundColor: '#34C759',
   },
   tabIndicator: { width: "45%", height: 2, backgroundColor: "green" },
   friendItem: {

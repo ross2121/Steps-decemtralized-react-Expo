@@ -89,7 +89,7 @@ const App = () => {
       });
       console.log("chekc1");
       const response = await axios.post(
-        `http://10.5.121.76:3000/api/v1/challenge/join/public/${selectedGame.id}`,
+        `${BACKEND_URL}/challenge/join/public/${selectedGame.id}`,
         { tx: serilize }
       );
       if (response.status == 200) {
@@ -492,8 +492,6 @@ const OfficialGames = ({ handleJoinClick }: any) => {
             </View>
           </TouchableOpacity>
         </View>
-
-        {/* Horizontal ScrollView for games */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -514,6 +512,7 @@ const OfficialGames = ({ handleJoinClick }: any) => {
                   alignItems: "center",
                   flexDirection: "row",
                   justifyContent: "space-between",
+                  paddingHorizontal:10
                 }}
               >
                 <View>
@@ -561,7 +560,7 @@ const OfficialGames = ({ handleJoinClick }: any) => {
                   }}
                 >
                   <View
-                    style={{ justifyContent: "center", alignItems: "center" }}
+                    style={{  alignItems: "center" }}
                   >
                     <View>
                       <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
@@ -626,9 +625,8 @@ const OfficialGames = ({ handleJoinClick }: any) => {
   );
 };
 
-const CommunityGames = ({ handleJoinClick }) => {
+const CommunityGames = ({ handleJoinClick}:any) => {
   const [error, seterror] = useState("");
-
   const [form, setform] = useState([
     {
       name: "",
@@ -738,8 +736,6 @@ const CommunityGames = ({ handleJoinClick }) => {
           </View>
         </TouchableOpacity>
       </View>
-
-      {/* Horizontal ScrollView for games */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -983,7 +979,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  // New styles for OfficialGames component
   gamesContainer: {
     marginVertical: 10,
     paddingLeft: 20,
@@ -998,14 +993,13 @@ const styles = StyleSheet.create({
     paddingRight: "100%",
   },
   gameCard: {
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    width: 300,
+    height:120, 
+    marginHorizontal: 10, 
+    backgroundColor: "#1a1a1a", 
     borderRadius: 10,
-    marginRight: 15,
-    width: "25%",
-    paddingHorizontal: 15,
-    paddingVertical: 20,
-    paddingBottom: 40,
-    overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center",
   },
   gameImage: {
     width: 170,
@@ -1019,7 +1013,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
-  //styles for game card
   gameHeader: {
     color: "white",
     fontSize: 23,
@@ -1033,8 +1026,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
-  //games create and join
   gamebttn: {
     backgroundColor: "#7E38B7",
     flexDirection: "row",
@@ -1050,8 +1041,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "bold",
   },
-
-  // Bottom Sheet styles
   bottomSheetContent: {
     flex: 1,
     padding: 20,
