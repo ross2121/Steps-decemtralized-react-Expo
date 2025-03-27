@@ -18,6 +18,7 @@ import {
   StatusBar,
   Modal,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import React from "react";
 import {
@@ -84,7 +85,6 @@ const Wallet = () => {
         Alert.alert("No public key found");
         return;
       }
-
       const response = await axios.get(
         "https://decentrailzed-ttrack-3yr8.vercel.app/test"
       );
@@ -504,31 +504,31 @@ const AddModal = () => {
 const SendModal = () => {
   const [Amount, setamount] = useState(0);
   const [publicaddress, setpublicaddress] = useState("");
-  const [error, seterror] = useState("");
+  const [error, seterror] = useState(null);
   const [loading, setloading] = useState(false);
   const [reponse, setrespons] = useState(false);
   const onSend = async () => {
     setloading(true);
     console.log("Cgeek");
-    const publickey = await AsyncStorage.getItem("PublicKey");
-    if (!publickey) {
-      Alert.alert("No publci key found");
-      return;
-    }
-
-    const connection = new Connection("https://api.devnet.solana.com");
-    const getBalance = await connection.getBalance(new PublicKey(publickey));
-    console.log(getBalance);
-    console.log(Amount * LAMPORTS_PER_SOL);
-    if (getBalance < Amount * LAMPORTS_PER_SOL) {
-      Alert.alert("Dont have enogh fundd");
-      return;
-    }
-    console.log("check1");
-    console.log("publlic", publicaddress);
-    console.log("amoutn", Amount);
-    console.log(publickey);
+    seterror(null);
     try {
+      const publickey = await AsyncStorage.getItem("PublicKey");
+      if (!publickey) {
+        Alert.alert("No publci key found");
+        return;
+      }
+      const connection = new Connection("https://api.devnet.solana.com");
+      const getBalance = await connection.getBalance(new PublicKey(publickey));
+      console.log(getBalance);
+      console.log(Amount * LAMPORTS_PER_SOL);
+      if (getBalance < Amount * LAMPORTS_PER_SOL) {
+        Alert.alert("Dont have enogh fundd");
+        return;
+      }
+      console.log("check1");
+      console.log("publlic", publicaddress);
+      console.log("amoutn", Amount);
+      console.log(publickey);
       const transaction = new Transaction().add(
         SystemProgram.transfer({
           fromPubkey: new PublicKey(publickey),
@@ -555,6 +555,9 @@ const SendModal = () => {
       console.log(e);
       Alert.alert(e);
       setrespons(false);
+      seterror(e);
+    } finally {
+      setloading(false);
     }
   };
   return (
@@ -566,66 +569,85 @@ const SendModal = () => {
       <View
         style={{ padding: 20, borderRadius: 20, backgroundColor: "#1a0033" }}
       >
-        <Text style={styles.bottomSheetTitle}>Send Crypto</Text>
-        <View>
-          <Text style={{ color: "white", marginTop: 20 }}>
-            Send crypto to a friend
-          </Text>
+        {loading ? (
           <View
             style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginTop: 20,
-              paddingLeft: 10,
+              justifyContent: "center",
+              alignContent: "center",
+              height: "100%",
+              width: "100%",
             }}
           >
-            <Text style={{ color: "white" }}>Amount</Text>
-            <View
+            <ActivityIndicator
+              size="large"
+              color="#00ff00"
               style={{
-                flex: 1,
-                backgroundColor: "#9c96a3",
-                padding: 8,
-                marginLeft: 5,
-                borderRadius: 20,
+                alignSelf: "center",
               }}
-            >
-              <TextInput
-                placeholder="Enter amount"
-                placeholderTextColor="rgba(255, 255, 255, 0.5)"
-                onChangeText={(e: any) => {
-                  setamount(parseInt(e));
+            />
+          </View>
+        ) : (
+          <View>
+            <Text style={styles.bottomSheetTitle}>Send Crypto</Text>
+            <View>
+              <Text style={{ color: "white", marginTop: 20 }}>
+                Send crypto to a friend
+              </Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginTop: 20,
+                  paddingLeft: 10,
                 }}
-                style={{ color: "white" }}
-                keyboardType="number-pad"
-              />
-            </View>
-          </View>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginTop: 20,
-            }}
-          >
-            <Text style={{ color: "white" }}>Recipient</Text>
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: "#9c96a3",
-                padding: 10,
-                borderRadius: 20,
-                marginLeft: 10,
-              }}
-            >
-              <TextInput
-                placeholder="Enter recipient address"
-                placeholderTextColor="rgba(255, 255, 255, 0.5)"
-                style={{ color: "white" }}
-                onChangeText={(e) => setpublicaddress(e)}
-              />
-            </View>
-          </View>
-          {/* <TouchableOpacity
+              >
+                <Text style={{ color: "white" }}>Amount</Text>
+                <View
+                  style={{
+                    flex: 1,
+                    backgroundColor: "#9c96a3",
+                    padding: 8,
+                    marginLeft: 5,
+                    borderRadius: 20,
+                  }}
+                >
+                  <TextInput
+                    placeholder="Enter amount"
+                    placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                    onChangeText={(e: any) => {
+                      setamount(parseInt(e));
+                    }}
+                    style={{ color: "white" }}
+                    keyboardType="number-pad"
+                  />
+                </View>
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginTop: 20,
+                }}
+              >
+                <Text style={{ color: "white" }}>Recipient</Text>
+                <View
+                  style={{
+                    flex: 1,
+                    backgroundColor: "#9c96a3",
+                    padding: 10,
+                    borderRadius: 20,
+                    marginLeft: 10,
+                  }}
+                >
+                  <TextInput
+                    placeholder="Enter recipient address"
+                    placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                    style={{ color: "white" }}
+                    onChangeText={(e) => setpublicaddress(e)}
+                  />
+                </View>
+              </View>
+              {/* <TouchableOpacity
               style={{
                 backgroundColor: "#7E3887",
                 paddingVertical: 10,
@@ -638,31 +660,33 @@ const SendModal = () => {
             >
               <Text style={{ color: "white" }}>Send</Text>
             </TouchableOpacity> */}
-          <View
-            style={{
-              marginTop: 20,
-            }}
-          >
-            <SlideButton
-              title="Slide To Send"
-              width="70%"
-              padding="2"
-              reverseSlideEnabled={false}
-              animation={true}
-              titleContainerStyle={{
-                backgroundColor: "#7E3887",
-              }}
-              containerStyle={{
-                backgroundColor: "#4b0082",
-              }}
-              underlayStyle={{
-                backgroundColor: "#1a0033",
-              }}
-              onSlideEnd={onSend}
-              // height="30%"
-            />
+              <View
+                style={{
+                  marginTop: 20,
+                }}
+              >
+                <SlideButton
+                  title="Slide To Send"
+                  width="70%"
+                  padding="2"
+                  reverseSlideEnabled={false}
+                  animation={true}
+                  titleContainerStyle={{
+                    backgroundColor: "#7E3887",
+                  }}
+                  containerStyle={{
+                    backgroundColor: "#4b0082",
+                  }}
+                  underlayStyle={{
+                    backgroundColor: "#1a0033",
+                  }}
+                  onSlideEnd={onSend}
+                  // height="30%"
+                />
+              </View>
+            </View>
           </View>
-        </View>
+        )}
       </View>
     </View>
   );
