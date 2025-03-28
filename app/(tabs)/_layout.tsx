@@ -36,9 +36,11 @@ const Layout = () => {
           left: "10%",
           right: "10%",
 
-          backgroundColor: "rgba(26, 0, 51, 0.75)",
-          borderRadius: 25,
+          backgroundColor: "#EE82EE",
+          // borderRadius: 25,
+
           height: 65,
+
           ...styles.shadow,
           borderTopWidth: 0,
         },

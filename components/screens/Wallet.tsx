@@ -1,31 +1,56 @@
-"use client"
+"use client";
 
-import AsyncStorage from "@react-native-async-storage/async-storage"
-import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { SafeAreaView } from "react-native-safe-area-context"
-import * as Clipboard from "expo-clipboard"
-import { View, Text, Alert, TouchableOpacity, Image, ToastAndroid, Animated } from "react-native"
-import React from "react"
-import { GestureHandlerRootView, TextInput } from "react-native-gesture-handler"
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  Connection,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+} from "@solana/web3.js";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
+import * as Clipboard from "expo-clipboard";
+import {
+  View,
+  Text,
+  Alert,
+  TouchableOpacity,
+  Image,
+  ToastAndroid,
+  Animated,
+} from "react-native";
+import React from "react";
+import {
+  GestureHandlerRootView,
+  TextInput,
+} from "react-native-gesture-handler";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetFlatList,
   BottomSheetModal,
   BottomSheetModalProvider,
   BottomSheetView,
-} from "@gorhom/bottom-sheet"
-import { Feather } from "@expo/vector-icons"
-import { StyleSheet } from "react-native"
-import { LinearGradient } from "expo-linear-gradient"
-import SlideButton from "rn-slide-button"
-import axios from "axios"
-import { BACKEND_URL } from "@/Backendurl"
+} from "@gorhom/bottom-sheet";
+import { Feather } from "@expo/vector-icons";
+import { StyleSheet } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import SlideButton from "rn-slide-button";
+import axios from "axios";
+import { BACKEND_URL } from "@/Backendurl";
 
 // Transaction Loader Component
-const TransactionLoader = ({ loading, error, success, amount, recipientAddress, onRetry, onClose }:any) => {
+const TransactionLoader = ({
+  loading,
+  error,
+  success,
+  amount,
+  recipientAddress,
+  onRetry,
+  onClose,
+}: any) => {
   // Animation for the loading spinner
-  const spinValue = React.useRef(new Animated.Value(0)).current
+  const spinValue = React.useRef(new Animated.Value(0)).current;
 
   React.useEffect(() => {
     if (loading) {
@@ -34,23 +59,25 @@ const TransactionLoader = ({ loading, error, success, amount, recipientAddress, 
           toValue: 1,
           duration: 1500,
           useNativeDriver: true,
-        }),
-      ).start()
+        })
+      ).start();
     } else {
-      spinValue.setValue(0)
+      spinValue.setValue(0);
     }
-  }, [loading, spinValue])
+  }, [loading, spinValue]);
 
   const spin = spinValue.interpolate({
     inputRange: [0, 1],
     outputRange: ["0deg", "360deg"],
-  })
+  });
 
   // Truncate the recipient address for display
-  const truncateAddress = (address:any) => {
-    if (!address) return ""
-    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`
-  }
+  const truncateAddress = (address: any) => {
+    if (!address) return "";
+    return `${address.substring(0, 6)}...${address.substring(
+      address.length - 4
+    )}`;
+  };
 
   return (
     <View style={loaderStyles.container}>
@@ -61,7 +88,9 @@ const TransactionLoader = ({ loading, error, success, amount, recipientAddress, 
               <Feather name="loader" size={48} color="#7C3AED" />
             </Animated.View>
             <Text style={loaderStyles.loadingText}>Processing Transaction</Text>
-            <Text style={loaderStyles.loadingSubtext}>Please wait while we process your transaction</Text>
+            <Text style={loaderStyles.loadingSubtext}>
+              Please wait while we process your transaction
+            </Text>
 
             <View style={loaderStyles.transactionDetails}>
               <View style={loaderStyles.detailRow}>
@@ -70,7 +99,9 @@ const TransactionLoader = ({ loading, error, success, amount, recipientAddress, 
               </View>
               <View style={loaderStyles.detailRow}>
                 <Text style={loaderStyles.detailLabel}>To:</Text>
-                <Text style={loaderStyles.detailValue}>{truncateAddress(recipientAddress)}</Text>
+                <Text style={loaderStyles.detailValue}>
+                  {truncateAddress(recipientAddress)}
+                </Text>
               </View>
             </View>
           </View>
@@ -82,13 +113,21 @@ const TransactionLoader = ({ loading, error, success, amount, recipientAddress, 
               <Feather name="alert-circle" size={48} color="#EF4444" />
             </View>
             <Text style={loaderStyles.errorTitle}>Transaction Failed</Text>
-            <Text style={loaderStyles.errorMessage}>{error.message || "An error occurred during the transaction"}</Text>
+            <Text style={loaderStyles.errorMessage}>
+              {error.message || "An error occurred during the transaction"}
+            </Text>
 
             <View style={loaderStyles.buttonContainer}>
-              <TouchableOpacity style={loaderStyles.retryButton} onPress={onRetry}>
+              <TouchableOpacity
+                style={loaderStyles.retryButton}
+                onPress={onRetry}
+              >
                 <Text style={loaderStyles.retryButtonText}>Retry</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={loaderStyles.cancelButton} onPress={onClose}>
+              <TouchableOpacity
+                style={loaderStyles.cancelButton}
+                onPress={onClose}
+              >
                 <Text style={loaderStyles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
             </View>
@@ -100,8 +139,12 @@ const TransactionLoader = ({ loading, error, success, amount, recipientAddress, 
             <View style={loaderStyles.successIconContainer}>
               <Feather name="check" size={48} color="#10B981" />
             </View>
-            <Text style={loaderStyles.successTitle}>Transaction Successful!</Text>
-            <Text style={loaderStyles.successMessage}>Your transaction has been processed successfully</Text>
+            <Text style={loaderStyles.successTitle}>
+              Transaction Successful!
+            </Text>
+            <Text style={loaderStyles.successMessage}>
+              Your transaction has been processed successfully
+            </Text>
 
             <View style={loaderStyles.transactionDetails}>
               <View style={loaderStyles.detailRow}>
@@ -110,11 +153,17 @@ const TransactionLoader = ({ loading, error, success, amount, recipientAddress, 
               </View>
               <View style={loaderStyles.detailRow}>
                 <Text style={loaderStyles.detailLabel}>To:</Text>
-                <Text style={loaderStyles.detailValue}>{truncateAddress(recipientAddress)}</Text>
+                <Text style={loaderStyles.detailValue}>
+                  {truncateAddress(recipientAddress)}
+                </Text>
               </View>
               <View style={loaderStyles.detailRow}>
                 <Text style={loaderStyles.detailLabel}>Status:</Text>
-                <Text style={[loaderStyles.detailValue, loaderStyles.successStatus]}>Confirmed</Text>
+                <Text
+                  style={[loaderStyles.detailValue, loaderStyles.successStatus]}
+                >
+                  Confirmed
+                </Text>
               </View>
             </View>
 
@@ -125,12 +174,12 @@ const TransactionLoader = ({ loading, error, success, amount, recipientAddress, 
         )}
       </View>
     </View>
-  )
-}
+  );
+};
 
 const Wallet = () => {
-  const connection = new Connection("https://api.devnet.solana.com")
-  const [balance, setBalance] = useState(0)
+  const connection = new Connection("https://api.devnet.solana.com");
+  const [balance, setBalance] = useState(0);
   const [history, sethistory] = useState([
     {
       id: 0,
@@ -140,33 +189,36 @@ const Wallet = () => {
       time: "",
       frompublickey: "",
     },
-  ])
-  const [sol, setsol] = useState(0)
-  const [error, seterror] = useState("")
+  ]);
+  const [sol, setsol] = useState(0);
+  const [error, seterror] = useState("");
   const Airdrop = async () => {
     try {
-      const connection = new Connection("https://api.devnet.solana.com")
-      const publicKey = await AsyncStorage.getItem("PublicKey")
+      const connection = new Connection("https://api.devnet.solana.com");
+      const publicKey = await AsyncStorage.getItem("PublicKey");
       if (!publicKey) {
-        Alert.alert("No public key found")
-        return
+        Alert.alert("No public key found");
+        return;
       }
-      await connection.requestAirdrop(new PublicKey(publicKey), 1 * LAMPORTS_PER_SOL)
-      Alert.alert("Success")
-    } catch (e:any) {
+      await connection.requestAirdrop(
+        new PublicKey(publicKey),
+        1 * LAMPORTS_PER_SOL
+      );
+      Alert.alert("Success");
+    } catch (e: any) {
       // seterro(e);
-      console.log(e)
-      seterror(e)
+      console.log(e);
+      seterror(e);
     }
-  }
+  };
   useEffect(() => {
     const fetchWallet = async () => {
       try {
-        const publicKey = await AsyncStorage.getItem("PublicKey")
-        console.log(publicKey)
+        const publicKey = await AsyncStorage.getItem("PublicKey");
+        console.log(publicKey);
         if (!publicKey) {
-          Alert.alert("No public key found")
-          return
+          Alert.alert("No public key found");
+          return;
         }
 
         const [response, balance, accountInfo] = await Promise.all([
@@ -175,67 +227,77 @@ const Wallet = () => {
           connection.getSignaturesForAddress(new PublicKey(publicKey), {
             limit: 10,
           }),
-        ])
+        ]);
 
         const transactionPromises = accountInfo.map(async (account) => {
           try {
-            const signature = await connection.getParsedTransaction(account.signature)
-            if (!signature) return null
+            const signature = await connection.getParsedTransaction(
+              account.signature
+            );
+            if (!signature) return null;
 
-            let amount = 0
-            let type = ""
-            let from = ""
-            let to = ""
+            let amount = 0;
+            let type = "";
+            let from = "";
+            let to = "";
             if (
               signature.transaction.message.accountKeys[0].signer &&
-              signature.transaction.message.accountKeys[0].pubkey.toBase58() === publicKey
+              signature.transaction.message.accountKeys[0].pubkey.toBase58() ===
+                publicKey
             ) {
-              const postbalance = signature.meta?.postBalances[0] || 0
-              const prebalance = signature.meta?.preBalances[0] || 0
-              amount = prebalance - postbalance
-              type = "Send"
-              from = publicKey
-              to = signature.transaction.message.accountKeys[1].pubkey.toBase58()
+              const postbalance = signature.meta?.postBalances[0] || 0;
+              const prebalance = signature.meta?.preBalances[0] || 0;
+              amount = prebalance - postbalance;
+              type = "Send";
+              from = publicKey;
+              to =
+                signature.transaction.message.accountKeys[1].pubkey.toBase58();
             } else {
-              const postbalance = signature.meta?.postBalances[1] || 0
-              const prebalance = signature.meta?.preBalances[1] || 0
-              amount = postbalance - prebalance
-              type = "Recieve"
-              from = signature.transaction.message.accountKeys[0].pubkey.toBase58()
-              to = signature.transaction.message.accountKeys[1].pubkey.toBase58()
+              const postbalance = signature.meta?.postBalances[1] || 0;
+              const prebalance = signature.meta?.preBalances[1] || 0;
+              amount = postbalance - prebalance;
+              type = "Recieve";
+              from =
+                signature.transaction.message.accountKeys[0].pubkey.toBase58();
+              to =
+                signature.transaction.message.accountKeys[1].pubkey.toBase58();
             }
 
             return {
               amount: Math.abs(amount) / LAMPORTS_PER_SOL,
               toPublicKey: to,
               type,
-              time: signature.blockTime ? new Date(signature.blockTime * 1000).toLocaleString() : "Unknown",
+              time: signature.blockTime
+                ? new Date(signature.blockTime * 1000).toLocaleString()
+                : "Unknown",
               frompublickey: from,
               id: account.signature,
-            }
+            };
           } catch (error) {
-            console.error("Error processing transaction:", error)
-            return null
+            console.error("Error processing transaction:", error);
+            return null;
           }
-        })
-        const transactions = (await Promise.all(transactionPromises)).filter(Boolean)
-        sethistory(transactions)
-        setBalance(balance * response.data.sol)
-        setsol(balance / LAMPORTS_PER_SOL)
+        });
+        const transactions = (await Promise.all(transactionPromises)).filter(
+          Boolean
+        );
+        sethistory(transactions);
+        setBalance(balance * response.data.sol);
+        setsol(balance / LAMPORTS_PER_SOL);
       } catch (e) {
-        console.error("Wallet fetch error:", e)
+        console.error("Wallet fetch error:", e);
       }
-    }
+    };
 
-    fetchWallet()
-  }, [])
-  const bottomSheetRef = useRef<BottomSheet>(null)
+    fetchWallet();
+  }, []);
+  const bottomSheetRef = useRef<BottomSheet>(null);
 
-  const snapPoints = useMemo(() => ["25%", "50%", "75%"], [])
-  const snapPointsModal = useMemo(() => ["30%", "50%"], [])
-  const snapPointsModal2 = useMemo(() => ["55%", "60%"], [])
+  const snapPoints = useMemo(() => ["25%", "50%", "75%"], []);
+  const snapPointsModal = useMemo(() => ["30%", "50%"], []);
+  const snapPointsModal2 = useMemo(() => ["55%", "60%"], []);
 
-  const renderItem = useCallback(({ item }:any) => {
+  const renderItem = useCallback(({ item }: any) => {
     return (
       <View style={styles.transactionItem}>
         <View style={styles.transactionIconContainer}>
@@ -251,7 +313,9 @@ const Wallet = () => {
 
         <View style={styles.transactionDetails}>
           <Text style={styles.transactionTitle}>
-            {item.type === "Recieve" ? `From ${item.frompublickey}` : `To ${item.toPublicKey}`}
+            {item.type === "Recieve"
+              ? `From ${item.frompublickey}`
+              : `To ${item.toPublicKey}`}
           </Text>
           <Text style={styles.transactionDate}>{item.time}</Text>
         </View>
@@ -260,47 +324,60 @@ const Wallet = () => {
           style={[
             styles.transactionAmount,
             {
-              color: item.type === "Recieve" ? "#4CD964" : item.type === "Send" ? "#FF3B30" : "#007AFF",
+              color:
+                item.type === "Recieve"
+                  ? "#4CD964"
+                  : item.type === "Send"
+                  ? "#FF3B30"
+                  : "#007AFF",
             },
           ]}
         >
           {item.amount}
         </Text>
-        <Image source={require("../../assets/images/Sol.png")} style={{ width: 20, height: 30, marginLeft: 10 }} />
+        <Image
+          source={require("../../assets/images/Sol.png")}
+          style={{ width: 20, height: 30, marginLeft: 10 }}
+        />
       </View>
-    )
-  }, [])
+    );
+  }, []);
 
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null)
-  const bottomSheetModalRef2 = useRef<BottomSheetModal>(null)
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const bottomSheetModalRef2 = useRef<BottomSheetModal>(null);
 
   // callbacks
   const handlePresentModalPress = useCallback(() => {
-    bottomSheetModalRef.current?.present()
-  }, [])
+    bottomSheetModalRef.current?.present();
+  }, []);
   const handleSendModal = useCallback(() => {
-    bottomSheetModalRef2.current?.present()
-  }, [])
+    bottomSheetModalRef2.current?.present();
+  }, []);
   const handleSheetChanges = useCallback((index: number) => {
-    console.log("handleSheetChanges", index)
-  }, [])
+    console.log("handleSheetChanges", index);
+  }, []);
   const handleSheetChanges2 = useCallback((index: number) => {
-    console.log("handleSheetChanges", index)
-  }, [])
+    console.log("handleSheetChanges", index);
+  }, []);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 1 }}>
         <BottomSheetModalProvider>
-          <LinearGradient colors={["#1a0033", "#4b0082", "#290d44"]} style={styles.gradient}>
+          <LinearGradient
+            colors={["#1a0033", "#4b0082", "#290d44"]}
+            style={styles.gradient}
+          >
             {/* Wallet Header */}
             <View style={styles.header}>
               <Text style={styles.headerTitle}>Wallet</Text>
-              <TouchableOpacity style={styles.settingsButton}>
+              {/* <TouchableOpacity style={styles.settingsButton}>
                 <Feather name="settings" size={24} color="#5EDCF5" />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
             <View style={styles.balanceContainer}>
-              <Text style={styles.balanceText}>${(balance / LAMPORTS_PER_SOL).toFixed(2)}</Text>
+              <Text style={styles.balanceText}>
+                ${(balance / LAMPORTS_PER_SOL).toFixed(2)}
+              </Text>
             </View>
             <View
               style={{
@@ -311,7 +388,10 @@ const Wallet = () => {
                 gap: 10,
               }}
             >
-              <Image source={require("../../assets/images/Sol.png")} style={{ width: 30, height: 30 }} />
+              <Image
+                source={require("../../assets/images/Sol.png")}
+                style={{ width: 30, height: 30 }}
+              />
               <Text
                 style={{
                   color: "white",
@@ -322,7 +402,10 @@ const Wallet = () => {
             </View>
             {/* Action Buttons */}
             <View style={styles.actionButtonsContainer}>
-              <TouchableOpacity style={styles.actionButton} onPress={handlePresentModalPress}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={handlePresentModalPress}
+              >
                 <Feather name="plus" size={24} color="white" />
                 <Text style={styles.actionButtonText}>Add</Text>
               </TouchableOpacity>
@@ -340,7 +423,12 @@ const Wallet = () => {
                 onChange={handleSheetChanges}
                 backgroundStyle={styles.bottomModalBackground}
                 backdropComponent={(props) => (
-                  <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.9} />
+                  <BottomSheetBackdrop
+                    {...props}
+                    disappearsOnIndex={-1}
+                    appearsOnIndex={0}
+                    opacity={0.9}
+                  />
                 )}
               >
                 <BottomSheetView>
@@ -352,7 +440,10 @@ const Wallet = () => {
                 <Text style={styles.actionButtonText}>Airdrop</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.actionButton} onPress={handleSendModal}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={handleSendModal}
+              >
                 <Feather name="send" size={24} color="white" />
                 <Text style={styles.actionButtonText}>Send</Text>
               </TouchableOpacity>
@@ -369,7 +460,12 @@ const Wallet = () => {
                 onChange={handleSheetChanges2}
                 backgroundStyle={styles.bottomModalBackground}
                 backdropComponent={(props) => (
-                  <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.9} />
+                  <BottomSheetBackdrop
+                    {...props}
+                    disappearsOnIndex={-1}
+                    appearsOnIndex={0}
+                    opacity={0.9}
+                  />
                 )}
               >
                 <BottomSheetView>
@@ -404,38 +500,41 @@ const Wallet = () => {
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderItem}
                 contentContainerStyle={styles.transactionList}
+                ListEmptyComponent={
+                  <Text style={styles.emptyText}>No Transaction available</Text>
+                }
               />
             </View>
           </BottomSheet>
         </BottomSheetModalProvider>
       </SafeAreaView>
     </GestureHandlerRootView>
-  )
-}
+  );
+};
 
 const AddModal = () => {
-  const [copiedText, setCopiedText] = useState("")
-  const [pubclickey, setpublic] = useState("")
+  const [copiedText, setCopiedText] = useState("");
+  const [pubclickey, setpublic] = useState("");
   useEffect(() => {
     const getpublic = async () => {
-      const key = await AsyncStorage.getItem("PublicKey")
+      const key = await AsyncStorage.getItem("PublicKey");
       if (key == null) {
-        return
+        return;
       }
-      setpublic(key)
-    }
-    getpublic()
-  })
+      setpublic(key);
+    };
+    getpublic();
+  });
   const copyToClipboard = async () => {
-    const key = await AsyncStorage.getItem("PublicKey")
+    const key = await AsyncStorage.getItem("PublicKey");
     if (key == null) {
-      setCopiedText("No public key found")
-      return
+      setCopiedText("No public key found");
+      return;
     }
 
-    setCopiedText(key)
-    await Clipboard.setStringAsync(key)
-  }
+    setCopiedText(key);
+    await Clipboard.setStringAsync(key);
+  };
   return (
     <View
       style={{
@@ -493,44 +592,44 @@ const AddModal = () => {
         </View>
       </View>
     </View>
-  )
-}
+  );
+};
 
 const SendModal = () => {
-  const [Amount, setamount] = useState(0)
-  const [publicaddress, setpublicaddress] = useState("")
-  const [error, seterror] = useState(null)
-  const [loading, setloading] = useState(false)
-  const [response, setresponse] = useState(false)
-  const [showLoader, setShowLoader] = useState(false)
+  const [Amount, setamount] = useState(0);
+  const [publicaddress, setpublicaddress] = useState("");
+  const [error, seterror] = useState(null);
+  const [loading, setloading] = useState(false);
+  const [response, setresponse] = useState(false);
+  const [showLoader, setShowLoader] = useState(false);
 
   const handleRetry = () => {
-    seterror(null)
-    onSend()
-  }
+    seterror(null);
+    onSend();
+  };
 
   const handleClose = () => {
-    setShowLoader(false)
-    seterror(null)
-    setresponse(false)
-  }
+    setShowLoader(false);
+    seterror(null);
+    setresponse(false);
+  };
 
   const onSend = async () => {
-    setShowLoader(true)
-    setloading(true)
-    seterror(null)
+    setShowLoader(true);
+    setloading(true);
+    seterror(null);
 
     try {
-      const publickey = await AsyncStorage.getItem("PublicKey")
+      const publickey = await AsyncStorage.getItem("PublicKey");
       if (!publickey) {
-        throw new Error("No public key found")
+        throw new Error("No public key found");
       }
 
-      const connection = new Connection("https://api.devnet.solana.com")
-      const getBalance = await connection.getBalance(new PublicKey(publickey))
+      const connection = new Connection("https://api.devnet.solana.com");
+      const getBalance = await connection.getBalance(new PublicKey(publickey));
 
       if (getBalance < Amount * LAMPORTS_PER_SOL) {
-        throw new Error("Don't have enough funds!")
+        throw new Error("Don't have enough funds!");
       }
 
       const transaction = new Transaction().add(
@@ -538,35 +637,36 @@ const SendModal = () => {
           fromPubkey: new PublicKey(publickey),
           toPubkey: new PublicKey(publicaddress),
           lamports: LAMPORTS_PER_SOL * Amount,
-        }),
-      )
+        })
+      );
 
-      const { blockhash } = await connection.getRecentBlockhash()
-      transaction.recentBlockhash = blockhash
-      transaction.feePayer = new PublicKey(publickey)
+      const { blockhash } = await connection.getRecentBlockhash();
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = new PublicKey(publickey);
       const serializetransaction = transaction.serialize({
         requireAllSignatures: false,
         verifySignatures: false,
-      })
+      });
       const response = await axios.post(`${BACKEND_URL}/send/wallet`, {
         tx: serializetransaction,
-      })
-      setresponse(true)
-      ToastAndroid.show("Transaction Sent Successfully!", ToastAndroid.SHORT)
-    
-    } catch (e:any) {
-      console.log(e)
-      setresponse(false)
-      seterror(e)
-      ToastAndroid.show(e.message || "Transaction Failed!", ToastAndroid.SHORT)
+      });
+      setresponse(true);
+      ToastAndroid.show("Transaction Sent Successfully!", ToastAndroid.SHORT);
+    } catch (e: any) {
+      console.log(e);
+      setresponse(false);
+      seterror(e);
+      ToastAndroid.show(e.message || "Transaction Failed!", ToastAndroid.SHORT);
     } finally {
-      setloading(false)
+      setloading(false);
     }
-  }
+  };
 
   return (
     <View style={{ paddingHorizontal: 20 }}>
-      <View style={{ padding: 20, borderRadius: 20, backgroundColor: "#1a0033" }}>
+      <View
+        style={{ padding: 20, borderRadius: 20, backgroundColor: "#1a0033" }}
+      >
         {showLoader ? (
           <TransactionLoader
             loading={loading}
@@ -581,7 +681,9 @@ const SendModal = () => {
           <View>
             <Text style={styles.bottomSheetTitle}>Send Crypto</Text>
             <View>
-              <Text style={{ color: "white", marginTop: 20 }}>Send crypto to a friend</Text>
+              <Text style={{ color: "white", marginTop: 20 }}>
+                Send crypto to a friend
+              </Text>
               <View
                 style={{
                   flexDirection: "row",
@@ -604,7 +706,7 @@ const SendModal = () => {
                     placeholder="Enter amount"
                     placeholderTextColor="rgba(255, 255, 255, 0.5)"
                     onChangeText={(e) => {
-                      setamount(Number.parseFloat(e) || 0)
+                      setamount(Number.parseFloat(e) || 0);
                     }}
                     style={{ color: "white" }}
                     keyboardType="number-pad"
@@ -660,8 +762,8 @@ const SendModal = () => {
         )}
       </View>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   gradient: {
@@ -785,7 +887,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-})
+  emptyText: {
+    color: "white",
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 20,
+  },
+});
 
 // Loader component styles
 const loaderStyles = StyleSheet.create({
@@ -882,6 +990,7 @@ const loaderStyles = StyleSheet.create({
     padding: 16,
     marginBottom: 24,
   },
+
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -946,6 +1055,6 @@ const loaderStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-})
+});
 
-export default Wallet
+export default Wallet;

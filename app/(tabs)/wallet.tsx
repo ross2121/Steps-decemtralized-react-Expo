@@ -10,9 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const wallet = () => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      {/* <NavigationContainer> */}
       <Wallet />
-      {/* </NavigationContainer> */}
     </GestureHandlerRootView>
   );
 };

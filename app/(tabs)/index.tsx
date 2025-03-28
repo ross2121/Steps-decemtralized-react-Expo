@@ -902,7 +902,7 @@ const JoinGame = ({ handleSearchGame }) => {
 
       <View
         style={{
-          backgroundColor: "rgba(0, 0, 0, 0.8)",
+          backgroundColor: "#1a0033",
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
@@ -969,7 +969,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   stepsCard: {
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    backgroundColor: "#1a0033",
     padding: 10,
     borderRadius: 10,
     margin: 20,
@@ -994,7 +994,7 @@ const styles = StyleSheet.create({
     width: 300,
     height: 170,
     marginHorizontal: 10,
-    backgroundColor: "#1a1a1a",
+    backgroundColor: "#1a0033",
     borderRadius: 10,
     padding: 10,
   },
