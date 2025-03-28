@@ -8,7 +8,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import {
@@ -31,11 +37,10 @@ const ProfileScreen = () => {
     "friends"
   );
   const animatedValue = useRef(new Animated.Value(0)).current;
-   
-   
-  interface Friend{
-    username:string,
-    status:string
+
+  interface Friend {
+    username: string;
+    status: string;
   }
   const logout = async () => {
     await AsyncStorage.removeItem("token");
@@ -47,7 +52,7 @@ const ProfileScreen = () => {
     bottomSheetModalRef.current?.present();
   }, []);
 
-  const snapPoints = useMemo(() => ["30%", "50%"], []);
+  const snapPoints = useMemo(() => ["50%", "70%"], []);
 
   const handleTabPress = (tab: "friends" | "search") => {
     setSelectedTab(tab);
@@ -73,25 +78,26 @@ const ProfileScreen = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Friend[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [friends,setfriends]=useState([]);
-  useEffect(()=>{
-    const Fetchfriend=async()=>{
-      try{
-        const userid=await AsyncStorage.getItem("userid");
-        const response=await axios.get(`${BACKEND_URL}/get/friends/${userid}`)
-        setfriends(response.data.user);    
-       }catch(e){
-         console.log(e);
-       }
-       Fetchfriend();
-    }
-  
-  },[])
+  const [friends, setfriends] = useState([]);
+  useEffect(() => {
+    const Fetchfriend = async () => {
+      try {
+        const userid = await AsyncStorage.getItem("userid");
+        const response = await axios.get(
+          `${BACKEND_URL}/get/friends/${userid}`
+        );
+        setfriends(response.data.user);
+      } catch (e) {
+        console.log(e);
+      }
+      Fetchfriend();
+    };
+  }, []);
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     setIsLoading(true);
     try {
-      const userid=await AsyncStorage.getItem("userid");
+      const userid = await AsyncStorage.getItem("userid");
       console.log(userid);
       console.log(BACKEND_URL);
       const response = await axios.get(
@@ -105,17 +111,20 @@ const ProfileScreen = () => {
       setIsLoading(false);
     }
   };
-  const Addfriend=async(username:string)=>{
+  const Addfriend = async (username: string) => {
     try {
-      const userid=await AsyncStorage.getItem("userid");
+      const userid = await AsyncStorage.getItem("userid");
       console.log(userid);
       console.log(username);
-      const response=await axios.post(`${BACKEND_URL}/add/friend`,{username:username,userid:userid})
+      const response = await axios.post(`${BACKEND_URL}/add/friend`, {
+        username: username,
+        userid: userid,
+      });
       console.log(response.data);
     } catch (error) {
-       console.log(error);
+      console.log(error);
     }
-  }
+  };
 
   return (
     <BottomSheetModalProvider>
@@ -154,17 +163,17 @@ const ProfileScreen = () => {
             <Text style={styles.username}>Username</Text>
           </View>
           <View>
-          <TouchableOpacity onPress={handlePresentModalPress}>
-            <View style={styles.options}>
-              <Text style={styles.optionText}>Friends</Text>
-              <Ionicons
-                name="chevron-forward-outline"
-                size={24}
-                color="white"
-                style={styles.optionIcon}
-              />
-            </View>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={handlePresentModalPress}>
+              <View style={styles.options}>
+                <Text style={styles.optionText}>Friends</Text>
+                <Ionicons
+                  name="chevron-forward-outline"
+                  size={24}
+                  color="white"
+                  style={styles.optionIcon}
+                />
+              </View>
+            </TouchableOpacity>
           </View>
           <BottomSheetModal
             snapPoints={snapPoints}
@@ -181,36 +190,35 @@ const ProfileScreen = () => {
           >
             {/* Tabs */}
             <View style={styles.tabContainer}>
-              <View>
               <TouchableOpacity onPress={() => handleTabPress("friends")}>
                 <View>
-                  <Text
-                    style={[
-                      styles.tabText,
-                      selectedTab === "friends" && styles.activeTabText,
-                    ]}
-                  >
-                    My Friends
-                  </Text>
+                  <View>
+                    <Text
+                      style={[
+                        styles.tabText,
+                        selectedTab === "friends" && styles.activeTabText,
+                      ]}
+                    >
+                      My Friends
+                    </Text>
+                  </View>
                 </View>
               </TouchableOpacity>
-              </View>
-              <View>
               <TouchableOpacity onPress={() => handleTabPress("search")}>
                 <View>
-                  <Text
-                    style={[
-                      styles.tabText,
-                      selectedTab === "search" && styles.activeTabText,
-                    ]}
-                  >
-                    Search
-                  </Text>
+                  <View>
+                    <Text
+                      style={[
+                        styles.tabText,
+                        selectedTab === "search" && styles.activeTabText,
+                      ]}
+                    >
+                      Search
+                    </Text>
+                  </View>
                 </View>
               </TouchableOpacity>
-              </View>
             </View>
-
 
             <View style={styles.tabIndicatorContainer}>
               <Animated.View style={[styles.tabIndicator, animatedBarStyle]} />
@@ -218,13 +226,20 @@ const ProfileScreen = () => {
             {selectedTab === "friends" ? (
               <BottomSheetFlatList
                 data={friends}
-                keyExtractor={(item:any) => item.id}
+                keyExtractor={(item: any) => item.id}
                 renderItem={({ item }) => (
                   <View style={styles.friendItem}>
                     <Text style={styles.friendText}>{item.username}</Text>
                   </View>
                 )}
                 contentContainerStyle={{ paddingBottom: 20 }}
+                ListEmptyComponent={
+                  <View style={styles.emptyContainer}>
+                    <Text style={styles.emptyText}>
+                      No friends yet, add friends!
+                    </Text>
+                  </View>
+                }
               />
             ) : (
               <View style={styles.searchView}>
@@ -247,32 +262,36 @@ const ProfileScreen = () => {
                 {/* Loader */}
                 {isLoading ? (
                   <ActivityIndicator size="large" color="#9C89FF" />
-                ) : (<FlatList
-                  data={searchResults}
-                  keyExtractor={(item: any) => item.id}
-                  renderItem={({ item }) => (
-                    <View style={styles.searchResultItem}>
-                      <Text style={styles.searchResultText}>{item.username}</Text>
-                      {item.status === "requested" ? (
-                        <View style={[styles.addButton, styles.requestedButton]}>
-                          <Text style={styles.addButtonText}>Requested</Text>
-                        </View>
-                      ) : item.status === "accepted" ? (
-                        <View style={[styles.addButton, styles.friendButton]}>
-                          <Text style={styles.addButtonText}>Accepted</Text>
-                        </View>
-                      ) : (
-                        <TouchableOpacity 
-                          style={[styles.addButton, styles.addButtonActive]} 
-                          onPress={() => Addfriend(item.username)}
-                        >
-                          <Text style={styles.addButtonText}>Add</Text>
-                        </TouchableOpacity>
-                      )}
-                    </View>
-                  )}
-                />
-                  
+                ) : (
+                  <FlatList
+                    data={searchResults}
+                    keyExtractor={(item: any) => item.id}
+                    renderItem={({ item }) => (
+                      <View style={styles.searchResultItem}>
+                        <Text style={styles.searchResultText}>
+                          {item.username}
+                        </Text>
+                        {item.status === "requested" ? (
+                          <View
+                            style={[styles.addButton, styles.requestedButton]}
+                          >
+                            <Text style={styles.addButtonText}>Requested</Text>
+                          </View>
+                        ) : item.status === "accepted" ? (
+                          <View style={[styles.addButton, styles.friendButton]}>
+                            <Text style={styles.addButtonText}>Accepted</Text>
+                          </View>
+                        ) : (
+                          <TouchableOpacity
+                            style={[styles.addButton, styles.addButtonActive]}
+                            onPress={() => Addfriend(item.username)}
+                          >
+                            <Text style={styles.addButtonText}>Add</Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    )}
+                  />
                 )}
               </View>
             )}
@@ -382,13 +401,13 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   addButtonActive: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
   },
   requestedButton: {
-    backgroundColor: '#AAAAAA',
+    backgroundColor: "#AAAAAA",
   },
   friendButton: {
-    backgroundColor: '#34C759',
+    backgroundColor: "#34C759",
   },
   tabIndicator: { width: "45%", height: 2, backgroundColor: "green" },
   friendItem: {
@@ -433,8 +452,8 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 10,
     marginBottom: 10,
-    height:60,
-    width:330
+    height: 60,
+    width: 330,
   },
   searchResultText: { color: "white", fontSize: 14 },
   addButton: {
@@ -444,4 +463,16 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   addButtonText: { color: "white", fontSize: 14, fontWeight: "bold" },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 20,
+  },
+  emptyText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
 });

@@ -576,7 +576,7 @@ const OfficialGames = ({ handleJoinClick }: any) => {
                   >
                     <View>
                       <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
-                        days
+                        Days
                       </Text>
                     </View>
                     <View>
@@ -747,7 +747,7 @@ const CommunityGames = ({ handleJoinClick }: any) => {
           },
         ]}
       >
-        {games.map((game) => (
+        {form.map((game) => (
           <View key={game.name} style={styles.gameCard}>
             <View
               style={{
@@ -817,7 +817,7 @@ const CommunityGames = ({ handleJoinClick }: any) => {
                   style={{ justifyContent: "center", alignItems: "center" }}
                 >
                   <View>
-                    <Text style={{ color: "#bfbfbf", fontSize: 12 }}>days</Text>
+                    <Text style={{ color: "#bfbfbf", fontSize: 12 }}>Days</Text>
                   </View>
                   <View>
                     <Text style={{ color: "white", fontSize: 13 }}>

@@ -28,12 +28,9 @@ export default function RootLayout() {
         name="(nonav)/historyGames"
         options={{ title: "History" }}
       />
-      <Stack.Screen name="(auth)/welcome" options={{ headerShown: false }} />
-      <Stack.Screen name="(auth)/login" options={{ title: "Login" }} />
-      <Stack.Screen name="(auth)/signup" options={{ headerShown: false }} />
       <Stack.Screen
-        name="(nonav)/notification.tsx"
-        options={{ headerShown: false }}
+        name="(nonav)/notification"
+        options={{ title: "Notification" }}
       />
     </Stack>
   );
