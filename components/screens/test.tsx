@@ -11,14 +11,25 @@ import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 
 const requestPermissions = async () => {
   try {
-    const permissionsToRequest = [
-      PermissionsAndroid.PERMISSIONS.ACTIVITY_RECOGNITION,
-    ];
+    const permissionsToRequest = [];
+
+    // Always include the standard permission
+    permissionsToRequest.push(
+      PermissionsAndroid.PERMISSIONS.READ_HEALTH_DATA_IN_BACKGROUND
+    );
 
     if (Platform.OS === "android") {
-      permissionsToRequest.push(
+      const healthPermissionAvailable = await PermissionsAndroid.check(
         "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND" as never
       );
+
+      if (healthPermissionAvailable) {
+        permissionsToRequest.push(
+          "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND" as never
+        );
+      } else {
+        console.log("Health Connect permission not available on this device.");
+      }
     }
 
     const results = await PermissionsAndroid.requestMultiple(

@@ -512,7 +512,7 @@ const OfficialGames = ({ handleJoinClick }: any) => {
                   alignItems: "center",
                   flexDirection: "row",
                   justifyContent: "space-between",
-                  paddingHorizontal:10
+                  paddingHorizontal: 10,
                 }}
               >
                 <View>
@@ -559,9 +559,7 @@ const OfficialGames = ({ handleJoinClick }: any) => {
                     paddingHorizontal: 5,
                   }}
                 >
-                  <View
-                    style={{  alignItems: "center" }}
-                  >
+                  <View style={{ alignItems: "center" }}>
                     <View>
                       <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
                         Entry
@@ -625,7 +623,7 @@ const OfficialGames = ({ handleJoinClick }: any) => {
   );
 };
 
-const CommunityGames = ({ handleJoinClick}:any) => {
+const CommunityGames = ({ handleJoinClick }: any) => {
   const [error, seterror] = useState("");
   const [form, setform] = useState([
     {
@@ -994,12 +992,11 @@ const styles = StyleSheet.create({
   },
   gameCard: {
     width: 300,
-    height:120, 
-    marginHorizontal: 10, 
-    backgroundColor: "#1a1a1a", 
+    height: 170,
+    marginHorizontal: 10,
+    backgroundColor: "#1a1a1a",
     borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
+    padding: 10,
   },
   gameImage: {
     width: 170,
