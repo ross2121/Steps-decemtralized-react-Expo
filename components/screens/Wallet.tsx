@@ -551,10 +551,9 @@ const SendModal = () => {
       const response = await axios.post(`${BACKEND_URL}/send/wallet`, {
         tx: serializetransaction,
       })
-      if(response.status==200){ 
       setresponse(true)
       ToastAndroid.show("Transaction Sent Successfully!", ToastAndroid.SHORT)
-    }
+    
     } catch (e:any) {
       console.log(e)
       setresponse(false)
@@ -950,4 +949,3 @@ const loaderStyles = StyleSheet.create({
 })
 
 export default Wallet
-

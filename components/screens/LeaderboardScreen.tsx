@@ -21,7 +21,7 @@ interface FORM {
 export default function LeaderboardScreen() {
   const [form, setform] = useState([
     {
-      steps: "",
+      steps: 0,
       username: "",
     },
   ]);
@@ -38,14 +38,14 @@ export default function LeaderboardScreen() {
     const fetchstep = async () => {
       try {
         const response = await axios.get(`${BACKEND_URL}/total/steps`);
-        console.log(response.data.data);
+        console.log(response.data.data)
         const formateddata = response.data.data.map((dat: any) => ({
-          id: "1",
+          id: dat.username,
           username: dat.username,
-          steps: dat.steps,
+          steps: Number(dat.steps),
           avatar:
             "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
-        }));
+        })).sort((a:any, b:any) => b.steps - a.steps);
         setform(formateddata);
       } catch (e) {
         console.log(e);
@@ -58,24 +58,26 @@ export default function LeaderboardScreen() {
     return (
       <View style={styles.itemContainer}>
         <Text style={styles.index}>{index + 1}</Text>
+        <View style={styles.avatarColumn}>
         <Image source={{ uri: item.avatar }} style={styles.avatar} />
-
+</View>
+<View style={styles.usernameColumn}>
         <Text style={styles.text}> {item.username}</Text>
-
+        </View>
+        <View style={styles.stepsColumn}>
         <Text style={styles.text}> {item.steps}</Text>
+        </View>
       </View>
     );
   };
 
   return (
     <View style={styles.container}>
-      {/* Background Content */}
       <LinearGradient
         colors={["#1a0033", "#4b0082", "#290d44"]}
         style={styles.gradient}
       >
         <View style={styles.backgroundContent}>
-          <Text style={styles.text}>Background Content</Text>
           <Image
             source={require("../../assets/images/Run2.gif")}
             style={{ width: "100%", height: "40%" }}
@@ -183,27 +185,53 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 14,
     fontWeight: "bold",
+    width:100,
     color: "white",
     textAlign: "center",
   },
   itemContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
-    backgroundColor: "#1a0033",
-    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#1a0033',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
     marginHorizontal: 10,
     marginVertical: 5,
     borderRadius: 10,
   },
+  rankColumn: {
+    width: 40,
+    alignItems: 'center',
+  },
+  avatarColumn: {
+    width: 50,
+    alignItems: 'center',
+  },
+  usernameColumn: {
+    width: 100,
+    alignItems: 'flex-start',
+    paddingLeft: 10,
+  },
+  stepsColumn: {
+    width: 80,
+    alignItems: 'flex-end',
+  },
   index: {
+    width:40,
     fontSize: 12,
+    textAlign:"center",
     fontWeight: "bold",
     color: "#FFD700",
   },
+  texts: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: 'white',
+  },
   avatar: {
-    width: 45,
-    height: 40,
+    width: 70,
+    height: 50,
     borderRadius: 25,
     marginRight: 10,
   },
@@ -212,14 +240,18 @@ const styles = StyleSheet.create({
   },
   headings: {
     flexDirection: "row",
-    marginLeft: 13,
+    marginBottom: 10,
+    paddingHorizontal:25,
     justifyContent: "space-around",
+    paddingTop:10
   },
   headingFont: {
     fontSize: 13,
     fontWeight: "bold",
     color: "#bfbfbf",
-    marginBottom: 10,
+    width:80,
+
+    // marginBottom: 10,
   },
   bottomSheetBackground: {
     backgroundColor: "#7E3887",
