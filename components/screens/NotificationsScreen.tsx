@@ -12,18 +12,17 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import axios from "axios";
 import { BACKEND_URL } from "@/Backendurl";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+interface user{
+  id:number,
+  username:string
+}
 const NotificationsScreen = () => {
+  const [username,setusername]=useState<user[]>([]);
   const [notifications, setNotifications] = useState([
     {
       id: "1",
       message: "Xyz sent you a friend request",
       type: "friend_request",
-    },
-    {
-      id: "2",
-      message: "Your friend request to Abcd was accepted",
-      type: "general",
     },
     {
       id: "3",
@@ -38,24 +37,33 @@ const NotificationsScreen = () => {
       setIsLoading(true);
       try {
         const userid = await AsyncStorage.getItem("userid");
+        console.log(userid);
         const response = await axios.get(
-          `${BACKEND_URL}/notifications/${userid}`
+          `${BACKEND_URL}/friend/request/${userid}`
         );
-        setNotifications(response.data.notifications);
+        const username:[]=response.data.message;
+        const formatedmessage=username.map((username,index)=>({
+           id:index+1,
+           username
+        }))
+        console.log(formatedmessage);
+        setusername(formatedmessage);
       } catch (error) {
         console.error("Error fetching notifications:", error);
       } finally {
         setIsLoading(false);
       }
     };
-
-    // fetchNotifications();
+    fetchNotifications();
   }, []);
 
-  const handleAccept = async (notificationId: string) => {
-    try {
-      await axios.post(`${BACKEND_URL}/notifications/accept`, {
-        id: notificationId,
+  const handleAccept = async (notificationId: string,username:string) => {
+    try { 
+      const userid=await AsyncStorage.getItem("userid");
+      await axios.post(`http://10.5.121.76:3000/api/v1/accept/friend`, {
+        userid:userid,
+        username:username,
+        bool:true
       });
       setNotifications((prev) =>
         prev.filter((notification) => notification.id !== notificationId)
@@ -64,7 +72,6 @@ const NotificationsScreen = () => {
       console.error("Error accepting friend request:", error);
     }
   };
-
   const handleDecline = async (notificationId: string) => {
     try {
       await axios.post(`${BACKEND_URL}/notifications/decline`, {
@@ -77,26 +84,24 @@ const NotificationsScreen = () => {
       console.error("Error declining friend request:", error);
     }
   };
-
   const renderNotification = ({ item }: any) => (
     <View style={styles.notificationItem}>
-      <Text style={styles.notificationText}>{item.message}</Text>
-      {item.type === "friend_request" && (
+      <Text style={styles.notificationText}>{item.username} sent you a friend request</Text>
         <View style={styles.actionButtons}>
           <TouchableOpacity
             style={styles.acceptButton}
-            onPress={() => handleAccept(item.id)}
+            onPress={() => handleAccept(item.id,item.username)}
           >
             <Ionicons name="checkmark-circle" size={30} color="green" />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.declineButton}
-            onPress={() => handleDecline(item.id)}
+            onPress={() => handleDecline(item.username)}
           >
             <Ionicons name="close-circle" size={30} color="red" />
           </TouchableOpacity>
         </View>
-      )}
+      
     </View>
   );
 
@@ -111,7 +116,7 @@ const NotificationsScreen = () => {
           <ActivityIndicator size="large" color="#9C89FF" />
         ) : (
           <FlatList
-            data={notifications}
+            data={username}
             keyExtractor={(item) => item.id}
             renderItem={renderNotification}
             ListEmptyComponent={
