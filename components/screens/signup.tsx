@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Button,
   ActivityIndicator,
+  ToastAndroid,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -45,7 +46,6 @@ const Signup = () => {
         email,
         password,
       });
-      Alert.alert("Success", "Account created successfully");
       await AsyncStorage.setItem("username", response.data.user.username);
       await AsyncStorage.setItem("token", response.data.token);
       await AsyncStorage.setItem("PublicKey", response.data.user.publickey);
@@ -60,10 +60,12 @@ const Signup = () => {
       if (err instanceof Error && "response" in err) {
         console.log(err);
         const axiosError = err as { response: { data: { message: string } } };
-        Alert.alert(axiosError.response.data.message);
+        // @ts-ignore
+        ToastAndroid.show(axiosError.response.data.error[0].message,ToastAndroid.LONG)
         console.log(axiosError.response.data);
         seterror(
-          axiosError.response.data.message ||
+          // @ts-ignore
+          axiosError.response.data.error[0].message ||
             "An error occurred. Please try again."
         );
       } else {

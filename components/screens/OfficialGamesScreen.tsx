@@ -1,76 +1,144 @@
+import { BACKEND_URL } from "@/Backendurl";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
   BottomSheetModalProvider,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import axios from "axios";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SlideButton from "rn-slide-button";
+interface GAME{
+  id: string,
+  name: string,
+  Amount: number,
+  days: number,
+  memberqty:number,
+  Dailystep:number ,
+}
 
 const OfficialGamesScreen = () => {
+  const [game,setgame]=useState<GAME[]>([]);
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const [selectedGame, setSelectedGame] = useState(null);
-
+  const escrowpublickey = "AL3YQV36ADyq3xwjuETH8kceNTH9fuP43esbFiLF1V1A";
+  const [selectedGame, setSelectedGame] = useState<GAME>();
   const snapPoints = useMemo(() => ["50%", "60%"], []);
-  const handleJoinClick = useCallback((game) => {
-    console.log("Joining game", game.title);
+  const handleJoinClick = useCallback((game:any) => {
+    console.log("Joining game", game.name);
     setSelectedGame(game);
     bottomSheetModalRef.current?.present();
   }, []);
-  const games = [
-    {
-      id: 1,
-      title: "Game1",
-      entryPrice: "2",
-      time: "10/3-16/03",
-      participants: "83",
-      dailySteps: "12k",
-    },
-    {
-      id: 2,
-      title: "Game2",
-      entryPrice: "2",
-      time: "10/3-16/03",
-      participants: "83",
-      dailySteps: "12k",
-    },
-    {
-      id: 3,
-      title: "Game 3",
+  useEffect(()=>{
+    const fetchgame=async()=>{
+     const response=await axios.get(`${BACKEND_URL}/challenge/public`)
+         setgame(response.data.allchalange);
+    }
+    fetchgame();
+  },[])
+  const Onsend = async () => {
+    try {
+      const connection = new Connection("https://api.devnet.solana.com");
+      const publickey = await AsyncStorage.getItem("PublicKey");
+      if (!publickey) {
+        Alert.alert("NO public key found");
+        return;
+      }
+      if(selectedGame==null){
+        return;
+      }
+      const balance = await connection.getBalance(new PublicKey(publickey));
+      console.log(selectedGame.Amount);
+      if (balance < selectedGame.Amount * LAMPORTS_PER_SOL) {
+        Alert.alert("Not enough credit");
+        return;
+      }
+      console.log("chh");
+      console.log(publickey);
+      const signature = new Transaction().add(
+        SystemProgram.transfer({
+          fromPubkey: new PublicKey(publickey),
+          toPubkey: new PublicKey(escrowpublickey),
+          lamports: LAMPORTS_PER_SOL * selectedGame.Amount,
+        })
+      );
+      const { blockhash } = await connection.getLatestBlockhash();
+      signature.recentBlockhash = blockhash;
+      signature.feePayer = new PublicKey(publickey);
+      const serilize = signature.serialize({
+        requireAllSignatures: false,
+        verifySignatures: false,
+      });
+      console.log("chekc1");
+      const response = await axios.post(
+        `${BACKEND_URL}/challenge/join/public/${selectedGame.id}`,
+        { tx: serilize }
+      );
+      if (response.status == 200) {
+        Alert.alert("ADDed to the contest");
+      }
+    } catch (e: any) {
+      console.log(e);
+      Alert.alert(e);
+    }
+  };
+   
+  // const games = [
+  //   {
+  //     id: 1,
+  //     title: "Game1",
+  //     entryPrice: "2",
+  //     time: "10/3-16/03",
+  //     participants: "83",
+  //     dailySteps: "12k",
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Game2",
+  //     entryPrice: "2",
+  //     time: "10/3-16/03",
+  //     participants: "83",
+  //     dailySteps: "12k",
+  //   },
+  //   {
+  //     id: 3,
+  //     title: "Game 3",
 
-      entryPrice: "2",
-      time: "10/3-16/03",
-      participants: "83",
-      dailySteps: "12k",
-    },
-    {
-      id: 4,
-      title: "Game 4",
+  //     entryPrice: "2",
+  //     time: "10/3-16/03",
+  //     participants: "83",
+  //     dailySteps: "12k",
+  //   },
+  //   {
+  //     id: 4,
+  //     title: "Game 4",
 
-      entryPrice: "2",
-      time: "10/3-16/03",
-      participants: "83",
-      dailySteps: "12k",
-    },
-    {
-      id: 5,
-      title: "Game 5",
+  //     entryPrice: "2",
+  //     time: "10/3-16/03",
+  //     participants: "83",
+  //     dailySteps: "12k",
+  //   },
+  //   {
+  //     id: 5,
+  //     title: "Game 5",
 
-      entryPrice: "2",
-      time: "10/3-16/03",
-      participants: "83",
-      dailySteps: "12k",
-    },
-  ];
+  //     entryPrice: "2",
+  //     time: "10/3-16/03",
+  //     participants: "83",
+  //     dailySteps: "12k",
+  //   },
+  // ];
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -83,7 +151,7 @@ const OfficialGamesScreen = () => {
             contentContainerStyle={styles.container}
             //   showsVerticalScrollIndicator={false}
           >
-            {games.map((game) => (
+            {game.map((game) => (
               <View key={game.id} style={styles.gameCard}>
                 <View
                   style={{
@@ -93,7 +161,7 @@ const OfficialGamesScreen = () => {
                   }}
                 >
                   <View>
-                    <Text style={styles.gameHeader}>{game.title}</Text>
+                    <Text style={styles.gameHeader}>{game.name}</Text>
                   </View>
                   <View>
                     <TouchableOpacity
@@ -146,7 +214,7 @@ const OfficialGamesScreen = () => {
                       </View>
                       <View>
                         <Text style={{ color: "white", fontSize: 13 }}>
-                          {game.entryPrice}
+                          {game.Amount}
                         </Text>
                       </View>
                     </View>
@@ -155,12 +223,12 @@ const OfficialGamesScreen = () => {
                     >
                       <View>
                         <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
-                          7 days
+                          Days
                         </Text>
                       </View>
                       <View>
                         <Text style={{ color: "white", fontSize: 13 }}>
-                          {game.time}
+                          {game.days}
                         </Text>
                       </View>
                     </View>
@@ -174,7 +242,7 @@ const OfficialGamesScreen = () => {
                       </View>
                       <View>
                         <Text style={{ color: "white", fontSize: 13 }}>
-                          {game.dailySteps}
+                          {game.Dailystep}
                         </Text>
                       </View>
                     </View>
@@ -188,7 +256,7 @@ const OfficialGamesScreen = () => {
                       </View>
                       <View>
                         <Text style={{ color: "white", fontSize: 13 }}>
-                          {game.participants}
+                          {game.memberqty}
                         </Text>
                       </View>
                     </View>
@@ -226,14 +294,14 @@ const OfficialGamesScreen = () => {
                     }}
                   >
                     <Text style={styles.bottomSheetTitle}>
-                      {selectedGame.title}
+                      {selectedGame.name}
                     </Text>
                     <Text
                       style={{
                         color: "white",
                       }}
                     >
-                      You Pay: {selectedGame.entryPrice}
+                      You Pay: {selectedGame.Amount}
                     </Text>
                     <SlideButton
                       title="Slide To Confirm"
@@ -250,6 +318,7 @@ const OfficialGamesScreen = () => {
                       underlayStyle={{
                         backgroundColor: "#1a0033",
                       }}
+                      onSlideEnd={Onsend}
                       // height="30%"
                     />
                   </View>

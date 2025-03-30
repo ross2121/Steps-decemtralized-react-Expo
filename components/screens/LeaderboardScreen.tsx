@@ -5,7 +5,7 @@ import React, {
   useState,
   useEffect,
 } from "react";
-import { StyleSheet, View, Text, Image, Switch } from "react-native";
+import { StyleSheet, View, Text, Image, Switch, ActivityIndicator } from "react-native";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { LinearGradient } from "expo-linear-gradient";
 import axios from "axios";
@@ -29,7 +29,7 @@ export default function LeaderboardScreen() {
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["30%", "53%", "75%"], []);
-
+   const [loading,setloading]=useState(false);
   const handleSheetChange = useCallback((index: any) => {
     console.log("handleSheetChange", index);
   }, []);
@@ -37,6 +37,7 @@ export default function LeaderboardScreen() {
   useEffect(() => {
     const fetchstep = async () => {
       try {
+        setloading(true);
         const response = await axios.get(`${BACKEND_URL}/total/steps`);
         console.log(response.data.data);
         const formateddata = response.data.data
@@ -51,6 +52,8 @@ export default function LeaderboardScreen() {
         setform(formateddata);
       } catch (e) {
         console.log(e);
+      }finally{
+        setloading(false);
       }
     };
     fetchstep();
@@ -75,6 +78,7 @@ export default function LeaderboardScreen() {
 
   return (
     <View style={styles.container}>
+
       <LinearGradient
         colors={["#1a0033", "#4b0082", "#290d44"]}
         style={styles.gradient}
@@ -151,22 +155,25 @@ export default function LeaderboardScreen() {
               </View>
             </View>
           </View>
-
-          {/* Headings */}
-          <View style={styles.headings}>
-            <Text style={styles.headingFont}>Rank</Text>
-            <Text style={styles.headingFont}>Avatar</Text>
-            <Text style={styles.headingFont}>User</Text>
-            <Text style={styles.headingFont}>Fitness XP</Text>
-          </View>
-
-          {/* List of Items */}
-          <BottomSheetFlatList
-            data={form}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            contentContainerStyle={styles.contentContainer}
-          />
+            {loading ?(
+               <ActivityIndicator size="large" color="#00ff00" />
+            ):(
+              <View>
+                <View style={styles.headings}>
+                <Text style={styles.headingFont}>Rank</Text>
+                <Text style={styles.headingFont}>Avatar</Text>
+                <Text style={styles.headingFont}>User</Text>
+                <Text style={styles.headingFont}>Fitness XP</Text>
+              </View>
+ <BottomSheetFlatList
+ data={form}
+ keyExtractor={(item) => item.id}
+ renderItem={renderItem}
+ contentContainerStyle={styles.contentContainer}
+/></View>
+            )}
+          {/* </View> */}
+          
         </View>
       </BottomSheet>
     </View>

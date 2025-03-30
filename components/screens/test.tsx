@@ -1,4 +1,5 @@
-import React from "react";
+import { BatteryOptimization } from "@/constants/battery";
+import React, { useEffect } from "react";
 import {
   Button,
   PermissionsAndroid,
@@ -11,6 +12,10 @@ import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 
 const requestPermissions = async () => {
   try {
+    useEffect(() => {
+      // Check on app start
+      BatteryOptimization.checkAndPromptBatteryOptimization();
+    }, []);
     const permissionsToRequest = [
       PermissionsAndroid.PERMISSIONS.ACTIVITY_RECOGNITION,
     ];
@@ -43,6 +48,10 @@ const AppS = () => (
     <SafeAreaView style={styles.container}>
       <Text style={styles.item}>Request Permissions</Text>
       <Button title="Request Permissions" onPress={requestPermissions} />
+      <Button 
+        title="Check Battery Optimization"
+        onPress={() => BatteryOptimization.checkAndPromptBatteryOptimization()}
+      />
     </SafeAreaView>
   </SafeAreaProvider>
 );

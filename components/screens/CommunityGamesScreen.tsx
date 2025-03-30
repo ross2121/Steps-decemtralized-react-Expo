@@ -1,11 +1,14 @@
+import { BACKEND_URL } from "@/Backendurl";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
   BottomSheetModalProvider,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -21,11 +24,12 @@ const CommunityGamesScreen = () => {
   const [selectedGame, setSelectedGame] = useState(null);
 
   const snapPoints = useMemo(() => ["50%", "60%"], []);
-  const handleJoinClick = useCallback((game) => {
+  const handleJoinClick = useCallback((game:any) => {
     console.log("Joining game", game.title);
     setSelectedGame(game);
     bottomSheetModalRef.current?.present();
   }, []);
+
   const games = [
     {
       id: 1,
@@ -45,7 +49,7 @@ const CommunityGamesScreen = () => {
     },
     {
       id: 3,
-      title: "Game 3",
+      title: "Game 12",
 
       entryPrice: "2",
       time: "10/3-16/03",
