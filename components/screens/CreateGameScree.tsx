@@ -53,7 +53,10 @@ const CreateGameScreen = () => {
   const animatedValue = useRef(new Animated.Value(0)).current;
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const [friend, setfriends] = useState([]);
+  const [friends, setFriends] = useState([]);
+
+  const [selectedFriends, setSelectedFriends] = useState([]);
+
   useEffect(() => {
     seterror(null);
     if (selectedTab === "community") {
@@ -61,15 +64,36 @@ const CreateGameScreen = () => {
     } else {
       bottomSheetModalRef.current?.dismiss();
     }
-    const fetchriend = async () => {
+    const fetchFriends = async () => {
       const userid = await AsyncStorage.getItem("userid");
       console.log(userid);
       const response = await axios.get(`${BACKEND_URL}/get/friends/${userid}`);
       console.log(response.data.user);
-      setfriends(response.data.user);
+      setFriends(response.data.user);
     };
-    fetchriend();
+    fetchFriends();
   }, [selectedTab]);
+
+  const toggleFriendSelection = (friend) => {
+    setSelectedFriends((prevSelected) => {
+      if (prevSelected.includes(friend)) {
+        const newSelected = prevSelected.filter((f) => f !== friend);
+        // console.log("Friend deselected:", friend);
+        // console.log("Currently selected friends:", newSelected);
+        return newSelected;
+      } else {
+        const newSelected = [...prevSelected, friend];
+        console.log("Friend selected:", friend);
+        console.log("Currently selected friends:", newSelected);
+        return newSelected;
+      }
+    });
+  };
+
+  useEffect(() => {
+    setform((prev) => ({ ...prev, request: selectedFriends }));
+  }, [selectedFriends]);
+
   const showMode = (currentMode: any) => {
     setShow(true);
     setMode(currentMode);
@@ -107,6 +131,7 @@ const CreateGameScreen = () => {
         startdate: form.startdate,
         enddate: form.enddate,
         userid: await AsyncStorage.getItem("userid"),
+        request: form.request,
       });
       Alert.alert("Success", "Game Created Successfully");
       router.push("/(tabs)");
@@ -166,6 +191,7 @@ const CreateGameScreen = () => {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
       <LinearGradient
         colors={["#1a0033", "#4b0082", "#8a2be2"]}
+        F
         style={styles.container}
       >
         <BottomSheetModalProvider>
@@ -238,14 +264,11 @@ const CreateGameScreen = () => {
                       handleEndDateChange={handleEndDateChange}
                       handleCreategame={handleCreategame}
                     />
-                    <TouchableOpacity onPress={handlePresentModalPress}>
-                      <Text
-                        style={{
-                          color: "white",
-                          fontSize: 16,
-                          textAlign: "center",
-                        }}
-                      >
+                    <TouchableOpacity
+                      onPress={handlePresentModalPress}
+                      style={styles.inviteFriendsButton}
+                    >
+                      <Text style={styles.inviteFriendsText}>
                         Invite Friends
                       </Text>
                     </TouchableOpacity>
@@ -265,38 +288,50 @@ const CreateGameScreen = () => {
                 borderRadius: 3,
               }}
               backgroundStyle={styles.bottomModalBackground}
-              backdropComponent={(props) => (
-                <BottomSheetBackdrop
-                  {...props}
-                  disappearsOnIndex={-1}
-                  appearsOnIndex={0}
-                  opacity={0.9}
-                />
-              )}
             >
               <BottomSheetView style={styles.bottomSheetContainer}>
-                <Text style={styles.bottomSheetText}>Friends</Text>
+                <Text style={styles.bottomSheetTitle}>Select Friends</Text>
+                <Text style={styles.selectedCountText}>
+                  {selectedFriends.length} friends selected
+                </Text>
                 <FlatList
-                  data={friend}
-                  keyExtractor={(item: any) => item.id}
+                  data={friends}
+                  keyExtractor={(item, index) => index.toString()}
                   renderItem={({ item }) => (
-                    <View style={styles.friendItem}>
-                      <TouchableOpacity
-                        style={styles.radioButton}
-                        onPress={(e: any) =>
-                          setform({ ...form, request: e.target })
-                        }
-                      >
+                    <TouchableOpacity
+                      style={[
+                        styles.friendItem,
+                        selectedFriends.includes(item) &&
+                          styles.friendItemSelected,
+                      ]}
+                      onPress={() => toggleFriendSelection(item)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={styles.checkboxContainer}>
                         <View
                           style={[
-                            styles.radioButtonCircle,
-                            friend === item.id && styles.radioButtonSelected,
+                            styles.checkbox,
+                            selectedFriends.includes(item) &&
+                              styles.checkboxSelected,
                           ]}
-                        />
-                      </TouchableOpacity>
-                      <Text style={styles.friendText}>{item}</Text>
-                    </View>
+                        >
+                          {selectedFriends.includes(item) && (
+                            <View style={styles.checkmark} />
+                          )}
+                        </View>
+                      </View>
+                      <View style={styles.friendInfoContainer}>
+                        <Text style={styles.friendText}>{item}</Text>
+                        {selectedFriends.includes(item) && (
+                          <Text style={styles.selectedText}>Selected</Text>
+                        )}
+                      </View>
+                    </TouchableOpacity>
                   )}
+                  ItemSeparatorComponent={() => (
+                    <View style={styles.separator} />
+                  )}
+                  contentContainerStyle={styles.friendsList}
                 />
               </BottomSheetView>
             </BottomSheetModal>
@@ -464,33 +499,90 @@ const styles = StyleSheet.create({
   formContainer: {
     width: "100%",
   },
-  radioButton: {
+
+  checkboxContainer: {
+    marginRight: 12,
+  },
+  checkbox: {
     width: 24,
     height: 24,
-    borderRadius: 12,
+    borderRadius: 4,
     borderWidth: 2,
     borderColor: "#4CAF50",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 10,
+    backgroundColor: "transparent",
   },
-  radioButtonCircle: {
+  checkboxSelected: {
+    backgroundColor: "#4CAF50",
+  },
+  checkmark: {
     width: 12,
     height: 12,
-    borderRadius: 6,
-    backgroundColor: "transparent",
+    backgroundColor: "white",
+    borderRadius: 2,
   },
   friendItem: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
   },
-  radioButtonSelected: {
-    backgroundColor: "#4CAF50",
+  friendItemSelected: {
+    backgroundColor: "rgba(76, 175, 80, 0.2)",
+    borderLeftWidth: 3,
+    borderLeftColor: "#4CAF50",
+  },
+  friendInfoContainer: {
+    flex: 1,
   },
   friendText: {
     fontSize: 16,
-    color: "#333",
+    color: "white",
+    fontWeight: "500",
+  },
+  selectedText: {
+    fontSize: 12,
+    color: "#4CAF50",
+    marginTop: 4,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    marginVertical: 8,
+  },
+  friendsList: {
+    paddingVertical: 8,
+  },
+  bottomSheetTitle: {
+    fontSize: 20,
+    marginBottom: 8,
+    color: "white",
+    fontWeight: "bold",
+    alignSelf: "flex-start",
+  },
+  selectedCountText: {
+    fontSize: 14,
+    color: "#4CAF50",
+    marginBottom: 16,
+    alignSelf: "flex-start",
+  },
+  inviteFriendsButton: {
+    backgroundColor: "rgba(74, 20, 140, 0.8)",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  inviteFriendsText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
   },
   inputContainer: {
     flexDirection: "row",
@@ -539,15 +631,12 @@ const styles = StyleSheet.create({
   },
   bottomSheetContainer: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
     padding: 20,
-  },
-  bottomSheetText: {
-    fontSize: 16,
-    marginBottom: 10,
-    color: "white",
-    fontWeight: "bold",
+    backgroundColor: "#1a0033",
+    marginHorizontal: 10,
+    marginTop: 10,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   bottomModalBackground: {
     flex: 1,
