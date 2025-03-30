@@ -22,6 +22,8 @@ const Layout = () => {
             iconName = focused ? "trophy" : "trophy-outline";
           } else if (route.name === "profile") {
             iconName = focused ? "person" : "person-outline";
+          }else if( route.name === "stats"){
+            iconName = focused ? "stats-chart-outline" : "stats-chart"
           }
 
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -82,6 +84,12 @@ const Layout = () => {
         name="profile"
         options={{
           title: "Profile",
+        }}
+      />
+      <Tabs.Screen
+        name="stats"
+        options={{
+          title: "Statistics",
         }}
       />
     </Tabs>

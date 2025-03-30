@@ -47,7 +47,7 @@ const Login = () => {
       await AsyncStorage.setItem("PublicKey", response.data.user.publickey);
       await AsyncStorage.setItem("userid", response.data.user.id);
       
-      router.push("/(tabs)");
+      router.push("/nativeheatlth");
       if (!AsyncStorage.getItem("PublicKey")) {
         console.log("No public found");
         Alert.alert("No public found");
@@ -55,10 +55,11 @@ const Login = () => {
       console.log("Signup response:", response.data);
     } catch (err: any) {
       if (err instanceof Error && "response" in err) {
-        console.log(err);
+        // console.log(err);
+        console.log("hrr"); 
         const axiosError = err as { response: { data: { message: string } } };
-        console.log(axiosError.response.data);
-        ToastAndroid.show(axiosError.response.data.error[0].message,ToastAndroid.LONG)
+        console.log(axiosError.response.data.error[0].message);
+        ToastAndroid.show(axiosError.response.data.error[0].message||"Password is Incorrect",ToastAndroid.LONG)
         seterror(
           axiosError.response.data.error[0].message ||
             "An error occurred. Please try again."

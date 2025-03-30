@@ -178,12 +178,12 @@ const App = () => {
         requireAllSignatures: false,
         verifySignatures: false,
       });
-
+       console.log(selectedGame.id)
       const response = await axios.post(
         `${BACKEND_URL}/challenge/join/public/${selectedGame.id}`,
         { tx: serializedTransaction }
       );
-
+      console.log(response.data);
       if (response.status === 200) {
         setSuccess(true);
         ToastAndroid.show("Added to the contest", ToastAndroid.SHORT);
@@ -451,7 +451,9 @@ const OfficialGames = ({ handleJoinClick }: any) => {
       startdate: "",
       enddate: "",
       id: "",
-      status:""
+      status:"",
+      members:[],
+  
     },
   ]);
   useEffect(() => {
@@ -557,17 +559,17 @@ const OfficialGames = ({ handleJoinClick }: any) => {
                   </Text>
                 </View>
                 </View>
-              
-                {joined.some((join) => join.id == game.id) ? (
+                {joined.some((join) => join.id == game.id) || game.memberqty == game.members.length ? (
   <View>
-    <Text style={{ color: "#bfbfbf", fontSize: 12 }}>ALREADY JOINED</Text>
+    <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
+      {game.memberqty == game.members.length ? "MEMBER FULL" : "ALREADY JOINED"}
+    </Text>
     <Text style={{
-                color:"white",
-
-                fontSize:11
-              }}>{
-                game.status
-              }</Text>
+      color: "white",
+      fontSize: 11
+    }}>
+      {game.status}
+    </Text>
   </View>
 ) : (
   <View>

@@ -240,7 +240,9 @@ const Wallet = () => {
             const signature = await connection.getParsedTransaction(
               account.signature
             );
+            // console.log(account);
             if (!signature) return null;
+            console.log("test",signature.transaction.message);
 
             let amount = 0;
             let type = "";

@@ -50,7 +50,7 @@ const Signup = () => {
       await AsyncStorage.setItem("token", response.data.token);
       await AsyncStorage.setItem("PublicKey", response.data.user.publickey);
       await AsyncStorage.setItem("userid", response.data.user.id);
-      router.push("/(tabs)");
+      router.push("/nativeheatlth");
       if (!AsyncStorage.getItem("PublicKey")) {
         console.log("No public found");
         Alert.alert("No public found");

@@ -27,11 +27,6 @@ const InitializeHealthConnect = () => {
     try {
       const isInitialized = await initialize();
       console.log({ isInitialized });
-      const isInstalled = await Linking.canOpenURL(`healthconnect://`);
-      // if(!isInstalled){
-      //   await Linking.openURL("https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata");
-      //   return;
-      // }
       const permissionsToRequest = [
         PermissionsAndroid.PERMISSIONS.ACTIVITY_RECOGNITION,
       ];
@@ -49,7 +44,6 @@ const InitializeHealthConnect = () => {
       } else {
         console.log("Some permissions were denied:", results);
       }
-    
       const permisdsions = await requestPermission([
         { accessType: "read", recordType: "Steps" },
       ]);
@@ -128,7 +122,7 @@ const InitializeHealthConnect = () => {
 
           <Text style={styles.footerText}>
             By connecting, you agree to our
-            <Text style={styles.linkText}>Terms of Service</Text> and{" "}
+            <Text style={styles.linkText}>Terms of Service</Text> and
             <Text style={styles.linkText}>Privacy Policy</Text>.
           </Text>
         </View>

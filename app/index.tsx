@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Redirect } from "expo-router";
+import { Redirect, router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ActivityIndicator } from "react-native";
+import { getGrantedPermissions, initialize } from "react-native-health-connect";
 
 const StartPage = () => {
   const [auth, setauth] = useState(false);
@@ -10,6 +11,11 @@ const StartPage = () => {
   useEffect(() => {
     const Auth = async () => {
       try {
+        const isInitialized = await initialize(); 
+        const granted=getGrantedPermissions();
+        if((await granted).length==0){
+          return router.push("/nativeheatlth")
+        } 
         const token = await AsyncStorage.getItem("token");
         console.log("Token found:", token);
         if (token) {
