@@ -15,6 +15,7 @@ import Animated, {
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { BACKEND_URL } from "@/Backendurl";
 
 interface Data {
   day: string;
@@ -80,8 +81,8 @@ const ActivityTracker = () => {
       try {
         const userid = await AsyncStorage.getItem("userid");
         const response = await axios.post(
-          "http://10.5.121.76:3000/api/v1/step/analysis",
-          { id: "7a200fa4-9f3e-470f-b4d3-0b7d41d2ca2e" }
+          `${BACKEND_URL}/step/analysis`,
+          { id: userid }
         );
         console.log(response.data);
         const formattedData = response.data.data.map((item: any) => ({

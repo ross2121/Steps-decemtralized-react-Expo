@@ -12,6 +12,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import axios from "axios";
 import { BACKEND_URL } from "@/Backendurl";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 interface user{
   id:number,
   username:string
@@ -60,7 +61,7 @@ const NotificationsScreen = () => {
   const handleAccept = async (notificationId: string,username:string) => {
     try { 
       const userid=await AsyncStorage.getItem("userid");
-      await axios.post(`http://10.5.121.76:3000/api/v1/accept/friend`, {
+      await axios.post(`${BACKEND_URL}/accept/friend`, {
         userid:userid,
         username:username,
         bool:true
@@ -74,9 +75,13 @@ const NotificationsScreen = () => {
   };
   const handleDecline = async (notificationId: string) => {
     try {
-      await axios.post(`${BACKEND_URL}/notifications/decline`, {
-        id: notificationId,
+      const userid=await AsyncStorage.getItem("userid");
+      await axios.post(`${BACKEND_URL}/accept/friend`, {
+        userid:userid,
+        username:username,
+        bool:false
       });
+      router.push("/(nonav)/notification")  
       setNotifications((prev) =>
         prev.filter((notification) => notification.id !== notificationId)
       );

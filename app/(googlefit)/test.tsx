@@ -1,4 +1,4 @@
-import InitializeHealthConnect from "@/app/(tabs)/nativeheatlth";
+import InitializeHealthConnect from "@/app/(nonav)/nativeheatlth";
 import React from "react";
 const Health = () => {
   return <InitializeHealthConnect></InitializeHealthConnect>;

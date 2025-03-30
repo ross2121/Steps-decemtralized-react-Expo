@@ -22,6 +22,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   GestureHandlerRootView,
+  RefreshControl,
   ScrollView,
 } from "react-native-gesture-handler";
 import SlideButton from "rn-slide-button";
@@ -45,7 +46,12 @@ import {
   SystemProgram,
   Transaction,
 } from "@solana/web3.js";
-import AppS from "@/components/screens/test";
+interface GAme{
+Amount:number,
+id:string,
+name:string,
+
+}
 
 const escrowpublickey = "AL3YQV36ADyq3xwjuETH8kceNTH9fuP43esbFiLF1V1A";
 
@@ -119,7 +125,7 @@ const TransactionLoader = ({
 
 const App = () => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const [selectedGame, setSelectedGame] = useState(null);
+  const [selectedGame, setSelectedGame] = useState<GAme>();
 
   const connection = new Connection("https://api.devnet.solana.com");
   const snapPoints = useMemo(() => ["50%", "75%"], []);
@@ -207,7 +213,13 @@ const App = () => {
     console.log("Search Game");
     bottomSheetModalRef2.current?.present();
   }, []);
-
+  const [refreshing, setRefreshing] = React.useState(false);
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar
@@ -222,12 +234,14 @@ const App = () => {
             colors={["#1a0033", "#4b0082", "#290d44"]}
             style={styles.gradient}
           >
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            <ScrollView    refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          } contentContainerStyle={{ flexGrow: 1 }}>
               <View style={{ padding: 5 }}>
                 <StepsCount />
               </View>
               <View>
-                <AppS />
+               
               </View>
               <View>
                 <OfficialGames handleJoinClick={handleJoinClick} />
@@ -322,18 +336,6 @@ const App = () => {
 const StepsCount = () => {
   const [error, seterror] = useState("");
   const [step, setstep] = useState(0);
-  const Onsenddd = async () => {
-    try {
-      const userid = await AsyncStorage.getItem("userid");
-      const response = await axios.post(`${BACKEND_URL}/regular/update`, {
-        userid,
-        steps: step,
-      });
-      console.log(response.data);
-    } catch (e: any) {
-      seterror(e);
-    }
-  };
   useEffect(() => {
     const fetchSteps = async () => {
       try {
@@ -403,7 +405,7 @@ const StepsCount = () => {
               marginTop: 20,
             }}
           />
-          <Button title="Test" onPress={Onsenddd}></Button>
+       
 
           <View style={styles.setpsdiv}>
             <Text style={styles.steptext}>{step}</Text>
@@ -436,6 +438,7 @@ interface Game {
 
 const OfficialGames = ({ handleJoinClick }: any) => {
   const [error, seterror] = useState("");
+  const [joined,setjoined]=useState([]);
   const [form, setform] = useState([
     {
       name: "",
@@ -448,9 +451,21 @@ const OfficialGames = ({ handleJoinClick }: any) => {
       startdate: "",
       enddate: "",
       id: "",
+      status:""
     },
   ]);
   useEffect(() => {
+    const fetchuserdata=async()=>{
+      try {
+         const userid=await AsyncStorage.getItem("userid");
+         console.log("userdid");
+         const response =await axios.get(`${BACKEND_URL}/history/prev/${userid}`)
+         console.log(response.data);
+         setjoined(response.data.Tournament)    
+      } catch (error) {
+           console.log(error);
+      }
+    }
     const fetchdata = async () => {
       try {
         const response = await axios.get(`${BACKEND_URL}/challenge/public`);
@@ -462,6 +477,7 @@ const OfficialGames = ({ handleJoinClick }: any) => {
       }
     };
     fetchdata();
+    fetchuserdata();
   }, []);
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -532,22 +548,44 @@ const OfficialGames = ({ handleJoinClick }: any) => {
               >
                 <View>
                   <Text style={styles.gameHeader}>{game.name}</Text>
+                  <View>
+                  <Text style={{
+                    color:"gray",
+                    fontSize:12
+                  }}>
+                    {game.startdate}
+                  </Text>
                 </View>
-                <View>
-                  <TouchableOpacity
-                    style={styles.joinbutton}
-                    onPress={() => handleJoinClick(game)}
-                  >
-                    <Text
-                      style={{
-                        color: "white",
-                        fontSize: 16,
-                      }}
-                    >
-                      Join
-                    </Text>
-                  </TouchableOpacity>
                 </View>
+              
+                {joined.some((join) => join.id == game.id) ? (
+  <View>
+    <Text style={{ color: "#bfbfbf", fontSize: 12 }}>ALREADY JOINED</Text>
+    <Text style={{
+                color:"white",
+
+                fontSize:11
+              }}>{
+                game.status
+              }</Text>
+  </View>
+) : (
+  <View>
+    <TouchableOpacity
+      style={styles.joinbutton}
+      onPress={() => handleJoinClick(game)}
+    >
+      <Text
+        style={{
+          color: "white",
+          fontSize: 16,
+        }}
+      >
+        Join
+      </Text>
+    </TouchableOpacity>
+  </View>
+)}
               </View>
               <View
                 style={{
@@ -640,6 +678,7 @@ const OfficialGames = ({ handleJoinClick }: any) => {
 
 const CommunityGames = ({ handleJoinClick }: any) => {
   const [error, seterror] = useState("");
+  const[joined,setjoined]=useState([]);
   const [form, setform] = useState([
     {
       name: "",
@@ -651,9 +690,23 @@ const CommunityGames = ({ handleJoinClick }: any) => {
       days: 0,
       startdate: "",
       enddate: "",
+      id:"",
+      status:""
     },
   ]);
   useEffect(() => {
+    const fetchuserdata=async()=>{
+      try {
+         const userid=await AsyncStorage.getItem("userid");
+         console.log("userdid");
+         const response =await axios.get(`${BACKEND_URL}/history/prev/${userid}`)
+         console.log(response.data);
+         setjoined(response.data.Tournament)    
+      } catch (error) {
+           console.log(error);
+      }
+    }
+
     const fetchdata = async () => {
       try {
         const userid = await AsyncStorage.getItem("username");
@@ -669,6 +722,7 @@ const CommunityGames = ({ handleJoinClick }: any) => {
       }
     };
     fetchdata();
+    fetchuserdata();
   }, []);
 
   return (
@@ -718,6 +772,9 @@ const CommunityGames = ({ handleJoinClick }: any) => {
         ]}
       >
         {form.map((game) => (
+           <View>
+
+              
           <View key={game.name} style={styles.gameCard}>
             <View
               style={{
@@ -728,21 +785,44 @@ const CommunityGames = ({ handleJoinClick }: any) => {
             >
               <View>
                 <Text style={styles.gameHeader}>{game.name}</Text>
+                <View>
+                  <Text style={{
+                    color:"gray",
+                    fontSize:12
+                  }}>
+                    {game.startdate}
+                  </Text>
+                </View>
               </View>
               <View>
-                <TouchableOpacity
-                  style={styles.joinbutton}
-                  onPress={() => handleJoinClick(game)}
-                >
-                  <Text
-                    style={{
-                      color: "white",
-                      fontSize: 16,
-                    }}
-                  >
-                    Join
-                  </Text>
-                </TouchableOpacity>
+              {joined.some((join) => join.id == game.id) ? (
+                 <View>
+              <Text style={{ color: "#bfbfbf", fontSize: 12 }}>Already Joined</Text>
+              <Text style={{
+                color:"white",
+
+                fontSize:11
+              }}>{
+                game.status
+              }</Text>
+                   </View>
+) : (
+  <View>
+    <TouchableOpacity
+      style={styles.joinbutton}
+      onPress={() => handleJoinClick(game)}
+    >
+      <Text
+        style={{
+          color: "white",
+          fontSize: 16,
+        }}
+      >
+        Join
+      </Text>
+    </TouchableOpacity>
+  </View>
+)}
               </View>
             </View>
             <View
@@ -826,13 +906,14 @@ const CommunityGames = ({ handleJoinClick }: any) => {
               </View>
             </View>
           </View>
+          </View> 
         ))}
       </ScrollView>
     </View>
   );
 };
 
-const JoinGame = ({ handleSearchGame }) => {
+const JoinGame = ({ handleSearchGame }:any) => {
   return (
     <View
       style={{
@@ -872,14 +953,9 @@ const JoinGame = ({ handleSearchGame }) => {
 
       <View
         style={{
-          backgroundColor: "#1a0033",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          paddingVertical: 20,
-          marginBottom: 10,
-          paddingHorizontal: 35,
-          borderRadius: 13,
+       
+       paddingHorizontal:20,
+       marginVertical:10
         }}
       >
         <TouchableOpacity onPress={() => router.push("/(nonav)/newGame")}>
@@ -900,7 +976,7 @@ const JoinGame = ({ handleSearchGame }) => {
             </View>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleSearchGame()}>
+        {/* <TouchableOpacity onPress={() => handleSearchGame()}>
           <View style={styles.gamebttn}>
             <View>
               <FontAwesome6 name="magnifying-glass" size={24} color="white" />
@@ -909,7 +985,7 @@ const JoinGame = ({ handleSearchGame }) => {
               <Text style={styles.gamebttnText}>Game code</Text>
             </View>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     </View>
   );
@@ -960,7 +1036,7 @@ const styles = StyleSheet.create({
     paddingRight: "100%",
   },
   gameCard: {
-    width: 300,
+    width: 320,
     height: 170,
     marginHorizontal: 10,
     backgroundColor: "#1a0033",

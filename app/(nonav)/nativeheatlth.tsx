@@ -15,6 +15,7 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
+  PermissionsAndroid,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -31,6 +32,24 @@ const InitializeHealthConnect = () => {
       //   await Linking.openURL("https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata");
       //   return;
       // }
+      const permissionsToRequest = [
+        PermissionsAndroid.PERMISSIONS.ACTIVITY_RECOGNITION,
+      ];
+      if (Platform.OS === "android") {
+        permissionsToRequest.push(
+          "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND" as never
+        );
+      }
+      const results = await PermissionsAndroid.requestMultiple(permissionsToRequest);
+      const allGranted = Object.values(results).every(
+        (result) => result === PermissionsAndroid.RESULTS.GRANTED
+      );
+      if (allGranted) {
+        console.log("All permissions granted!");
+      } else {
+        console.log("Some permissions were denied:", results);
+      }
+    
       const permisdsions = await requestPermission([
         { accessType: "read", recordType: "Steps" },
       ]);
@@ -43,11 +62,10 @@ const InitializeHealthConnect = () => {
         console.log("no permission");
       }
       console.log("Granted permissions:", permissions);
-    } catch (error) {
-      console.error("Error initializing Health Connect:", error);
-      Alert.alert("Error", "Failed to initialize Health Connect.");
-    }
-  };
+    } 
+    catch (err) {
+      console.warn("Error requesting permissions:", err);
+    }}
   return (
     <LinearGradient
       colors={["#1a0033", "#4b0082", "#290d44"]}
