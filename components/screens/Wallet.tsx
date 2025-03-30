@@ -38,6 +38,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import SlideButton from "rn-slide-button";
 import axios from "axios";
 import { BACKEND_URL } from "@/Backendurl";
+import { router } from "expo-router";
 
 const TransactionLoader = ({
   loading,
@@ -203,11 +204,16 @@ const Wallet = () => {
         new PublicKey(publicKey),
         1 * LAMPORTS_PER_SOL
       );
+          
       ToastAndroid.show("1 SOL Airdropped", ToastAndroid.SHORT);
+      router.push("/(tabs)/wallet") 
+      
     } catch (e: any) {
       // seterro(e);
       console.log(e);
       seterror(e);
+      ToastAndroid.show("Failed To Airdrop Try after Sometime", ToastAndroid.SHORT);
+      router.push("/(tabs)/wallet") 
     }
   };
   useEffect(() => {

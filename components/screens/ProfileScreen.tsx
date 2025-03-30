@@ -77,7 +77,7 @@ const ProfileScreen = () => {
       },
     ],
   };
-
+   const[username,setusername]=useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Friend[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -87,6 +87,10 @@ const ProfileScreen = () => {
   useEffect(() => {
     Fetchfriend = async () => {
       try {
+        const username=await AsyncStorage.getItem("username");
+        if(username){
+        setusername(username);
+      }
         const userid = await AsyncStorage.getItem("userid");
         console.log(userid);
         const response = await axios.get(
@@ -177,7 +181,7 @@ const ProfileScreen = () => {
               source={require("../../assets/images/profile.png")}
               style={styles.profileImage}
             />
-            <Text style={styles.username}>Username</Text>
+            <Text style={styles.username}>{username}</Text>
           </View>
           <View>
             <TouchableOpacity onPress={handlePresentModalPress}>
