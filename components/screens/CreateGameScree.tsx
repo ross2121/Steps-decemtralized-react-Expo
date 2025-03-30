@@ -38,6 +38,17 @@ const CreateGameScreen = () => {
     days: 0,
     startdate: format(new Date(), "yyyy-MM-dd").toString(),
     enddate: format(new Date(), "yyyy-MM-dd").toString(),
+  });
+  const [privateform, setprivateform] = useState({
+    name: "",
+    memberqty: 0,
+    Dailystep: 0,
+    Amount: 0,
+    Digital_Currency: "sol",
+    days: 0,
+    type:"private",
+    startdate: format(new Date(), "yyyy-MM-dd").toString(),
+    enddate: format(new Date(), "yyyy-MM-dd").toString(),
     request: [],
   });
   const [loading, setLoading] = useState(false);
@@ -74,10 +85,10 @@ const CreateGameScreen = () => {
     fetchFriends();
   }, [selectedTab]);
 
-  const toggleFriendSelection = (friend) => {
-    setSelectedFriends((prevSelected) => {
+  const toggleFriendSelection = (friend:any) => {
+    setSelectedFriends((prevSelected:any) => {
       if (prevSelected.includes(friend)) {
-        const newSelected = prevSelected.filter((f) => f !== friend);
+        const newSelected = prevSelected.filter((f:any) => f !== friend);
         // console.log("Friend deselected:", friend);
         // console.log("Currently selected friends:", newSelected);
         return newSelected;
@@ -131,7 +142,7 @@ const CreateGameScreen = () => {
         startdate: form.startdate,
         enddate: form.enddate,
         userid: await AsyncStorage.getItem("userid"),
-        request: form.request,
+        // request: form.request,
       });
       Alert.alert("Success", "Game Created Successfully");
       router.push("/(tabs)");
@@ -148,6 +159,50 @@ const CreateGameScreen = () => {
         );
         // @ts-ignore
         seterror(
+          axiosError.response.data.error[0].message ||
+            "An error occurred. Please try again."
+        );
+      } else {
+        console.log(err);
+        seterror("An unexpected error occurred. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handlePrivateCreategame = async () => {
+    setLoading(true);
+    seterror(null);
+    try {
+      const response = await axios.post(`${BACKEND_URL}/challenge/private`, {
+        name: privateform.name,
+        memberqty: privateform.memberqty,
+        Dailystep: privateform.Dailystep,
+        Amount:privateform.Amount,
+        Digital_Currency: "sol",
+        days: privateform.days,
+        startdate:privateform.startdate,
+        enddate: privateform.enddate,
+        userid: await AsyncStorage.getItem("userid"),
+        request:selectedFriends,
+      });
+      Alert.alert("Success", "Game Created Successfully");
+      router.push("/(tabs)");
+      console.log("Signup response:", response.data);
+    } catch (err: any) {
+      if (err instanceof Error && "response" in err) {
+        // console.log(err);
+        const axiosError = err as { response: { data: { message: string } } };
+        // @ts-ignore
+        console.log(axiosError.response.data.error[0].message);
+        ToastAndroid.show(
+          // @ts-ignore
+          axiosError.response.data.error[0].message,
+          ToastAndroid.LONG
+        );
+        // @ts-ignore
+        seterror(
+          // @ts-ignore
           axiosError.response.data.error[0].message ||
             "An error occurred. Please try again."
         );
@@ -191,7 +246,6 @@ const CreateGameScreen = () => {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
       <LinearGradient
         colors={["#1a0033", "#4b0082", "#8a2be2"]}
-        F
         style={styles.container}
       >
         <BottomSheetModalProvider>
@@ -249,10 +303,9 @@ const CreateGameScreen = () => {
                         Create Challenge for Community
                       </Text>
                     </View>
-
                     <GameForm
-                      form={form}
-                      setform={setform}
+                      form={privateform}
+                      setform={setprivateform}
                       loading={loading}
                       error={error}
                       startDate={startDate}
@@ -262,7 +315,7 @@ const CreateGameScreen = () => {
                       showMode={showMode}
                       handleStartDateChange={handleStartDateChange}
                       handleEndDateChange={handleEndDateChange}
-                      handleCreategame={handleCreategame}
+                      handleCreategame={handlePrivateCreategame}
                     />
                     <TouchableOpacity
                       onPress={handlePresentModalPress}
