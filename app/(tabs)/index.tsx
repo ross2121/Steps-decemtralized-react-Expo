@@ -14,6 +14,9 @@ import {
   Alert,
   StatusBar,
   Button,
+  ToastAndroid,
+  ActivityIndicator,
+  Animated,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -42,12 +45,78 @@ import {
   SystemProgram,
   Transaction,
 } from "@solana/web3.js";
-import { set } from "date-fns";
 import AppS from "@/components/screens/test";
+
 const escrowpublickey = "AL3YQV36ADyq3xwjuETH8kceNTH9fuP43esbFiLF1V1A";
-interface Game{
-  Amount:number
-}
+
+const TransactionLoader = ({
+  loading,
+  error,
+  success,
+  amount,
+  onRetry,
+  onClose,
+}: any) => {
+  const spinValue = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (loading) {
+      Animated.loop(
+        Animated.timing(spinValue, {
+          toValue: 1,
+          duration: 1500,
+          useNativeDriver: true,
+        })
+      ).start();
+    } else {
+      spinValue.setValue(0);
+    }
+  }, [loading, spinValue]);
+
+  const spin = spinValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
+
+  return (
+    <View style={styles.transactionContainer}>
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <Animated.View style={{ transform: [{ rotate: spin }] }}>
+            <ActivityIndicator size="large" color="#9C89FF" />
+          </Animated.View>
+          <Text style={styles.loaderText}>Processing...</Text>
+        </View>
+      )}
+      {error && !loading && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Transaction Failed</Text>
+          <Text style={styles.errorMessage}>
+            {error.message || "An error occurred"}
+          </Text>
+          <View style={styles.buttonContainer}>
+            <Text onPress={onRetry} style={styles.retryButton}>
+              Retry
+            </Text>
+            <Text onPress={onClose} style={styles.closeButton}>
+              Close
+            </Text>
+          </View>
+        </View>
+      )}
+      {success && !loading && (
+        <View style={styles.successContainer}>
+          <Text style={styles.successText}>Transaction Successful!</Text>
+          <Text style={styles.successMessage}>Amount: {amount} SOL</Text>
+          <Text onPress={onClose} style={styles.closeButton}>
+            Close
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+};
+
 const App = () => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [selectedGame, setSelectedGame] = useState(null);
@@ -61,52 +130,77 @@ const App = () => {
     bottomSheetModalRef.current?.present();
   }, []);
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [showLoader, setShowLoader] = useState(false);
+
   const Onsend = async () => {
+    setShowLoader(true);
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+
     try {
       const publickey = await AsyncStorage.getItem("PublicKey");
       if (!publickey) {
-        Alert.alert("NO public key found");
-        return;
+        throw new Error("No public key found");
       }
+
       const balance = await connection.getBalance(new PublicKey(publickey));
-      if(selectedGame===null){
-        return;
+      if (!selectedGame) {
+        throw new Error("No game selected");
       }
-      console.log(selectedGame.Amount);
+
       if (balance < selectedGame.Amount * LAMPORTS_PER_SOL) {
-        Alert.alert("Not enough credit");
-        return;
+        throw new Error("Insufficient balance");
       }
-      console.log("chh");
-      console.log(publickey);
-      const signature = new Transaction().add(
+
+      const transaction = new Transaction().add(
         SystemProgram.transfer({
           fromPubkey: new PublicKey(publickey),
           toPubkey: new PublicKey(escrowpublickey),
           lamports: LAMPORTS_PER_SOL * selectedGame.Amount,
         })
       );
+
       const { blockhash } = await connection.getLatestBlockhash();
-      signature.recentBlockhash = blockhash;
-      signature.feePayer = new PublicKey(publickey);
-      const serilize = signature.serialize({
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = new PublicKey(publickey);
+
+      const serializedTransaction = transaction.serialize({
         requireAllSignatures: false,
         verifySignatures: false,
       });
-      console.log("chekc1");
-      console.log
+
       const response = await axios.post(
-        `http://10.5.121.76:3000/api/v1/challenge/join/public/${selectedGame.id}`,
-        { tx: serilize }
+        `${BACKEND_URL}/challenge/join/public/${selectedGame.id}`,
+        { tx: serializedTransaction }
       );
-      if (response.status == 200) {
-        Alert.alert("ADDed to the contest");
+
+      if (response.status === 200) {
+        setSuccess(true);
+        ToastAndroid.show("Added to the contest", ToastAndroid.SHORT);
       }
     } catch (e: any) {
-      console.log(e);
-      Alert.alert(e);
+      setError(e);
+      ToastAndroid.show(e.message || "Transaction Failed!", ToastAndroid.SHORT);
+    } finally {
+      setLoading(false);
     }
   };
+
+  const handleRetry = () => {
+    setError(null);
+    Onsend();
+  };
+
+  const handleClose = () => {
+    setShowLoader(false);
+    setError(null);
+    setSuccess(false);
+  };
+
   const bottomSheetModalRef2 = useRef<BottomSheetModal>(null);
   const snapPoints2 = useMemo(() => ["30%"], []);
   const handleSearchGame = useCallback(() => {
@@ -160,19 +254,8 @@ const App = () => {
             >
               <BottomSheetView>
                 {selectedGame ? (
-                  <View
-                    style={{
-                      paddingHorizontal: 10,
-                    }}
-                  >
-                    <View
-                      style={{
-                        backgroundColor: "#1a0033",
-                        borderRadius: 20,
-                        paddingHorizontal: 20,
-                        paddingVertical: 20,
-                      }}
-                    >
+                  <View style={{ paddingHorizontal: 10 }}>
+                    <View style={styles.gameDetailsContainer}>
                       <Text style={styles.bottomSheetTitle}>
                         {selectedGame.name}
                       </Text>
@@ -183,46 +266,6 @@ const App = () => {
                       >
                         You Pay: {selectedGame.Amount}
                       </Text>
-                      {/* <View style={{ marginTop: 20 }}>
-                        <Text
-                          style={{
-                            color: "white",
-                            fontSize: 16,
-                            marginBottom: 10,
-                          }}
-                        >
-                          Slide to Confirm
-                        </Text>
-                        <View
-                          style={{
-                            backgroundColor: "#4b0082",
-                            borderRadius: 50,
-                            height: 50,
-                            justifyContent: "center",
-                            paddingHorizontal: 5,
-                          }}
-                        >
-                          <TouchableOpacity
-                            style={{
-                              backgroundColor: "#9C89FF",
-                              borderRadius: 50,
-                              height: 40,
-                              width: 100,
-                              justifyContent: "center",
-                              alignItems: "center",
-                              position: "absolute",
-                              left: 5,
-                            }}
-                            onPress={() => console.log("Confirmed!")}
-                          >
-                            <Text
-                              style={{ color: "white", fontWeight: "bold" }}
-                            >
-                              Confirm
-                            </Text>
-                          </TouchableOpacity>
-                        </View>
-                      </View> */}
                       <SlideButton
                         title="Slide To Confirm"
                         width="80%"
@@ -239,9 +282,18 @@ const App = () => {
                           backgroundColor: "#1a0033",
                         }}
                         onSlideEnd={Onsend}
-                        // height="30%"
                       />
                     </View>
+                    {showLoader && (
+                      <TransactionLoader
+                        loading={loading}
+                        error={error}
+                        success={success}
+                        amount={selectedGame?.Amount}
+                        onRetry={handleRetry}
+                        onClose={handleClose}
+                      />
+                    )}
                   </View>
                 ) : (
                   <Text style={styles.bottomSheetTitle}>No Game Selected</Text>
@@ -407,57 +459,13 @@ const OfficialGames = ({ handleJoinClick }: any) => {
         console.log("response", response.data.allchalange);
       } catch (Error) {
         console.log(Error);
-        // seterror(Error); r
       }
     };
     fetchdata();
   }, []);
 
-  const games = [
-    {
-      id: 1,
-      title: "Game1",
-      entryPrice: "2",
-      time: "10/3-16/03",
-      participants: "83",
-      dailySteps: "12k",
-    },
-    {
-      id: 2,
-      title: "Game2",
-      entryPrice: "2",
-      time: "10/3-16/03",
-      participants: "83",
-      dailySteps: "12k",
-    },
-    {
-      id: 3,
-      title: "Game 3",
-      entryPrice: "2",
-      time: "10/3-16/03",
-      participants: "83",
-      dailySteps: "12k",
-    },
-    {
-      id: 4,
-      title: "Game 4",
-      entryPrice: "2",
-      time: "10/3-16/03",
-      participants: "83",
-      dailySteps: "12k",
-    },
-    {
-      id: 5,
-      title: "Game 5",
-      entryPrice: "2",
-      time: "10/3-16/03",
-      participants: "83",
-      dailySteps: "12k",
-    },
-  ];
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
-  
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
   }, []);
@@ -504,7 +512,7 @@ const OfficialGames = ({ handleJoinClick }: any) => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={[
             styles.gamesScrollContent,
-            games.length <= 4 && {
+            form.length <= 4 && {
               alignSelf: "center",
               width: 1400,
               paddingRight: "40%",
@@ -658,54 +666,10 @@ const CommunityGames = ({ handleJoinClick }: any) => {
         console.log("response", response.data.allchalange);
       } catch (Error) {
         console.log(Error);
-        // seterror(Error); r
       }
     };
     fetchdata();
   }, []);
-
-  const games = [
-    {
-      id: 1,
-      title: "Game1",
-      entryPrice: "2",
-      time: "10/3-16/03",
-      participants: "83",
-      dailySteps: "12k",
-    },
-    {
-      id: 2,
-      title: "Game2",
-      entryPrice: "2",
-      time: "10/3-16/03",
-      participants: "83",
-      dailySteps: "12k",
-    },
-    // {
-    //   id: 3,
-    //   title: "Game 3",
-    //   entryPrice: "2",
-    //   time: "10/3-16/03",
-    //   participants: "83",
-    //   dailySteps: "12k",
-    // },
-    // {
-    //   id: 4,
-    //   title: "Game 4",
-    //   entryPrice: "2",
-    //   time: "10/3-16/03",
-    //   participants: "83",
-    //   dailySteps: "12k",
-    // },
-    // {
-    //   id: 5,
-    //   title: "Game 5",
-    //   entryPrice: "2",
-    //   time: "10/3-16/03",
-    //   participants: "83",
-    //   dailySteps: "12k",
-    // },
-  ];
 
   return (
     <View style={styles.gamesContainer}>
@@ -714,7 +678,6 @@ const CommunityGames = ({ handleJoinClick }: any) => {
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
-          // paddingRight: 16,
           marginBottom: 10,
         }}
       >
@@ -746,7 +709,7 @@ const CommunityGames = ({ handleJoinClick }: any) => {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={[
           styles.gamesScrollContent,
-          games.length <= 4 && {
+          form.length <= 4 && {
             alignSelf: "center",
             width: 1400,
             paddingRight: "40%",
@@ -987,7 +950,6 @@ const styles = StyleSheet.create({
   gamesContainer: {
     marginVertical: 10,
     paddingLeft: 20,
-    // width: 500,
   },
   gamesTitle: {
     color: "white",
@@ -1016,7 +978,6 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "bold",
   },
-
   gameHeader: {
     color: "white",
     fontSize: 23,
@@ -1112,6 +1073,67 @@ const styles = StyleSheet.create({
     backgroundColor: "#7E3887",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
+  },
+  transactionContainer: {
+    marginTop: 20,
+    padding: 20,
+    backgroundColor: "#1a0033",
+    borderRadius: 10,
+  },
+  loadingContainer: {
+    alignItems: "center",
+  },
+  loaderText: {
+    color: "white",
+    fontSize: 18,
+    marginTop: 10,
+  },
+  errorContainer: {
+    alignItems: "center",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  errorMessage: {
+    color: "white",
+    fontSize: 14,
+    marginTop: 10,
+    textAlign: "center",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    marginTop: 20,
+  },
+  retryButton: {
+    color: "white",
+    fontSize: 16,
+    marginRight: 20,
+  },
+  closeButton: {
+    color: "white",
+    fontSize: 16,
+  },
+  successContainer: {
+    alignItems: "center",
+  },
+  successText: {
+    color: "green",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  successMessage: {
+    color: "white",
+    fontSize: 14,
+    marginTop: 10,
+    textAlign: "center",
+  },
+  gameDetailsContainer: {
+    backgroundColor: "#1a0033",
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
   },
 });
 
