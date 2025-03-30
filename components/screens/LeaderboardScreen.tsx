@@ -39,14 +39,16 @@ export default function LeaderboardScreen() {
       try {
         setloading(true);
         const response = await axios.get(`${BACKEND_URL}/total/steps`);
-        console.log(response.data.data)
-        const formateddata = response.data.data.map((dat: any) => ({
-          id: dat.username,
-          username: dat.username,
-          steps: Number(dat.steps),
-          avatar:
-            "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
-        })).sort((a:any, b:any) => b.steps - a.steps);
+        console.log(response.data.data);
+        const formateddata = response.data.data
+          .map((dat: any) => ({
+            id: dat.username,
+            username: dat.username,
+            steps: Number(dat.steps),
+            avatar:
+              "https://c8.alamy.com/comp/2PWERD5/student-avatar-illustration-simple-cartoon-user-portrait-user-profile-icon-youth-avatar-vector-illustration-2PWERD5.jpg",
+          }))
+          .sort((a: any, b: any) => b.steps - a.steps);
         setform(formateddata);
       } catch (e) {
         console.log(e);
@@ -62,13 +64,13 @@ export default function LeaderboardScreen() {
       <View style={styles.itemContainer}>
         <Text style={styles.index}>{index + 1}</Text>
         <View style={styles.avatarColumn}>
-        <Image source={{ uri: item.avatar }} style={styles.avatar} />
-</View>
-<View style={styles.usernameColumn}>
-        <Text style={styles.text}> {item.username}</Text>
+          <Image source={{ uri: item.avatar }} style={styles.avatar} />
+        </View>
+        <View style={styles.usernameColumn}>
+          <Text style={styles.text}> {item.username}</Text>
         </View>
         <View style={styles.stepsColumn}>
-        <Text style={styles.text}> {item.steps}</Text>
+          <Text style={styles.text}> {item.steps}</Text>
         </View>
       </View>
     );
@@ -192,15 +194,15 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 14,
     fontWeight: "bold",
-    width:100,
+    width: 100,
     color: "white",
     textAlign: "center",
   },
   itemContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#1a0033',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#1a0033",
     paddingVertical: 10,
     paddingHorizontal: 15,
     marginHorizontal: 10,
@@ -209,38 +211,39 @@ const styles = StyleSheet.create({
   },
   rankColumn: {
     width: 40,
-    alignItems: 'center',
+    alignItems: "center",
   },
   avatarColumn: {
     width: 50,
-    alignItems: 'center',
+    alignItems: "center",
   },
   usernameColumn: {
     width: 100,
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
     paddingLeft: 10,
+    textOverflow: "ellipsis",
   },
   stepsColumn: {
     width: 80,
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
   },
   index: {
-    width:40,
+    width: 40,
     fontSize: 12,
-    textAlign:"center",
+    textAlign: "center",
     fontWeight: "bold",
     color: "#FFD700",
   },
   texts: {
     fontSize: 14,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
   },
   avatar: {
-    width: 70,
+    width: 50,
     height: 50,
     borderRadius: 25,
-    marginRight: 10,
+    marginLeft: 27,
   },
   contentContainer: {
     paddingBottom: "100%",
@@ -248,15 +251,15 @@ const styles = StyleSheet.create({
   headings: {
     flexDirection: "row",
     marginBottom: 10,
-    paddingHorizontal:25,
+    paddingHorizontal: 25,
     justifyContent: "space-around",
-    paddingTop:10
+    paddingTop: 10,
   },
   headingFont: {
     fontSize: 13,
     fontWeight: "bold",
     color: "#bfbfbf",
-    width:80,
+    width: 80,
 
     // marginBottom: 10,
   },

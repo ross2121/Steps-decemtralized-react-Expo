@@ -83,12 +83,12 @@ const ProfileScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   const [friends, setfriends] = useState([]);
-  let Fetchfriend:any=null
+  let Fetchfriend: any = null;
   useEffect(() => {
-     Fetchfriend = async () => {
+    Fetchfriend = async () => {
       try {
         const userid = await AsyncStorage.getItem("userid");
-          console.log(userid);
+        console.log(userid);
         const response = await axios.get(
           `${BACKEND_URL}/get/friends/${userid}`
         );
@@ -97,7 +97,6 @@ const ProfileScreen = () => {
       } catch (e) {
         console.log(e);
       }
-     
     };
     Fetchfriend();
   }, []);
@@ -129,17 +128,17 @@ const ProfileScreen = () => {
         username: username,
         userid: userid,
       });
-      ToastAndroid.show("Friend request send ",ToastAndroid.LONG)
-      
+      ToastAndroid.show("Friend request send ", ToastAndroid.LONG);
+
       console.log(response.data);
-       await axios.post(`${BACKEND_URL}/add/friend`, {
+      await axios.post(`${BACKEND_URL}/add/friend`, {
         username: username,
         userid: userid,
       });
       // await Fetchfriend();
     } catch (error) {
       console.log(error);
-    }finally{
+    } finally {
       setIsLoading(false);
     }
   };
@@ -190,14 +189,12 @@ const ProfileScreen = () => {
                   color="white"
                   style={styles.optionIcon}
                 />
-
-
-
               </View>
             </TouchableOpacity>
           </View>
           <BottomSheetModal
             snapPoints={snapPoints}
+            index={1}
             ref={bottomSheetModalRef}
             backgroundStyle={styles.bottomSheetBackground}
             backdropComponent={(props) => (
@@ -482,7 +479,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 10,
   },
-  addButtonText: { color: "white", fontSize: 14, fontWeight: "bold" },
+  addButtonText: { color: "white", fontSize: 12, fontWeight: "bold" },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
