@@ -11,6 +11,8 @@ import {
   ActivityIndicator,
   Animated,
   ScrollView,
+  FlatList,
+  ToastAndroid,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -36,6 +38,7 @@ const CreateGameScreen = () => {
     days: 0,
     startdate: format(new Date(), "yyyy-MM-dd").toString(),
     enddate: format(new Date(), "yyyy-MM-dd").toString(),
+    request:[]
   });
   const [loading, setLoading] = useState(false);
   const [error, seterror] = useState<string | null>(null);
@@ -50,16 +53,26 @@ const CreateGameScreen = () => {
   const animatedValue = useRef(new Animated.Value(0)).current;
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const [friend,setfriends]=useState([])
   useEffect(() => {
+    seterror(null);
     if (selectedTab === "community") {
       bottomSheetModalRef.current?.present();
     } else {
       bottomSheetModalRef.current?.dismiss();
     }
+    const fetchriend=async()=>{
+      const userid=await AsyncStorage.getItem("userid");
+      console.log(userid);
+      const response = await axios.get(
+        `${BACKEND_URL}/get/friends/${userid}`
+      );
+      console.log(response.data.user);
+      setfriends(response.data.user);
+    }
+    fetchriend()
   }, [selectedTab]);
-
-
-  const showMode = (currentMode) => {
+  const showMode = (currentMode:any) => {
     setShow(true);
     setMode(currentMode);
   };
@@ -105,11 +118,14 @@ const CreateGameScreen = () => {
       console.log("Signup response:", response.data);
     } catch (err: any) {
       if (err instanceof Error && "response" in err) {
-        console.log(err);
+        // console.log(err);
         const axiosError = err as { response: { data: { message: string } } };
-        console.log(axiosError.response.data);
+        // @ts-ignore
+        console.log(axiosError.response.data.error[0].message);
+        ToastAndroid.show(axiosError.response.data.error[0].message,ToastAndroid.LONG)
+        // @ts-ignore
         seterror(
-          axiosError.response.data.message ||
+          axiosError.response.data.error[0].message ||
             "An error occurred. Please try again."
         );
       } else {
@@ -239,8 +255,6 @@ const CreateGameScreen = () => {
                 )}
               </View>
             </ScrollView>
-
-            {/* Bottom Sheet Modal */}
             <BottomSheetModal
               ref={bottomSheetModalRef}
               index={0}
@@ -264,9 +278,26 @@ const CreateGameScreen = () => {
             >
               <BottomSheetView style={styles.bottomSheetContainer}>
                 <Text style={styles.bottomSheetText}>Community Options</Text>
-                <Text style={styles.bottomSheetText}>
-                  Add your community-specific settings here.
-                </Text>
+                <FlatList
+        data={friend}
+        keyExtractor={(item:any) => item.id}
+        renderItem={({ item }) => (
+          <View style={styles.friendItem}>
+            <TouchableOpacity
+              style={styles.radioButton}
+              onPress={(e:any) =>setform({...form,request:e.target})}
+            >
+              <View
+                style={[
+                  styles.radioButtonCircle,
+                  friend === item.id && styles.radioButtonSelected,
+                ]}
+              />
+            </TouchableOpacity>
+            <Text style={styles.friendText}>{item}</Text>
+          </View>
+        )}
+      />
               </BottomSheetView>
             </BottomSheetModal>
           </SafeAreaView>
@@ -432,6 +463,34 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     width: "100%",
+  },
+  radioButton: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "#4CAF50",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  radioButtonCircle: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "transparent",
+  },
+  friendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  radioButtonSelected: {
+    backgroundColor: "#4CAF50",
+  },
+  friendText: {
+    fontSize: 16,
+    color: "#333",
   },
   inputContainer: {
     flexDirection: "row",

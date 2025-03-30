@@ -19,6 +19,7 @@ import {
   Image,
   ToastAndroid,
   Animated,
+  ActivityIndicator,
 } from "react-native";
 import React from "react";
 import {
@@ -39,7 +40,7 @@ import SlideButton from "rn-slide-button";
 import axios from "axios";
 import { BACKEND_URL } from "@/Backendurl";
 
-// Transaction Loader Component
+
 const TransactionLoader = ({
   loading,
   error,
@@ -49,7 +50,6 @@ const TransactionLoader = ({
   onRetry,
   onClose,
 }: any) => {
-  // Animation for the loading spinner
   const spinValue = React.useRef(new Animated.Value(0)).current;
 
   React.useEffect(() => {
@@ -71,7 +71,6 @@ const TransactionLoader = ({
     outputRange: ["0deg", "360deg"],
   });
 
-  // Truncate the recipient address for display
   const truncateAddress = (address: any) => {
     if (!address) return "";
     return `${address.substring(0, 6)}...${address.substring(
@@ -192,8 +191,10 @@ const Wallet = () => {
   ]);
   const [sol, setsol] = useState(0);
   const [error, seterror] = useState("");
+  const[loading,setloading]=useState(false);
   const Airdrop = async () => {
     try {
+      setloading
       const connection = new Connection("https://api.devnet.solana.com");
       const publicKey = await AsyncStorage.getItem("PublicKey");
       if (!publicKey) {
@@ -214,6 +215,7 @@ const Wallet = () => {
   useEffect(() => {
     const fetchWallet = async () => {
       try {
+        setloading(true);
         const publicKey = await AsyncStorage.getItem("PublicKey");
         console.log(publicKey);
         if (!publicKey) {
@@ -276,6 +278,8 @@ const Wallet = () => {
           } catch (error) {
             console.error("Error processing transaction:", error);
             return null;
+          }finally{
+            setloading(false);
           }
         });
         const transactions = (await Promise.all(transactionPromises)).filter(
@@ -367,7 +371,6 @@ const Wallet = () => {
             colors={["#1a0033", "#4b0082", "#290d44"]}
             style={styles.gradient}
           >
-            {/* Wallet Header */}
             <View style={styles.header}>
               <Text style={styles.headerTitle}>Wallet</Text>
               {/* <TouchableOpacity style={styles.settingsButton}>
@@ -494,8 +497,13 @@ const Wallet = () => {
                 <Text style={styles.bottomSheetTitle}>Balances</Text>
                 <Feather name="clock" size={20} color="white" />
               </View>
-
-              <BottomSheetFlatList
+              <View>
+            
+              </View>
+              {loading?(
+                  <ActivityIndicator size="large" color="#00ff00" />
+              ):(
+                <BottomSheetFlatList
                 data={history}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderItem}
@@ -504,6 +512,8 @@ const Wallet = () => {
                   <Text style={styles.emptyText}>No Transaction available</Text>
                 }
               />
+              )}  
+            
             </View>
           </BottomSheet>
         </BottomSheetModalProvider>

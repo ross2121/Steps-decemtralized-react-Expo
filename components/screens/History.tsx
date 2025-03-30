@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Animated,
   FlatList,
   SafeAreaView,
@@ -92,13 +93,13 @@ const History = () => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
+        setIsLoading(true);
         const userid = await AsyncStorage.getItem("userid");
         if (!userid) {
           setError("User ID not found.");
           setIsLoading(false);
           return;
         }
-
         const response = await axios.get(
           `${BACKEND_URL}/history/prevgame/${userid}`
         ); 
@@ -139,7 +140,7 @@ const History = () => {
     ],
   };
 
-  const Item = ({ item }) => (
+  const Item = ({ item }:any) => (
     <View style={styles.item}>
       <Text style={styles.title}>Name: {item.name}</Text>
       <Text style={styles.text}>Members: {item.memberqty}</Text>
@@ -172,13 +173,17 @@ const History = () => {
             </View>
           </TouchableOpacity>
         </View>
-        {/* tab bar  */}
+  
         <View style={styles.tabIndicatorContainer}>
           <Animated.View style={[styles.tabIndicator, animatedBarStyle]} />
         </View>
 
         {selectedTab === "participated" ? (
           <View>
+            {isLoading? ( 
+                <ActivityIndicator size="large" color="#00ff00" />    
+           ):(
+            <View>
             <FlatList
               data={participated}
               scrollEnabled={true}
@@ -197,6 +202,10 @@ const History = () => {
                 </Text>
               }
             />
+          </View>
+          )
+           }
+
           </View>
         ) : (
           <View>

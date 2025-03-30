@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Button,
   ActivityIndicator,
+  ToastAndroid,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -58,6 +59,7 @@ const Login = () => {
         console.log(err);
         const axiosError = err as { response: { data: { message: string } } };
         console.log(axiosError.response.data);
+        ToastAndroid.show(axiosError.response.data.message,ToastAndroid.LONG)
         seterror(
           axiosError.response.data.message ||
             "An error occurred. Please try again."

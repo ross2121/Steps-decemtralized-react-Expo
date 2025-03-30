@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -51,7 +52,9 @@ const ProfileScreen = () => {
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
   }, []);
-
+  const handleDismissModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.dismiss();
+  }, []);
   const snapPoints = useMemo(() => ["50%", "70%"], []);
 
   const handleTabPress = (tab: "friends" | "search") => {
@@ -78,20 +81,25 @@ const ProfileScreen = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Friend[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   const [friends, setfriends] = useState([]);
+  let Fetchfriend:any=null
   useEffect(() => {
-    const Fetchfriend = async () => {
+     Fetchfriend = async () => {
       try {
         const userid = await AsyncStorage.getItem("userid");
+          console.log(userid);
         const response = await axios.get(
           `${BACKEND_URL}/get/friends/${userid}`
         );
+        console.log(response.data.user);
         setfriends(response.data.user);
       } catch (e) {
         console.log(e);
       }
-      Fetchfriend();
+     
     };
+    Fetchfriend();
   }, []);
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -113,6 +121,7 @@ const ProfileScreen = () => {
   };
   const Addfriend = async (username: string) => {
     try {
+      setIsLoading(true);
       const userid = await AsyncStorage.getItem("userid");
       console.log(userid);
       console.log(username);
@@ -120,9 +129,18 @@ const ProfileScreen = () => {
         username: username,
         userid: userid,
       });
+      ToastAndroid.show("Friend request send ",ToastAndroid.LONG)
+      
       console.log(response.data);
+       await axios.post(`${BACKEND_URL}/add/friend`, {
+        username: username,
+        userid: userid,
+      });
+      // await Fetchfriend();
     } catch (error) {
       console.log(error);
+    }finally{
+      setIsLoading(false);
     }
   };
 
@@ -172,6 +190,9 @@ const ProfileScreen = () => {
                   color="white"
                   style={styles.optionIcon}
                 />
+
+
+
               </View>
             </TouchableOpacity>
           </View>
@@ -229,7 +250,7 @@ const ProfileScreen = () => {
                 keyExtractor={(item: any) => item.id}
                 renderItem={({ item }) => (
                   <View style={styles.friendItem}>
-                    <Text style={styles.friendText}>{item.username}</Text>
+                    <Text style={styles.friendText}>{item}</Text>
                   </View>
                 )}
                 contentContainerStyle={{ paddingBottom: 20 }}
@@ -243,7 +264,6 @@ const ProfileScreen = () => {
               />
             ) : (
               <View style={styles.searchView}>
-                {/* Search Bar */}
                 <View style={styles.searchBar}>
                   <TextInput
                     style={styles.searchInput}
