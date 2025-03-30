@@ -38,7 +38,7 @@ const CreateGameScreen = () => {
     days: 0,
     startdate: format(new Date(), "yyyy-MM-dd").toString(),
     enddate: format(new Date(), "yyyy-MM-dd").toString(),
-    request:[]
+    request: [],
   });
   const [loading, setLoading] = useState(false);
   const [error, seterror] = useState<string | null>(null);
@@ -53,7 +53,7 @@ const CreateGameScreen = () => {
   const animatedValue = useRef(new Animated.Value(0)).current;
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const [friend,setfriends]=useState([])
+  const [friend, setfriends] = useState([]);
   useEffect(() => {
     seterror(null);
     if (selectedTab === "community") {
@@ -61,18 +61,16 @@ const CreateGameScreen = () => {
     } else {
       bottomSheetModalRef.current?.dismiss();
     }
-    const fetchriend=async()=>{
-      const userid=await AsyncStorage.getItem("userid");
+    const fetchriend = async () => {
+      const userid = await AsyncStorage.getItem("userid");
       console.log(userid);
-      const response = await axios.get(
-        `${BACKEND_URL}/get/friends/${userid}`
-      );
+      const response = await axios.get(`${BACKEND_URL}/get/friends/${userid}`);
       console.log(response.data.user);
       setfriends(response.data.user);
-    }
-    fetchriend()
+    };
+    fetchriend();
   }, [selectedTab]);
-  const showMode = (currentMode:any) => {
+  const showMode = (currentMode: any) => {
     setShow(true);
     setMode(currentMode);
   };
@@ -81,14 +79,14 @@ const CreateGameScreen = () => {
     showMode("date");
   };
 
-  const handleStartDateChange = (event:any, selectedDate:any) => {
+  const handleStartDateChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate || startDate;
     setShow(false);
     setStartDate(currentDate);
     setform({ ...form, startdate: format(currentDate, "yyyy-MM-dd") });
   };
 
-  const handleEndDateChange = (event:any, selectedDate:any) => {
+  const handleEndDateChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate || endDate;
     setShow(false);
     setEndDate(currentDate);
@@ -99,20 +97,17 @@ const CreateGameScreen = () => {
     setLoading(true);
     seterror(null);
     try {
-      const response = await axios.post(
-        `${BACKEND_URL}/create/challenge`,
-        {
-          name: form.name,
-          memberqty: form.memberqty,
-          Dailystep: form.Dailystep,
-          Amount: form.Amount,
-          Digital_Currency: "sol",
-          days: form.days,
-          startdate: form.startdate,
-          enddate: form.enddate,
-          userid: await AsyncStorage.getItem("userid"),
-        }
-      );
+      const response = await axios.post(`${BACKEND_URL}/create/challenge`, {
+        name: form.name,
+        memberqty: form.memberqty,
+        Dailystep: form.Dailystep,
+        Amount: form.Amount,
+        Digital_Currency: "sol",
+        days: form.days,
+        startdate: form.startdate,
+        enddate: form.enddate,
+        userid: await AsyncStorage.getItem("userid"),
+      });
       Alert.alert("Success", "Game Created Successfully");
       router.push("/(tabs)");
       console.log("Signup response:", response.data);
@@ -122,7 +117,10 @@ const CreateGameScreen = () => {
         const axiosError = err as { response: { data: { message: string } } };
         // @ts-ignore
         console.log(axiosError.response.data.error[0].message);
-        ToastAndroid.show(axiosError.response.data.error[0].message,ToastAndroid.LONG)
+        ToastAndroid.show(
+          axiosError.response.data.error[0].message,
+          ToastAndroid.LONG
+        );
         // @ts-ignore
         seterror(
           axiosError.response.data.error[0].message ||
@@ -277,27 +275,29 @@ const CreateGameScreen = () => {
               )}
             >
               <BottomSheetView style={styles.bottomSheetContainer}>
-                <Text style={styles.bottomSheetText}>Community Options</Text>
+                <Text style={styles.bottomSheetText}>Friends</Text>
                 <FlatList
-        data={friend}
-        keyExtractor={(item:any) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.friendItem}>
-            <TouchableOpacity
-              style={styles.radioButton}
-              onPress={(e:any) =>setform({...form,request:e.target})}
-            >
-              <View
-                style={[
-                  styles.radioButtonCircle,
-                  friend === item.id && styles.radioButtonSelected,
-                ]}
-              />
-            </TouchableOpacity>
-            <Text style={styles.friendText}>{item}</Text>
-          </View>
-        )}
-      />
+                  data={friend}
+                  keyExtractor={(item: any) => item.id}
+                  renderItem={({ item }) => (
+                    <View style={styles.friendItem}>
+                      <TouchableOpacity
+                        style={styles.radioButton}
+                        onPress={(e: any) =>
+                          setform({ ...form, request: e.target })
+                        }
+                      >
+                        <View
+                          style={[
+                            styles.radioButtonCircle,
+                            friend === item.id && styles.radioButtonSelected,
+                          ]}
+                        />
+                      </TouchableOpacity>
+                      <Text style={styles.friendText}>{item}</Text>
+                    </View>
+                  )}
+                />
               </BottomSheetView>
             </BottomSheetModal>
           </SafeAreaView>
@@ -545,7 +545,9 @@ const styles = StyleSheet.create({
   },
   bottomSheetText: {
     fontSize: 16,
-    color: "#333",
+    marginBottom: 10,
+    color: "white",
+    fontWeight: "bold",
   },
   bottomModalBackground: {
     flex: 1,
