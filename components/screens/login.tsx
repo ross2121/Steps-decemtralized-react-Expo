@@ -42,7 +42,6 @@ const Login = () => {
         email,
         password,
       });
-      Alert.alert("Success", "Account created successfully");
       await AsyncStorage.setItem("username", response.data.user.username);
       await AsyncStorage.setItem("token", response.data.token);
       await AsyncStorage.setItem("PublicKey", response.data.user.publickey);
@@ -59,9 +58,9 @@ const Login = () => {
         console.log(err);
         const axiosError = err as { response: { data: { message: string } } };
         console.log(axiosError.response.data);
-        ToastAndroid.show(axiosError.response.data.message,ToastAndroid.LONG)
+        ToastAndroid.show(axiosError.response.data.error[0].message,ToastAndroid.LONG)
         seterror(
-          axiosError.response.data.message ||
+          axiosError.response.data.error[0].message ||
             "An error occurred. Please try again."
         );
       } else {
