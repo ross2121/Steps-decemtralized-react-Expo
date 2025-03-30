@@ -1,5 +1,4 @@
 "use client";
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   Connection,
@@ -649,7 +648,6 @@ const SendModal = () => {
           lamports: LAMPORTS_PER_SOL * Amount,
         })
       );
-
       const { blockhash } = await connection.getRecentBlockhash();
       transaction.recentBlockhash = blockhash;
       transaction.feePayer = new PublicKey(publickey);
@@ -660,6 +658,7 @@ const SendModal = () => {
       const response = await axios.post(`${BACKEND_URL}/send/wallet`, {
         tx: serializetransaction,
       });
+      console.log(response.data);
       setresponse(true);
       ToastAndroid.show("Transaction Sent Successfully!", ToastAndroid.SHORT);
     } catch (e: any) {

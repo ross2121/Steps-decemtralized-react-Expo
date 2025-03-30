@@ -14,6 +14,7 @@ import {
   Alert,
   StatusBar,
   Button,
+  Animated,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -42,13 +43,17 @@ import {
   SystemProgram,
   Transaction,
 } from "@solana/web3.js";
-import { set } from "date-fns";
 import AppS from "@/components/screens/test";
+import Feather from "@expo/vector-icons/build/Feather";
+interface SelectedGame{
+  Amount:number,
+  id:string,
+  name:string
+}
 const escrowpublickey = "AL3YQV36ADyq3xwjuETH8kceNTH9fuP43esbFiLF1V1A";
 const App = () => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const [selectedGame, setSelectedGame] = useState(null);
-
+  const [selectedGame, setSelectedGame] = useState<SelectedGame>();
   const connection = new Connection("https://api.devnet.solana.com");
   const snapPoints = useMemo(() => ["50%", "75%"], []);
 
@@ -63,6 +68,9 @@ const App = () => {
       const publickey = await AsyncStorage.getItem("PublicKey");
       if (!publickey) {
         Alert.alert("NO public key found");
+        return;
+      }
+      if(selectedGame==null){
         return;
       }
       const balance = await connection.getBalance(new PublicKey(publickey));
@@ -99,6 +107,141 @@ const App = () => {
       console.log(e);
       Alert.alert(e);
     }
+  };
+
+  const TransactionLoader = ({
+    loading,
+    error,
+    success,
+    amount,
+    recipientAddress,
+    onRetry,
+    onClose,
+  }: any) => {
+    const spinValue = React.useRef(new Animated.Value(0)).current;
+  
+    React.useEffect(() => {
+      if (loading) {
+        Animated.loop(
+          Animated.timing(spinValue, {
+            toValue: 1,
+            duration: 1500,
+            useNativeDriver: true,
+          })
+        ).start();
+      } else {
+        spinValue.setValue(0);
+      }
+    }, [loading, spinValue]);
+  
+    const spin = spinValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: ["0deg", "360deg"],
+    });
+  
+    const truncateAddress = (address: any) => {
+      if (!address) return "";
+      return `${address.substring(0, 6)}...${address.substring(
+        address.length - 4
+      )}`;
+    };
+  
+    return (
+      <View style={loaderStyles.container}>
+        <View style={loaderStyles.card}>
+          {loading && (
+            <View style={loaderStyles.loadingContainer}>
+              <Animated.View style={{ transform: [{ rotate: spin }] }}>
+                <Feather name="loader" size={48} color="#7C3AED" />
+              </Animated.View>
+              <Text style={loaderStyles.loadingText}>Processing Transaction</Text>
+              <Text style={loaderStyles.loadingSubtext}>
+                Please wait while we process your transaction
+              </Text>
+  
+              <View style={loaderStyles.transactionDetails}>
+                <View style={loaderStyles.detailRow}>
+                  <Text style={loaderStyles.detailLabel}>Amount:</Text>
+                  <Text style={loaderStyles.detailValue}>{amount} SOL</Text>
+                </View>
+                <View style={loaderStyles.detailRow}>
+                  <Text style={loaderStyles.detailLabel}>To:</Text>
+                  <Text style={loaderStyles.detailValue}>
+                    {truncateAddress(recipientAddress)}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          )}
+  
+          {error && !loading && (
+            <View style={loaderStyles.errorContainer}>
+              <View style={loaderStyles.errorIconContainer}>
+                <Feather name="alert-circle" size={48} color="#EF4444" />
+              </View>
+              <Text style={loaderStyles.errorTitle}>Transaction Failed</Text>
+              <Text style={loaderStyles.errorMessage}>
+                {error.message || "An error occurred during the transaction"}
+              </Text>
+  
+              <View style={loaderStyles.buttonContainer}>
+                <TouchableOpacity
+                  style={loaderStyles.retryButton}
+                  onPress={onRetry}
+                >
+                  <Text style={loaderStyles.retryButtonText}>Retry</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={loaderStyles.cancelButton}
+                  onPress={onClose}
+                >
+                  <Text style={loaderStyles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+  
+          {success && !loading && !error && (
+            <View style={loaderStyles.successContainer}>
+              <View style={loaderStyles.successIconContainer}>
+                <Feather name="check" size={48} color="#10B981" />
+              </View>
+              <Text style={loaderStyles.successTitle}>
+                Transaction Successful!
+              </Text>
+              <Text style={loaderStyles.successMessage}>
+                Your transaction has been processed successfully
+              </Text>
+  
+              <View style={loaderStyles.transactionDetails}>
+                <View style={loaderStyles.detailRow}>
+                  <Text style={loaderStyles.detailLabel}>Amount:</Text>
+                  <Text style={loaderStyles.detailValue}>{amount} SOL</Text>
+                </View>
+                <View style={loaderStyles.detailRow}>
+                  <Text style={loaderStyles.detailLabel}>To:</Text>
+                  <Text style={loaderStyles.detailValue}>
+                    {truncateAddress(recipientAddress)}
+                  </Text>
+                </View>
+                <View style={loaderStyles.detailRow}>
+                  <Text style={loaderStyles.detailLabel}>Status:</Text>
+                  <Text
+                    style={[loaderStyles.detailValue, loaderStyles.successStatus]}
+                  >
+                    Confirmed
+                  </Text>
+                </View>
+              </View>
+  
+              <TouchableOpacity style={loaderStyles.doneButton} onPress={onClose}>
+                <Text style={loaderStyles.doneButtonText}>Done</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      </View>
+    );
   };
   const bottomSheetModalRef2 = useRef<BottomSheetModal>(null);
   const snapPoints2 = useMemo(() => ["30%"], []);
@@ -447,16 +590,7 @@ const OfficialGames = ({ handleJoinClick }: any) => {
       participants: "83",
       dailySteps: "12k",
     },
-  ];
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-
-  // callbacks
-  const handlePresentModalPress = useCallback(() => {
-    bottomSheetModalRef.current?.present();
-  }, []);
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log("handleSheetChanges", index);
-  }, []);
+  ];  
   return (
     <BottomSheetModalProvider>
       <View style={styles.gamesContainer}>
@@ -512,7 +646,7 @@ const OfficialGames = ({ handleJoinClick }: any) => {
                   alignItems: "center",
                   flexDirection: "row",
                   justifyContent: "space-between",
-                  paddingHorizontal: 10,
+                  paddingHorizontal:10
                 }}
               >
                 <View>
@@ -556,10 +690,13 @@ const OfficialGames = ({ handleJoinClick }: any) => {
                     marginTop: 10,
                     flexDirection: "row",
                     justifyContent: "space-between",
+                  
                     paddingHorizontal: 5,
                   }}
                 >
-                  <View style={{ alignItems: "center" }}>
+                  <View
+                    style={{  alignItems: "center" }}
+                  >
                     <View>
                       <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
                         Entry
@@ -576,7 +713,7 @@ const OfficialGames = ({ handleJoinClick }: any) => {
                   >
                     <View>
                       <Text style={{ color: "#bfbfbf", fontSize: 12 }}>
-                        Days
+                        days
                       </Text>
                     </View>
                     <View>
@@ -623,7 +760,7 @@ const OfficialGames = ({ handleJoinClick }: any) => {
   );
 };
 
-const CommunityGames = ({ handleJoinClick }: any) => {
+const CommunityGames = ({ handleJoinClick}:any) => {
   const [error, seterror] = useState("");
   const [form, setform] = useState([
     {
@@ -747,7 +884,7 @@ const CommunityGames = ({ handleJoinClick }: any) => {
           },
         ]}
       >
-        {form.map((game) => (
+        {games.map((game:any) => (
           <View key={game.name} style={styles.gameCard}>
             <View
               style={{
@@ -817,7 +954,7 @@ const CommunityGames = ({ handleJoinClick }: any) => {
                   style={{ justifyContent: "center", alignItems: "center" }}
                 >
                   <View>
-                    <Text style={{ color: "#bfbfbf", fontSize: 12 }}>Days</Text>
+                    <Text style={{ color: "#bfbfbf", fontSize: 12 }}>days</Text>
                   </View>
                   <View>
                     <Text style={{ color: "white", fontSize: 13 }}>
@@ -862,7 +999,7 @@ const CommunityGames = ({ handleJoinClick }: any) => {
   );
 };
 
-const JoinGame = ({ handleSearchGame }) => {
+const JoinGame = ({ handleSearchGame }:any) => {
   return (
     <View
       style={{
@@ -902,7 +1039,7 @@ const JoinGame = ({ handleSearchGame }) => {
 
       <View
         style={{
-          backgroundColor: "#1a0033",
+          backgroundColor: "rgba(0, 0, 0, 0.8)",
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
@@ -969,7 +1106,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   stepsCard: {
-    backgroundColor: "#1a0033",
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
     padding: 10,
     borderRadius: 10,
     margin: 20,
@@ -992,11 +1129,12 @@ const styles = StyleSheet.create({
   },
   gameCard: {
     width: 300,
-    height: 170,
-    marginHorizontal: 10,
-    backgroundColor: "#1a0033",
+    height:120, 
+    marginHorizontal: 10, 
+    backgroundColor: "#1a1a1a", 
     borderRadius: 10,
-    padding: 10,
+    justifyContent: "center",
+    alignItems: "center",
   },
   gameImage: {
     width: 170,
@@ -1105,6 +1243,166 @@ const styles = StyleSheet.create({
     backgroundColor: "#7E3887",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
+  },
+});
+const loaderStyles = StyleSheet.create({
+  container: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
+  card: {
+    width: "100%",
+    backgroundColor: "#1a0033",
+    borderRadius: 16,
+    padding: 24,
+    alignItems: "center",
+  },
+  loadingContainer: {
+    alignItems: "center",
+    padding: 16,
+  },
+  loadingText: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  loadingSubtext: {
+    fontSize: 14,
+    color: "#CCCCCC",
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  errorContainer: {
+    alignItems: "center",
+    padding: 16,
+  },
+  errorIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#3F1D54",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#EF4444",
+    marginBottom: 8,
+  },
+  errorMessage: {
+    fontSize: 14,
+    color: "#CCCCCC",
+    textAlign: "center",
+    marginBottom: 24,
+    paddingHorizontal: 16,
+  },
+  successContainer: {
+    alignItems: "center",
+    padding: 16,
+  },
+  successIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#1D3F2B",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  successTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#10B981",
+    marginBottom: 8,
+  },
+  successMessage: {
+    fontSize: 14,
+    color: "#CCCCCC",
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  transactionDetails: {
+    width: "100%",
+    backgroundColor: "#290d44",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+  },
+
+  detailRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  detailLabel: {
+    fontSize: 14,
+    color: "#CCCCCC",
+    fontWeight: "500",
+  },
+  detailValue: {
+    fontSize: 14,
+    color: "#FFFFFF",
+    fontWeight: "600",
+  },
+  successStatus: {
+    color: "#10B981",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  retryButton: {
+    backgroundColor: "#7C3AED",
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    flex: 1,
+    marginRight: 8,
+    alignItems: "center",
+  },
+  retryButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  cancelButton: {
+    backgroundColor: "#290d44",
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    flex: 1,
+    marginLeft: 8,
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    color: "#CCCCCC",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  doneButton: {
+    backgroundColor: "#7C3AED",
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    width: "100%",
+    alignItems: "center",
+  },
+  doneButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
 
