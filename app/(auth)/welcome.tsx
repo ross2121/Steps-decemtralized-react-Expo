@@ -9,12 +9,19 @@ import {
   TouchableOpacity,
   FlatList,
   Animated,
-  Easing,
 } from "react-native";
 import { useFonts } from "expo-font";
 import { router } from "expo-router";
 
 const { width, height } = Dimensions.get("window");
+
+// Import local images
+const localImages = {
+  stake: require("../../assets/images/sleep2.png"),
+  track: require("../../assets/images/Run2.gif"),
+  rewards: require("../../assets/images/sleep2.png"),
+  compete: require("../../assets/images/Run2.gif"),
+};
 
 const slides = [
   {
@@ -22,32 +29,28 @@ const slides = [
     title: "Stake to Achieve",
     description:
       "Join challenges by staking SOL. Put your money where your goals are and commit to real change.",
-    image:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/sleep2-fG2vcfD3gree3esrHD30VsJRIARcBn.png",
+    image: localImages.stake,
   },
   {
     id: "2",
     title: "Track Your Progress",
     description:
       "Automated tracking connects with health APIs to monitor your activity. Watch your goals become reality in real-time.",
-    image:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Run2-fFH8dYzEJFImG0dLzWwRjSPHXX8FYj.gif",
+    image: localImages.track,
   },
   {
     id: "3",
     title: "Earn Rewards",
     description:
       "Complete challenges to get your stake back plus rewards. Success pays off—literally.",
-    image:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/sleep2-fG2vcfD3gree3esrHD30VsJRIARcBn.png",
+    image: localImages.rewards,
   },
   {
     id: "4",
     title: "Compete & Connect",
     description:
       "Join a community of achievers. Climb leaderboards, earn badges, and celebrate streaks together.",
-    image:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Run2-fFH8dYzEJFImG0dLzWwRjSPHXX8FYj.gif",
+    image: localImages.compete,
   },
 ];
 
@@ -77,7 +80,7 @@ const Slide = ({ item, scrollX, index }) => {
   return (
     <View style={styles.slideContainer}>
       <Animated.Image
-        source={{ uri: item.image }}
+        source={item.image}
         style={[
           styles.image,
           {
@@ -163,7 +166,7 @@ const Welcome = () => {
     if (currentIndex < slides.length - 1) {
       slidesRef.current.scrollToIndex({ index: currentIndex + 1 });
     } else {
-      router.push("/(auth)/singup");
+      router.push("/(auth)/signup");
     }
   };
 
