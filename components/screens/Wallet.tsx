@@ -39,7 +39,6 @@ import SlideButton from "rn-slide-button";
 import axios from "axios";
 import { BACKEND_URL } from "@/Backendurl";
 
-
 const TransactionLoader = ({
   loading,
   error,
@@ -83,7 +82,7 @@ const TransactionLoader = ({
         {loading && (
           <View style={loaderStyles.loadingContainer}>
             <Animated.View style={{ transform: [{ rotate: spin }] }}>
-              <Feather name="loader" size={48} color="#7C3AED" />
+              <Feather name="loader" size={48} color="white" />
             </Animated.View>
             <Text style={loaderStyles.loadingText}>Processing Transaction</Text>
             <Text style={loaderStyles.loadingSubtext}>
@@ -190,21 +189,21 @@ const Wallet = () => {
   ]);
   const [sol, setsol] = useState(0);
   const [error, seterror] = useState("");
-  const[loading,setloading]=useState(false);
+  const [loading, setloading] = useState(false);
   const Airdrop = async () => {
     try {
-      setloading
+      setloading;
       const connection = new Connection("https://api.devnet.solana.com");
       const publicKey = await AsyncStorage.getItem("PublicKey");
       if (!publicKey) {
-        Alert.alert("No public key found");
+        ToastAndroid.show("No public Key found", ToastAndroid.SHORT);
         return;
       }
       await connection.requestAirdrop(
         new PublicKey(publicKey),
         1 * LAMPORTS_PER_SOL
       );
-      Alert.alert("Success");
+      ToastAndroid.show("1 SOL Airdropped", ToastAndroid.SHORT);
     } catch (e: any) {
       // seterro(e);
       console.log(e);
@@ -218,7 +217,7 @@ const Wallet = () => {
         const publicKey = await AsyncStorage.getItem("PublicKey");
         console.log(publicKey);
         if (!publicKey) {
-          Alert.alert("No public key found");
+          ToastAndroid.show("No public Key found", ToastAndroid.SHORT);
           return;
         }
 
@@ -277,7 +276,7 @@ const Wallet = () => {
           } catch (error) {
             console.error("Error processing transaction:", error);
             return null;
-          }finally{
+          } finally {
             setloading(false);
           }
         });
@@ -377,9 +376,13 @@ const Wallet = () => {
               </TouchableOpacity> */}
             </View>
             <View style={styles.balanceContainer}>
-              <Text style={styles.balanceText}>
-                ${(balance / LAMPORTS_PER_SOL).toFixed(2)}
-              </Text>
+              {loading ? (
+                <ActivityIndicator size="large" color="#00ff00" />
+              ) : (
+                <Text style={styles.balanceText}>
+                  ${(balance / LAMPORTS_PER_SOL).toFixed(2)}
+                </Text>
+              )}
             </View>
             <View
               style={{
@@ -489,30 +492,30 @@ const Wallet = () => {
               style={{
                 backgroundColor: "#1a0033",
                 marginTop: 20,
-                borderRadius: 20,
+                borderTopLeftRadius: 20,
+                borderTopRightRadius: 20,
               }}
             >
               <View style={styles.bottomSheetHeader}>
                 <Text style={styles.bottomSheetTitle}>Balances</Text>
                 <Feather name="clock" size={20} color="white" />
               </View>
-              <View>
-            
-              </View>
-              {loading?(
-                  <ActivityIndicator size="large" color="#00ff00" />
-              ):(
+              <View></View>
+              {loading ? (
+                <ActivityIndicator size="large" color="#00ff00" />
+              ) : (
                 <BottomSheetFlatList
-                data={history}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={renderItem}
-                contentContainerStyle={styles.transactionList}
-                ListEmptyComponent={
-                  <Text style={styles.emptyText}>No Transaction available</Text>
-                }
-              />
-              )}  
-            
+                  data={history}
+                  keyExtractor={(item) => item.id.toString()}
+                  renderItem={renderItem}
+                  contentContainerStyle={styles.transactionList}
+                  ListEmptyComponent={
+                    <Text style={styles.emptyText}>
+                      No Transaction available
+                    </Text>
+                  }
+                />
+              )}
             </View>
           </BottomSheet>
         </BottomSheetModalProvider>
@@ -919,7 +922,8 @@ const loaderStyles = StyleSheet.create({
   },
   card: {
     width: "100%",
-    backgroundColor: "#1a0033",
+
+    backgroundColor: "#7E3887",
     borderRadius: 16,
     padding: 24,
     alignItems: "center",
@@ -970,6 +974,7 @@ const loaderStyles = StyleSheet.create({
   successContainer: {
     alignItems: "center",
     padding: 16,
+    backgroundColor: "#1a0033",
   },
   successIconContainer: {
     width: 80,
@@ -993,11 +998,12 @@ const loaderStyles = StyleSheet.create({
     marginBottom: 24,
   },
   transactionDetails: {
-    width: "100%",
+    // width: "100%",
     backgroundColor: "#290d44",
     borderRadius: 12,
     padding: 16,
     marginBottom: 24,
+    marginTop: 16,
   },
 
   detailRow: {
