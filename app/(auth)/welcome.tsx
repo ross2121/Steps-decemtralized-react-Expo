@@ -166,7 +166,7 @@ const Welcome = () => {
     if (currentIndex < slides.length - 1) {
       slidesRef.current.scrollToIndex({ index: currentIndex + 1 });
     } else {
-      router.push("/(auth)/signup");
+      router.push("/(auth)/singup");
     }
   };
 

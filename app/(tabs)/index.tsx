@@ -503,7 +503,7 @@ const OfficialGames = ({ handleJoinClick }: any) => {
           }}
         >
           <Text style={styles.gamesTitle}>Official Games</Text>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={{
               paddingHorizontal: 10,
               paddingVertical: 5,
@@ -523,7 +523,7 @@ const OfficialGames = ({ handleJoinClick }: any) => {
               <Text style={{ color: "white" }}>All</Text>
               <AntDesign name="arrowright" size={15} color="white" />
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
         <ScrollView
           horizontal
@@ -738,7 +738,7 @@ const CommunityGames = ({ handleJoinClick }: any) => {
         }}
       >
         <Text style={styles.gamesTitle}>Community Games</Text>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={{
             paddingHorizontal: 10,
             paddingVertical: 5,
@@ -758,7 +758,7 @@ const CommunityGames = ({ handleJoinClick }: any) => {
             <Text style={{ color: "white" }}>All</Text>
             <AntDesign name="arrowright" size={15} color="white" />
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       <ScrollView
         horizontal

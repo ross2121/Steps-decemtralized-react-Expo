@@ -23,33 +23,36 @@ import { LinearGradient } from "expo-linear-gradient";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { MaterialIcons } from "@expo/vector-icons";
 const InitializeHealthConnect = () => {
+  const background=async()=>{
+    const permissionsToRequest = [
+      PermissionsAndroid.PERMISSIONS.ACTIVITY_RECOGNITION,
+    ];
+    if (Platform.OS === "android") {
+      permissionsToRequest.push(
+        "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND" as never
+      );
+    }
+    const results = await PermissionsAndroid.requestMultiple(permissionsToRequest);
+    const allGranted = Object.values(results).every(
+      (result) => result === PermissionsAndroid.RESULTS.GRANTED
+    );
+    if (allGranted) {
+      console.log("All permissions granted!");
+      router.push("/(tabs)");
+    } else {
+      console.log("Some permissions were denied:", results);
+    }
+    router.push("/(tabs)");
+  }
   const handleButtonPress = async () => {
     try {
       const isInitialized = await initialize();
       console.log({ isInitialized });
-      const permissionsToRequest = [
-        PermissionsAndroid.PERMISSIONS.ACTIVITY_RECOGNITION,
-      ];
-      if (Platform.OS === "android") {
-        permissionsToRequest.push(
-          "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND" as never
-        );
-      }
-      const results = await PermissionsAndroid.requestMultiple(permissionsToRequest);
-      const allGranted = Object.values(results).every(
-        (result) => result === PermissionsAndroid.RESULTS.GRANTED
-      );
-      if (allGranted) {
-        console.log("All permissions granted!");
-      } else {
-        console.log("Some permissions were denied:", results);
-      }
+     
       const permisdsions = await requestPermission([
         { accessType: "read", recordType: "Steps" },
       ]);
-      if (permisdsions) {
-        router.push("/(tabs)");
-      }
+        console.log(permisdsions)
       const permissions = await getGrantedPermissions();
 
       if (permissions.length == 0) {
@@ -115,9 +118,20 @@ const InitializeHealthConnect = () => {
               </View>
             </TouchableOpacity>
           </View>
+          <TouchableOpacity style={{
+            marginBottom:10,
+            backgroundColor:"#8a2be2",
+            
+            padding:10,
+            borderRadius:10
 
-          <TouchableOpacity style={styles.button} onPress={handleButtonPress}>
-            <Text style={styles.buttonText}>Connect Now</Text>
+          }} onPress={handleButtonPress}>
+            <Text style={{
+              color:"white"
+            }}>Click to allow Background Permission</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={background}>
+            <Text style={styles.buttonText}>Continue</Text>
           </TouchableOpacity>
 
           <Text style={styles.footerText}>
@@ -159,7 +173,7 @@ const styles = StyleSheet.create({
   },
   providerContainer: {
     width: "100%",
-    marginBottom: 40,
+    marginBottom: 20,
   },
   providerItem: {
     flexDirection: "row",
@@ -179,11 +193,12 @@ const styles = StyleSheet.create({
     color: "white",
   },
   button: {
-    backgroundColor: "#8a2be2",
+    backgroundColor: "#cca3ff",
     paddingVertical: 15,
     paddingHorizontal: 40,
     borderRadius: 30,
     marginBottom: 20,
+    marginTop:10
   },
   buttonText: {
     fontSize: 18,
@@ -194,6 +209,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#ccc",
     textAlign: "center",
+    marginBottom:20
   },
   linkText: {
     color: "#8a2be2",

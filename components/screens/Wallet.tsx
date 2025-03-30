@@ -674,7 +674,7 @@ const SendModal = () => {
       ToastAndroid.show("Transaction Sent Successfully!", ToastAndroid.SHORT);
     } catch (e: any) {
       console.log(e);
-      setresponse(false);
+      // setresponse(false);
       seterror(e);
       ToastAndroid.show(e.message || "Transaction Failed!", ToastAndroid.SHORT);
     } finally {

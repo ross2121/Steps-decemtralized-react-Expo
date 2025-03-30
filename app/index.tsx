@@ -13,9 +13,6 @@ const StartPage = () => {
       try {
         const isInitialized = await initialize(); 
         const granted=getGrantedPermissions();
-        if((await granted).length==0){
-          return router.push("/nativeheatlth")
-        } 
         const token = await AsyncStorage.getItem("token");
         console.log("Token found:", token);
         if (token) {
