@@ -1063,7 +1063,7 @@ const JoinGame = ({ handleSearchGame }:any) => {
             </View>
 
             <View>
-              <Text style={styles.gamebttnText}>New Game</Text>
+              <Text style={styles.gamebttnText}>Create Game</Text>
             </View>
           </View>
         </TouchableOpacity>
